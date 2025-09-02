@@ -1,7 +1,8 @@
 import { Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FiArrowRight } from "react-icons/fi";
+import { Link } from "react-router-dom";
 import {
   useMotionTemplate,
   useMotionValue,
@@ -31,8 +32,9 @@ const Hero = () => {
     <motion.section
       style={{
         backgroundImage,
+        height: '100vh', // Full viewport height since navbar is now overlay
       }}
-      className="relative grid min-h-screen place-content-center overflow-hidden bg-gray-950 px-4 py-24 text-gray-200"
+      className="relative grid place-content-center overflow-hidden bg-gray-950 px-4 py-24 text-gray-200"
     >
       <div className="relative z-10 flex flex-col items-center">
         <span className="mb-1.5 inline-block rounded-full bg-gray-600/50 px-3 py-1.5 text-sm">
@@ -58,7 +60,7 @@ const Hero = () => {
           }}
           className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-4 py-2 text-gray-50 transition-colors hover:bg-gray-950/50"
         >
-          Start free trial
+          Get Started
           <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
         </motion.button>
       </div>
