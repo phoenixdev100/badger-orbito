@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import assets from '../assets/assets.js'
 
 const Navbar = () => {
 
@@ -12,7 +13,7 @@ const Navbar = () => {
                     {/* Brand (left) */}
                     <div className="flex items-center gap-8">
                         <Link to="/" className="flex items-center">
-                            <img src="/logo.png" alt="FlexiTool Logo" className="h-13 w-auto" />
+                            <img src={assets.Navlogo} alt="FlexiTool Logo" className="h-16 w-auto" />
                         </Link>
                     </div>
 

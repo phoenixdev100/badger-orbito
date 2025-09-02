@@ -1,0 +1,12 @@
+ <motion.div
+                key={cert.name}
+                className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 text-center card-hover"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <div className="text-3xl mb-3">{cert.icon}</div>
+                <h4 className="font-semibold text-gray-900 mb-2">{cert.name}</h4>
+                <p className="text-sm text-gray-600">{cert.description}</p>
+              </motion.div>
