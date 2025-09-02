@@ -21,7 +21,6 @@ const Navbar = () => {
                     <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
                         {[
                             { to: '/', label: 'Home' },
-                            { to: '/tools', label: 'Tools' },
                             { to: '/about', label: 'About' },
                             { to: '/contact', label: 'Contact' },
                         ].map((item) => (
