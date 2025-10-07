@@ -45,7 +45,7 @@ const Login = ({ onClose }) => {
 
   const navigate = useNavigate();
 
-  const onSubmitHandler = async async (e) => {
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
     try {
 
