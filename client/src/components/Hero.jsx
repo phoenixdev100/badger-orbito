@@ -9,6 +9,7 @@ import {
   motion,
   animate,
 } from "framer-motion";
+import Footer from './Footer';
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
 
@@ -69,6 +70,8 @@ const Hero = () => {
           <Stars radius={50} count={2500} factor={4} fade speed={2} />
         </Canvas>
       </div>
+      
+      <Footer />
     </motion.section>
   );
 };

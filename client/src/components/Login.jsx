@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { motion } from 'framer-motion';
+import Loader from './Loader';
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
@@ -40,10 +41,11 @@ const Login = ({ onClose }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const onSubmitHandler = async (e) => {
+  const onSubmitHandler = async async (e) => {
     e.preventDefault();
     try {
 
@@ -94,14 +96,19 @@ const Login = ({ onClose }) => {
 
   return (
     <div className="fixed top-0 left-0 right-0 bottom-0 z-[9999] backdrop-blur-sm bg-black/30 flex justify-center items-center">
-      <motion.form
-        onSubmit={onSubmitHandler}
-        initial={{ opacity: 0.2, y: 50 }}
-        transition={{ duration: 0.3 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="relative bg-black p-10 rounded-xl text-white shadow-xl w-[90%] max-w-md"
-      >
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <Loader />
+        </div>
+      ) : (
+        <motion.form
+          onSubmit={onSubmitHandler}
+          initial={{ opacity: 0.2, y: 50 }}
+          transition={{ duration: 0.3 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative bg-black p-10 rounded-xl text-white shadow-xl w-[90%] max-w-md"
+        >
         <h1 className="text-center text-2xl text-white font-medium">{state}</h1>
         <p className="text-sm text-center">Welcome back! Please sign in to continue</p>
 
@@ -184,6 +191,7 @@ const Login = ({ onClose }) => {
           ✕
         </button>
       </motion.form>
+      )}
     </div>
   );
 };
