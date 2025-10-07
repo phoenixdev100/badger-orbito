@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Loader from './Loader';
 
 const IconUser = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
@@ -35,12 +36,17 @@ const Login = ({ onClose }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmitHandler = (e) => {
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
-    // Replace with real auth wiring later.
-    // For now just log and close.
+    setIsLoading(true);
+    
+    // Simulate API call - replace with real auth later
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     console.log(`[${state}]`, { name, email, password });
+    setIsLoading(false);
     onClose?.();
   };
 
@@ -56,14 +62,19 @@ const Login = ({ onClose }) => {
 
   return (
     <div className="fixed top-0 left-0 right-0 bottom-0 z-[9999] backdrop-blur-sm bg-black/30 flex justify-center items-center">
-      <motion.form
-        onSubmit={onSubmitHandler}
-        initial={{ opacity: 0.2, y: 50 }}
-        transition={{ duration: 0.3 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="relative bg-black p-10 rounded-xl text-white shadow-xl w-[90%] max-w-md"
-      >
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <Loader />
+        </div>
+      ) : (
+        <motion.form
+          onSubmit={onSubmitHandler}
+          initial={{ opacity: 0.2, y: 50 }}
+          transition={{ duration: 0.3 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative bg-black p-10 rounded-xl text-white shadow-xl w-[90%] max-w-md"
+        >
         <h1 className="text-center text-2xl text-white font-medium">{state}</h1>
         <p className="text-sm text-center">Welcome back! Please sign in to continue</p>
 
@@ -146,6 +157,7 @@ const Login = ({ onClose }) => {
           ✕
         </button>
       </motion.form>
+      )}
     </div>
   );
 };
