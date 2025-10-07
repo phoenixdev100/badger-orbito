@@ -1,10 +1,12 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
 import Login from './Login.jsx';
 
 const Navbar = () => {
-  const [showLogin, setShowLogin] = useState(false);
+  const { showLogin, setShowLogin } = useContext(AppContext);
 
   return (
     <>

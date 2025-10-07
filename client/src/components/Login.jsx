@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react'
 import { motion } from 'framer-motion';
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { AppContext } from '../context/AppContext'
 
 const IconUser = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
@@ -31,16 +35,50 @@ const IconGoogle = () => (
 );
 
 const Login = ({ onClose }) => {
+  const { setShowLogin, backendUrl, setToken, setUser } = useContext(AppContext);
   const [state, setState] = useState('Login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const onSubmitHandler = (e) => {
+  const navigate = useNavigate();
+
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
-    // Replace with real auth wiring later.
-    // For now just log and close.
-    console.log(`[${state}]`, { name, email, password });
+    try {
+
+      if (state === 'Login') {
+        const { data } = await axios.post(backendUrl + '/api/user/login', { email, password })
+
+        if (data.success) {
+          setToken(data.token)
+          setUser(data.user)
+          localStorage.setItem('token', data.token)
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setShowLogin(false)
+          navigate('/dashboard')
+        } else {
+          toast.error(data.message)
+        }
+
+      } else {
+        const { data } = await axios.post(backendUrl + '/api/user/register', { name, email, password })
+
+        if (data.success) {
+          setToken(data.token)
+          setUser(data.user)
+          localStorage.setItem('token', data.token)
+          setShowLogin(false)
+          navigate('/dashboard')
+        } else {
+          toast.error(data.message)
+        }
+
+      }
+
+    } catch (error) {
+      toast.error(error.message)
+    }
     onClose?.();
   };
 
