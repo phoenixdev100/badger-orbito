@@ -13,3 +13,98 @@ https://webflow.com/made-in-webflow/space?cloneable=true&msockid=0eee86c6dc3b661
 
 
 className="relative grid content-center justify-start overflow-hidden bg-gray-950 px-4 py-24 text-gray-200"
+
+
+
+
+//features
+https://21st.dev/svg-ui/database-with-rest-api/default
+https://21st.dev/Codehagen/display-cards/default
+https://21st.dev/reactbits/tilted-scroll/default
+
+//can go in the bg of features
+https://21st.dev/minhxthanh/animated-shader-background/default
+https://21st.dev/minhxthanh/shader-background/default
+
+
+//testimonial
+https://21st.dev/aceternity/meteors/default
+
+//bg
+https://21st.dev/minhxthanh/digital-serenity-animated-landing-page/default
+
+
+//footer
+https://21st.dev/arihantcodes/stacked-circular-footer/default
+
+
+
+//pricing
+https://21st.dev/ravikatiyar162/pricing/default
+
+
+//faq
+https://21st.dev/minhxthanh/digital-serenity-animated-landing-page/default
+
+
+
+//cool text area
+https://21st.dev/minhxthanh/digital-serenity-animated-landing-page/default
+
+
+//404 not found
+https://21st.dev/minhxthanh/page-not-found/default
+https://21st.dev/shailendrakumar19999/404-page-not-found/default
+https://21st.dev/xubohuah/ghost-404-page/default
+
+
+//warning
+https://21st.dev/isaiahbjork/warning-graphic/default
+
+
+//group peoples in circles
+https://21st.dev/aceternity/animated-tooltip/default
+
+
+
+//cool quicktooltip
+https://21st.dev/suraj-xd/quick-tooltip-actions/default
+
+
+//badges options
+https://21st.dev/designali-in/badge/default
+https://21st.dev/designali-in/award/default
+
+
+
+//social icons 
+https://21st.dev/serafimcloud/floating-action-button/default
+
+
+
+//cards
+https://21st.dev/ibelick/glow-effect/default
+https://21st.dev/jatin-yadav05/glowing-card/default
+
+
+
+//checkboxes
+https://21st.dev/berlix/checkbox/default
+
+
+//platforms section
+https://21st.dev/ruixen.ui/integration-hero/default
+https://21st.dev/TomIsLoading/clip-path-links/default
+
+//meet the team 
+https://21st.dev/arunachalam0606/profile-card-testimonial-carousel/default
+
+
+
+//form for asking platform username
+https://21st.dev/isaiahbjork/animated-download/default
+
+
+
+//sidebars
+https://21st.dev/aceternity/sidebar/default
