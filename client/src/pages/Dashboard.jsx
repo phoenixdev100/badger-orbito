@@ -1,5 +1,4 @@
 import React from 'react'
-import Footer from '../components/Footer'
 
 const Dashboard = () => {
   return (
@@ -7,7 +6,6 @@ const Dashboard = () => {
       <div className="min-h-screen">
         Dashboard
       </div>
-      <Footer />
     </div>
   )
 }

@@ -2,14 +2,12 @@ import { Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import React, { useEffect, useRef, useState } from "react";
 import { FiArrowRight } from "react-icons/fi";
-import { Link } from "react-router-dom";
 import {
   useMotionTemplate,
   useMotionValue,
   motion,
   animate,
 } from "framer-motion";
-import Footer from './Footer';
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
 
@@ -71,8 +69,7 @@ const Hero = () => {
         </Canvas>
       </div>
       
-      <Footer />
-    </motion.section>
+     </motion.section>
   );
 };
 

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Navbar from './components/Navbar'
 import Login from './components/Login'
 import { AppContext } from './context/AppContext'
+import Footer from './components/Footer'
 
 const App = () => {
   const {showLogin, isAuthenticated} = useContext(AppContext);
@@ -26,6 +27,7 @@ const App = () => {
         <Route path='/' element={<Home />} />
         <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />} /> 
       </Routes>
+      <Footer />
     </div>
     </>
   )
