@@ -16,7 +16,9 @@ import {
 
 const Platforms: React.FC = () => {
   return (
-    <div className="divide-y divide-white/10 py-10">
+    <div className="divide-y divide-white/10 py-10" style={{
+      paddingBottom: 0,
+    }}>
       {/* Row 1 */}
       <div className="grid grid-cols-2 divide-x divide-white/10">
         <LinkBox
