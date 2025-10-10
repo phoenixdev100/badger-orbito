@@ -44,7 +44,7 @@ https://21st.dev/ravikatiyar162/pricing/default
 
 
 //faq
-https://21st.dev/minhxthanh/digital-serenity-animated-landing-page/default
+https://21st.dev/anshuman008/faq-chat-accordion/default
 
 
 
@@ -95,6 +95,7 @@ https://21st.dev/berlix/checkbox/default
 //platforms section
 https://21st.dev/ruixen.ui/integration-hero/default
 https://21st.dev/TomIsLoading/clip-path-links/default
+
 
 //meet the team 
 https://21st.dev/arunachalam0606/profile-card-testimonial-carousel/default
