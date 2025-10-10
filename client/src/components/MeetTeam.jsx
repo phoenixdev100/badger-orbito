@@ -1,24 +1,25 @@
 import React from "react";
 import { AnimatedTooltip } from "./ui/animated-tooltip";
+import assets from "../assets/assets";
 
 const teamMembers = [
   {
     id: 1,
     name: "Priyanshi Sharma",
     designation: "Founder & CEO",
-    image: "https://i.pravatar.cc/100?img=1",
+    image: "",
   },
   {
     id: 2,
     name: "Ayush Singh",
     designation: "Founding Engineering",
-    image: "https://i.pravatar.cc/100?img=2",
+    image: assets.AyushImage,
   },
   {
     id: 3,
     name: "Deepak",
     designation: "Founding Engineering",
-    image: "https://i.pravatar.cc/100?img=3",
+    image: "",
   },
 ];
 

@@ -1,7 +1,13 @@
 import Navlogo from "../assets/nav-logo.png"
+import AyushImage from "../assets/AyushImage.png"
+// import DeepakImage from "../assets/DeepakImage.png"
+// import PriyanshiImage from "../assets/PriyanshiImage.png"
 
 const assets = {
-    Navlogo
+    Navlogo,
+    AyushImage,
+    // DeepakImage,
+    // PriyanshiImage
 }
 
 export default assets

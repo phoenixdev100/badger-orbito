@@ -5,6 +5,7 @@ import Platforms from '../components/Platforms'
 import { motion, useMotionTemplate, useMotionValue, animate } from 'framer-motion'
 import Testimonial from '../components/Testimonial'
 import MeetTeam from '../components/MeetTeam'
+import FAQ from '../components/FAQ'
 
 const Home = () => {
   // Match Hero's color cycle exactly
@@ -79,6 +80,7 @@ const Home = () => {
       </motion.div>
       <Testimonial />
       <MeetTeam />
+      <FAQ />
     </div>
   )
 }
