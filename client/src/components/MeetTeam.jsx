@@ -7,19 +7,19 @@ const teamMembers = [
     id: 1,
     name: "Priyanshi Sharma",
     designation: "Founder & CEO",
-    image: "",
+    image: assets.PriyanshiImage,
   },
   {
     id: 2,
     name: "Ayush Singh",
-    designation: "Founding Engineering",
+    designation: "Founding Engineer",
     image: assets.AyushImage,
   },
   {
     id: 3,
     name: "Deepak",
-    designation: "Founding Engineering",
-    image: "",
+    designation: "Founding Engineer",
+    image: assets.DeepakImage,
   },
 ];
 
