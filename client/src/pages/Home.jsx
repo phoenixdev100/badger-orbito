@@ -3,6 +3,8 @@ import Hero from '../components/Hero'
 import Features from '../components/Features'
 import Platforms from '../components/Platforms'
 import { motion, useMotionTemplate, useMotionValue, animate } from 'framer-motion'
+import Testimonial from '../components/Testimonial'
+import MeetTeam from '../components/MeetTeam'
 
 const Home = () => {
   // Match Hero's color cycle exactly
@@ -19,10 +21,6 @@ const Home = () => {
     return () => controls.stop();
   }, []);
 
-  // Two corner glows that finish toward center over solid black base
-  // - Bottom-right radial to center
-  // - Top-left radial to center
-  // Base remains black so overall background stays black
   const backgroundImage = useMotionTemplate`
     radial-gradient(60% 60% at 100% 100%, ${color} 0%, rgba(0,0,0,0) 60%),
     radial-gradient(60% 60% at 0% 0%, ${color} 0%, rgba(0,0,0,0) 60%),
@@ -67,13 +65,20 @@ const Home = () => {
         <div className="corner-element-animate top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8" style={{ animationDelay: '4s' }}>
           <div className="absolute top-0 right-0 w-2 h-2 bg-slate-300 opacity-30 rounded-full"></div>
         </div>
-        <div className="corner-element-animate top-4 left-0 sm:top-6 md:top-8" style={{ animationDelay: '4.2s' }}>
+        {/* 2. Top-center (slightly left) */}
+        <div className="corner-element-animate top-6 left-[36%]" style={{ animationDelay: '4.2s' }}>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-300 opacity-30 rounded-full"></div>
+        </div>
+        {/* 5. Bottom-left (allowed, avoid bottom-right) */}
+        <div className="corner-element-animate bottom-10 left-12" style={{ animationDelay: '4.8s' }}>
           <div className="absolute bottom-0 left-0 w-2 h-2 bg-slate-300 opacity-30 rounded-full"></div>
         </div>
 
         <Features />
         <Platforms />
       </motion.div>
+      <Testimonial />
+      <MeetTeam />
     </div>
   )
 }
