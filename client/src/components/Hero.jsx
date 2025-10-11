@@ -1,6 +1,6 @@
 import { Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { FiArrowRight } from "react-icons/fi";
 import {
   useMotionTemplate,
@@ -11,8 +11,11 @@ import {
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
 
+import { AppContext } from "../context/AppContext";
+
 const Hero = () => {
   const color = useMotionValue(COLORS_TOP[0]);
+  const { setShowLogin } = useContext(AppContext);
 
   useEffect(() => {
     animate(color, COLORS_TOP, {
@@ -57,6 +60,7 @@ const Hero = () => {
             scale: 0.985,
           }}
           className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-4 py-2 text-gray-50 transition-colors hover:bg-gray-950/50"
+          onClick={() => setShowLogin(true)}
         >
           Get Started
           <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
