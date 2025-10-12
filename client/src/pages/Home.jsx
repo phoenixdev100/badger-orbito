@@ -6,6 +6,7 @@ import { motion, useMotionTemplate, useMotionValue, animate } from 'framer-motio
 import Testimonial from '../components/Testimonial'
 import MeetTeam from '../components/MeetTeam'
 import FAQ from '../components/FAQ'
+import Contact from '../components/Contact'
 
 const Home = () => {
   // Match Hero's color cycle exactly
@@ -81,6 +82,7 @@ const Home = () => {
       <Testimonial />
       <MeetTeam />
       <FAQ />
+      <Contact />
     </div>
   )
 }

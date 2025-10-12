@@ -8,18 +8,21 @@ const teamMembers = [
     name: "Priyanshi Sharma",
     designation: "Founder & CEO",
     image: assets.PriyanshiImage,
+    link: "https://www.linkedin.com/in/priyanshi1111/",
   },
   {
     id: 2,
     name: "Ayush Singh",
-    designation: "Founding Engineer",
+    designation: "Co-Founder",
     image: assets.AyushImage,
+    link: "https://www.linkedin.com/in/ayush-singh-87b3682a5/",
   },
   {
     id: 3,
     name: "Deepak",
     designation: "Founding Engineer",
     image: assets.DeepakImage,
+    link: "https://www.linkedin.com/in/phoenixdev100/",
   },
 ];
 
@@ -77,7 +80,7 @@ export default function MeetTeam() {
             </div>
 
             <div className="flex justify-center">
-              <AnimatedTooltip items={teamMembers} size="lg" className="gap-4 md:gap-6" />
+              <AnimatedTooltip items={teamMembers} size="xl" className="gap-4 md:gap-6" />
             </div>
           </div>
         </div>

@@ -19,9 +19,11 @@ export const AnimatedTooltip = ({
     name: string;
     designation: string;
     image: string;
+    link?: string;
+    size?: "sm" | "md" | "lg" | "xl"; // optional per-item size override
   }[];
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const springConfig = { stiffness: 100, damping: 5 };
@@ -35,9 +37,11 @@ export const AnimatedTooltip = ({
   };
 
   // Map size to Tailwind classes (keep literals for proper extraction)
-  const avatarSizeClass =
-    size === "lg" ? "h-20 w-20" : size === "sm" ? "h-12 w-12" : "h-14 w-14";
-  const tooltipTopClass = size === "lg" ? "-top-20" : size === "sm" ? "-top-14" : "-top-16";
+  const getSizeClass = (s: "sm" | "md" | "lg" | "xl") =>
+    s === "xl" ? "h-24 w-24" : s === "lg" ? "h-20 w-20" : s === "sm" ? "h-12 w-12" : "h-14 w-14";
+  const avatarSizeClass = getSizeClass(size);
+  const tooltipTopClass =
+    size === "xl" ? "-top-24" : size === "lg" ? "-top-20" : size === "sm" ? "-top-14" : "-top-16";
 
   return (
     <div className={cn("flex items-center gap-3 md:gap-4", className)}>
@@ -85,16 +89,36 @@ export const AnimatedTooltip = ({
             )}
           </AnimatePresence>
 
-          {/* Replaced <Image /> with normal <img /> */}
-          <img
-            onMouseMove={handleMouseMove}
-            src={item.image}
-            alt={item.name}
-            className={cn(
-              "object-cover !m-0 !p-0 object-top rounded-full border-2 group-hover:scale-105 group-hover:z-30 border-background relative transition duration-500",
-              avatarSizeClass
-            )}
-          />
+          {/* Avatar (optionally wrapped in link) */}
+          {item.link ? (
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${item.name} LinkedIn`}
+              className="block"
+            >
+              <img
+                onMouseMove={handleMouseMove}
+                src={item.image}
+                alt={item.name}
+                className={cn(
+                  "object-cover !m-0 !p-0 object-top rounded-full border-2 group-hover:scale-105 group-hover:z-30 border-background relative transition duration-500",
+                  item.size ? getSizeClass(item.size) : avatarSizeClass
+                )}
+              />
+            </a>
+          ) : (
+            <img
+              onMouseMove={handleMouseMove}
+              src={item.image}
+              alt={item.name}
+              className={cn(
+                "object-cover !m-0 !p-0 object-top rounded-full border-2 group-hover:scale-105 group-hover:z-30 border-background relative transition duration-500",
+                item.size ? getSizeClass(item.size) : avatarSizeClass
+              )}
+            />
+          )}
         </div>
       ))}
     </div>

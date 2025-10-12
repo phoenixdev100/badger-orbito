@@ -2,28 +2,33 @@ import React, { useState } from "react";
 
 const faqs = [
   {
-    q: "How late does the internet close?",
-    a: "The internet never closes. Our app is available 24/7, though maintenance may occur occasionally.",
-    icon: "💖",
+    q: "How does Badger collect my badges?",
+    a: "Badger connects securely with your learning platforms like Credly, LeetCode, or Microsoft Learn to fetch and verify your badges automatically.",
+    icon: "🏆",
+  },{
+  
+  q: "Can I add badges manually?",
+  a: "Yes! For unsupported platforms, you can upload badges manually with proof — we’ll keep them safe and stylish.",
+  icon: "🧩",
+},
+{
+  q: "Is my data secure?",
+  a: "Totally. All connections are encrypted, and we never store your login credentials — only verified badge info.",
+  icon: "🔒",
+},
+  {
+    q: "Will my badges update automatically?",
+    a: "Absolutely! Once linked, new badges appear in your dashboard as soon as you earn them — no manual refresh needed.",
+    icon: "🔄",
   },
   {
-    q: "Do I need a license?",
-    a: "No license required. Just a modern browser and a good vibe.",
+    q: "Can I share my badges on LinkedIn or Discord?",
+    a: "Of course. Share your achievements to socials with one click and show off your learning journey proudly.",
+    icon: "🚀",
   },
-  {
-    q: "What flavour are the cookies?",
-    a: "Mostly chocolate chip. Sometimes strictly functional.",
-  },
-  {
-    q: "Can I get lost here?",
-    a: "Not really. Clear navigation and search should keep you on track.",
-    icon: "⭐",
-  },
-  {
-    q: "What if I click the wrong button?",
-    a: "Most actions are reversible and we confirm destructive ones. You're safe to explore.",
-  },
+  ,
 ];
+
 
 function Pill({ children, rightIcon, onClick, active }) {
   return (
