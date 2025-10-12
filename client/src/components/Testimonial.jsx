@@ -6,18 +6,21 @@ const testimonials = [
       "Badger brought all my scattered achievements into one clean profile. Now sharing my progress is effortless.",
     name: "Aarav Sharma",
     role: "Full‑stack Developer",
+    image: "https://i.pravatar.cc/100?img=12",
   },
   {
     quote:
       "The UI feels fast and polished. I love the subtle animations and the way badges are organized.",
     name: "Ishita Verma",
     role: "Product Designer",
+    image: "https://i.pravatar.cc/100?img=32",
   },
   {
     quote:
       "Finally a place where my coding, design, and course certificates live together. Huge time saver!",
     name: "Kartik Rao",
     role: "Student & Creator",
+    image: "https://i.pravatar.cc/100?img=58",
   },
 ];
 
@@ -117,7 +120,11 @@ export default function Testimonial() {
                     “{t.quote}”
                   </blockquote>
                   <div className="mt-6 flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gray-600 to-gray-400" />
+                    <img
+                      src={t.image}
+                      alt={t.name}
+                      className="h-9 w-9 rounded-full object-cover border border-white/20"
+                    />
                     <div>
                       <p className="text-sm font-semibold text-white">{t.name}</p>
                       <p className="text-xs text-white/60">{t.role}</p>
