@@ -13,7 +13,7 @@ const teamMembers = [
   {
     id: 2,
     name: "Ayush Singh",
-    designation: "Founding Engineer",
+    designation: "Co-Founder",
     image: assets.AyushImage,
     link: "https://www.linkedin.com/in/ayush-singh-87b3682a5/",
   },

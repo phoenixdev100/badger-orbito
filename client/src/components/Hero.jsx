@@ -1,6 +1,7 @@
 import { Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import React, { useEffect, useRef, useState, useContext } from "react";
+import { Rocket } from "lucide-react";
 import { FiArrowRight } from "react-icons/fi";
 import {
   useMotionTemplate,
@@ -71,6 +72,10 @@ const Hero = () => {
         <Canvas>
           <Stars radius={50} count={2500} factor={4} fade speed={2} />
         </Canvas>
+      </div>
+      {/* Rocket doodle */}
+      <div className="pointer-events-none absolute right-6 bottom-6 sm:right-10 sm:bottom-10 z-0 opacity-40">
+        <Rocket className="h-16 w-16 text-white/60" strokeWidth={1.2} />
       </div>
       
      </motion.section>

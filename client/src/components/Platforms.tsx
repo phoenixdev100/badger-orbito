@@ -5,8 +5,8 @@ import {
   SiGeeksforgeeks,
   SiHackerrank,
   SiCodechef,
+  SiKaggle,
 } from "react-icons/si";
-import { FaDiscord } from "react-icons/fa";
 import { Github } from "lucide-react";
 // CSS-driven hover animations; no JS animation needed
 
@@ -43,7 +43,7 @@ const Platforms: React.FC = () => {
 
       {/* Row 3 */}
       <div className="grid grid-cols-3 divide-x divide-white/10">
-        <LinkBox Icon={FaDiscord} href="https://discord.com" />
+        <LinkBox Icon={SiKaggle} href="https://www.kaggle.com" />
         <LinkBox
           href=""
           className="h-6 w-auto object-contain"
