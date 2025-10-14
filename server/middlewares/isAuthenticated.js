@@ -13,7 +13,7 @@ const isAuthenticated = (req, res, next) => {
     req.userId = decoded.id
     return next()
   } catch (err) {
-    return res.status(401).json({ success: false, message: 'Invalid token' })
+    return res.status(401).json({ success: false, message: 'Please login first' })
   }
 }
 
