@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
 import Hero from '../components/Hero'
 import Features from '../components/Features'
 import Platforms from '../components/Platforms'
@@ -9,6 +11,8 @@ import FAQ from '../components/FAQ'
 import Contact from '../components/Contact'
 
 const Home = () => {
+  const location = useLocation();
+
   // Match Hero's color cycle exactly
   const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
   const color = useMotionValue(COLORS_TOP[0]);
@@ -28,9 +32,24 @@ const Home = () => {
     radial-gradient(60% 60% at 0% 0%, ${color} 0%, rgba(0,0,0,0) 60%),
     linear-gradient(0deg, #000000, #000000)
   `;
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const el = document.getElementById(id);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  }, [location]);
+
   return (
     <div>
-      <Hero />
+      <div id="home">
+        <Hero />
+      </div>
+
       <motion.div
         className="relative overflow-hidden text-slate-100"
         style={{ backgroundImage }}
@@ -76,13 +95,20 @@ const Home = () => {
           <div className="absolute bottom-0 left-0 w-2 h-2 bg-slate-300 opacity-30 rounded-full"></div>
         </div>
 
-        <Features />
-        <Platforms />
+        <div id="features">
+          <Features />
+        </div>
+        <div id="platforms">
+          <Platforms />
+        </div>
       </motion.div>
+
       <Testimonial />
       <MeetTeam />
       <FAQ />
-      <Contact />
+      <div id="contact">
+        <Contact />
+      </div>
     </div>
   )
 }

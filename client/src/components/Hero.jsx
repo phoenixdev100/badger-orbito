@@ -9,6 +9,7 @@ import {
   motion,
   animate,
 } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
 
@@ -16,7 +17,10 @@ import { AppContext } from "../context/AppContext";
 
 const Hero = () => {
   const color = useMotionValue(COLORS_TOP[0]);
-  const { setShowLogin } = useContext(AppContext);
+  const { setShowLogin, isAuthenticated } = useContext(AppContext);
+  const navigate = useNavigate();
+  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
+  const isAuthed = hasToken && isAuthenticated;
 
   useEffect(() => {
     animate(color, COLORS_TOP, {
@@ -61,9 +65,16 @@ const Hero = () => {
             scale: 0.985,
           }}
           className="group relative flex w-fit items-center gap-1.5 rounded-full bg-gray-950/10 px-4 py-2 text-gray-50 transition-colors hover:bg-gray-950/50"
-          onClick={() => setShowLogin(true)}
+          onClick={() => {
+            if (isAuthed) {
+              // Navigate to platforms section
+              navigate('/#platforms');
+            } else {
+              setShowLogin(true);
+            }
+          }}
         >
-          Get Started
+          {isAuthed ? 'Explore Now' : 'Get Started'}
           <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
         </motion.button>
       </div>
