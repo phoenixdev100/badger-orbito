@@ -22,7 +22,7 @@ const App = () => {
     {showLogin && <Login />}
     <div className='min-h-screen bg-gradient-to-b from-teal-50 to-orange-50'> 
     <ToastContainer position='bottom-right'/>
-    {pathname !== '/dashboard' && <Navbar />}
+    <Navbar />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />} /> 
