@@ -2,7 +2,7 @@
 
 <img src="client/public/vite.svg" alt="Badger Logo" width="180"/>
 
-# ✨ Badger - AI Transforming Your Images Magically ✨
+# ✨ Badger ✨
 
 > 🎨 Where Creativity Meets Technology
 
