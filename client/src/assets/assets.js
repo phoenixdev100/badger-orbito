@@ -1,6 +1,6 @@
 import Navlogo from "../assets/nav-logo.png"
 import AyushImage from "../assets/AyushImage.png"
-import DeepakImage from "../assets/DeepakImage.png"
+import DeepakImage from "../assets/DeepakImage.jpg"
 import PriyanshiImage from "../assets/PriyanshiImage.jpg"
 
 const assets = {

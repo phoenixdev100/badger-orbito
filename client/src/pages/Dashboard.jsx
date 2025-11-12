@@ -4,11 +4,14 @@ import Shelf from '../components/Shelf';
 import Graph from '../components/Graph';
 import Feed from '../components/Feed';
 import Certificates from '../components/Certificates';
+import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
   return (
-    <div className="w-full bg-black min-h-screen pt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
+    <div className="w-full bg-black min-h-screen">
+      <Sidebar />
+      <div className="ml-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
         <div className="relative overflow-visible text-white">
           <style>{`
             @keyframes grid-draw { 0% { stroke-dashoffset: 1000; opacity: 0; } 50% { opacity: 0.3; } 100% { stroke-dashoffset: 0; opacity: 0.15; } }
@@ -68,6 +71,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
