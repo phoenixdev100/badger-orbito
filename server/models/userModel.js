@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   googleId: { type: String },
   profilePicture: { type: String },
+  platforms: {
+    credly: { type: String, default: null },
+    leetcode: { type: String, default: null },
+  }
 }, {
   timestamps: true  // Add timestamps for better tracking
 });

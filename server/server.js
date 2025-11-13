@@ -1,8 +1,10 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
-import userRoutes from './routes/userRoutes.js'
 import connectDB from './config/mongodb.js'
+
+import userRoutes from './routes/userRoutes.js'
+import platformRoutes from './routes/platformRoutes.js';
 
 const PORT = process.env.PORT || 4000
 const app = express()
@@ -14,7 +16,10 @@ app.use(cors({ origin: '*' }))
 
 await connectDB()
 
-app.get('/', (req, res) => res.send("Badger API Working fine"))
+
 app.use('/api/user', userRoutes)
+app.use('/api/platforms', platformRoutes);
+
+app.get('/', (req, res) => res.send("Badger API Working fine"))
 
 app.listen(PORT, () => console.log('Server running on port ' + PORT))
