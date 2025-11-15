@@ -1,9 +1,5 @@
 import React from 'react';
-import Stats from '../components/Stats';
-import Shelf from '../components/Shelf';
-import Graph from '../components/Graph';
-import Feed from '../components/Feed';
-import Certificates from '../components/Certificates';
+import GradientBlobCard from '../components/gradient-bold-card';
 import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
@@ -56,22 +52,10 @@ const Dashboard = () => {
 
           {/* Dashboard Content */}
           <div className="relative z-10">
-            <Stats />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <div className="lg:col-span-2">
-                <Shelf />
-              </div>
-              <div className="lg:col-span-1">
-                <Graph />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Feed />
-              <Certificates />
-            </div>
+            <GradientBlobCard />
           </div>
         </div>
-      </div>
+        </div>
       </div>
     </div>
   );

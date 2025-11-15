@@ -22,3 +22,22 @@ export const fetchLeetCodeData = async (username) => {
     return [];
   }
 };
+
+export const verifyLeetCodeOwnership = async (username, verificationCode) => {
+  try {
+    const url = `https://leetcode.com/u/${username}/`;
+    console.log(url);
+    const { data } = await axios.get(url);
+    console.log(data);
+    
+    // Check if verification code exists in the profile HTML
+    // This could be in bio, name, or other profile fields
+    const htmlContent = data.toLowerCase();
+    const codeToFind = verificationCode.toLowerCase();
+    
+    return htmlContent.includes(codeToFind);
+  } catch (err) {
+    console.error('LeetCode verification error:', err.message);
+    return false;
+  }
+};

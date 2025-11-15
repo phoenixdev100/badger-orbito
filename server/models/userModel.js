@@ -7,8 +7,26 @@ const userSchema = new mongoose.Schema({
   googleId: { type: String },
   profilePicture: { type: String },
   platforms: {
-    credly: { type: String, default: null },
-    leetcode: { type: String, default: null },
+    credly: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    leetcode: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    codechef: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    codestudio: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    }
   }
 }, {
   timestamps: true  // Add timestamps for better tracking

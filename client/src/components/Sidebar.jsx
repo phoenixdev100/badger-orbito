@@ -1,29 +1,32 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import assets from '../assets/assets.js';
+
 import { 
   User, 
-  Send, 
+  Plus, 
   MessageSquare, 
   Calendar,
   Settings,
-  ChevronUp
 } from 'lucide-react';
 
 const Sidebar = () => {
+
+  const navigate = useNavigate();
+
+
   const [activeItem, setActiveItem] = useState('profile');
 
   const menuItems = [
     { id: 'profile', icon: User, label: 'Profile' },
-    { id: 'messages', icon: Send, label: 'Messages' },
-    { id: 'chat', icon: MessageSquare, label: 'Chat' },
-    { id: 'calendar', icon: Calendar, label: 'Calendar' },
+    { id: 'addPlatform', icon: Plus, label: 'Add Platform' },
   ];
 
   return (
     <div className="fixed left-0 top-0 h-screen w-20 bg-black flex flex-col items-center py-4 z-50 border-r border-gray-800">
       {/* Logo/Brand at top */}
       <div className="mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-        </div>
+        <a href='/dashboard'><img src={assets.websiteLogo} alt="Logo" className="w-10 h-10 rounded-2xl" /></a>
       </div>
 
       {/* Navigation Items */}
@@ -35,19 +38,26 @@ const Sidebar = () => {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveItem(item.id)}
+              onClick={() =>{
+                setActiveItem(item.id)
+                navigate(`/${item.id}`)
+              }}
               className={`
-                relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group
+                relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group overflow-hidden
                 ${isActive 
-                  ? 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/25' 
-                  : 'bg-gray-800 bg-opacity-50 border border-gray-700 hover:bg-gray-700 hover:border-gray-600'
+                  ? 'shadow-[8px_8px_20px_#111,-8px_-8px_20px_#222] border border-gray-600/50' 
+                  : 'bg-gray-800/30 border border-gray-700/50 hover:bg-gray-700/40 hover:border-gray-600/60 hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]'
                 }
               `}
               title={item.label}
             >
+              {/* Glass morphism background for active state */}
+              {isActive && (
+                <div className="absolute inset-[2px] bg-black/60 backdrop-blur-[12px] rounded-[14px] border border-gray-600/30"></div>
+              )}
               <IconComponent 
                 className={`
-                  w-5 h-5 transition-colors duration-300
+                  relative z-10 w-5 h-5 transition-colors duration-300
                   ${isActive ? 'text-white' : 'text-gray-300 group-hover:text-white'}
                 `} 
               />
@@ -66,17 +76,21 @@ const Sidebar = () => {
         <button
           onClick={() => setActiveItem('settings')}
           className={`
-            w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group
+            relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group overflow-hidden
             ${activeItem === 'settings' 
-              ? 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/25' 
-              : 'bg-gray-800 bg-opacity-50 border border-gray-700 hover:bg-gray-700 hover:border-gray-600'
+              ? 'shadow-[8px_8px_20px_#111,-8px_-8px_20px_#222] border border-gray-600/50' 
+              : 'bg-gray-800/30 border border-gray-700/50 hover:bg-gray-700/40 hover:border-gray-600/60 hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]'
             }
           `}
           title="Settings"
         >
+          {/* Glass morphism background for active state */}
+          {activeItem === 'settings' && (
+            <div className="absolute inset-[2px] bg-black/60 backdrop-blur-[12px] rounded-[14px] border border-gray-600/30"></div>
+          )}
           <Settings 
             className={`
-              w-5 h-5 transition-colors duration-300
+              relative z-10 w-5 h-5 transition-colors duration-300
               ${activeItem === 'settings' ? 'text-white' : 'text-gray-300 group-hover:text-white'}
             `} 
           />
