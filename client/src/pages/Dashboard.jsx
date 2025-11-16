@@ -1,6 +1,8 @@
 import React from 'react';
 import GradientBlobCard from '../components/gradient-bold-card';
 import Sidebar from '../components/Sidebar';
+import FeaturedAchievements from '../components/FeaturedAchievements';
+import { XCard } from '../components/ui/x-gradient-card';
 
 const Dashboard = () => {
   return (
@@ -51,8 +53,42 @@ const Dashboard = () => {
           </div>
 
           {/* Dashboard Content */}
-          <div className="relative z-10">
+          <div className="relative z-10 space-y-8">
             <GradientBlobCard />
+            <div className="mt-12">
+              <FeaturedAchievements />
+            </div>
+            
+            {/* Certificates Section */}
+            <div className="mt-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Certificates</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <XCard
+                  authorName="React Developer"
+                  authorHandle="@reactjs"
+                  authorImage="https://pbs.twimg.com/profile_images/446356636710363136/OYIaJ1KK_400x400.png"
+                  content={[
+                    "Successfully completed the React Developer Certification Program.",
+                    "Topics covered: Hooks, Context API, and Performance Optimization"
+                  ]}
+                  timestamp="Issued: Nov 2023"
+                  isVerified={true}
+                />
+                <XCard
+                  authorName="Node.js Expert"
+                  authorHandle="@nodejs"
+                  authorImage="https://pbs.twimg.com/profile_images/1262824892535373825/BiXDFDD5_400x400.png"
+                  content={[
+                    "Advanced Node.js Certification",
+                    "Mastered asynchronous programming, APIs, and database integration"
+                  ]}
+                  timestamp="Issued: Oct 2023"
+                  isVerified={true}
+                />
+              </div>
+            </div>
           </div>
         </div>
         </div>

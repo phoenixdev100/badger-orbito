@@ -23,7 +23,24 @@ const registerUser = async(req, res)=>{
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET)
 
-        res.json({success:true, token, user: {name: user.name}});
+        // Sanitize user object for client (no password, platforms, or internal fields)
+        const safeUser = {
+            name: user.name,
+            email: user.email,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            platforms: Object.keys(user.platforms || {}).reduce((acc, key) => {
+                const p = user.platforms[key] || {};
+                acc[key] = {
+                    verified: !!p.verified,
+                };
+                return acc;
+            }, {}),
+        };
+
+        console.log(safeUser);
+
+        res.json({success:true, token, user: safeUser});
 
 
     } catch (error) {
@@ -49,7 +66,24 @@ const loginUser = async (req, res) => {
         if (isMatch) {
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
-            res.json({ success: true, token, user: { name: user.name } });
+            // Sanitize user object for client (no password, platforms, or internal fields)
+            const safeUser = {
+                name: user.name,
+                email: user.email,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                platforms: Object.keys(user.platforms || {}).reduce((acc, key) => {
+                const p = user.platforms[key] || {};
+                acc[key] = {
+                    verified: !!p.verified,
+                };
+                return acc;
+            }, {}),
+            };
+
+            console.log(safeUser);
+
+            res.json({ success: true, token, user: safeUser });
         } else {
             return res.json({ success: false, message: 'Invalid credentials' });
         }

@@ -5,7 +5,14 @@ import { useNavigate } from "react-router-dom";
 export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        try {
+            const stored = localStorage.getItem('user');
+            return stored ? JSON.parse(stored) : null;
+        } catch {
+            return null;
+        }
+    });
     const [showLogin, setShowLogin] = useState(false);
     const [token, setToken] = useState(localStorage.getItem('token'))
 
@@ -18,12 +25,11 @@ const AppContextProvider = (props) => {
 
 
     const logout = () => {
-        localStorage.removeItem('token')
-        setToken('')
-        setUser(null)
-        navigate('/')
-
-
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setToken('');
+        setUser(null);
+        navigate('/');
     }
 
     // Link platform username
@@ -138,10 +144,12 @@ const AppContextProvider = (props) => {
         }
     }
 
+    // keep localStorage user in sync when setUser is called
     useEffect(() => {
-        if (token) {
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
         }
-    }, [token])
+    }, [user])
 
     const value = {
         user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated, linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData
