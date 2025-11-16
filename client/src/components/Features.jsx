@@ -66,7 +66,7 @@ export default function Features() {
           Powerful Features
         </h2>
         <p className="mt-3 text-white/70">
-        Explore what makes Badger your ultimate badge companion
+        Explore what makes Orbito your ultimate badge companion
         </p>
         </div>
         <div className="w-full max-w-6xl">

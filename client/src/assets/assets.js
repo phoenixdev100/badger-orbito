@@ -7,6 +7,7 @@ import codestudioImage from "../assets/codestudio.png"
 import codechefImage from "../assets/codechef.png"
 import leetcodeImage from "../assets/leetcode.png"
 import credlyImage from "../assets/credly.svg"
+import leetcodeWhite from "../assets/leetcode-white.png"
 
 const assets = {
     AyushImage,
@@ -17,7 +18,8 @@ const assets = {
     codestudioImage,
     codechefImage,
     leetcodeImage,
-    credlyImage
+    credlyImage,
+    leetcodeWhite
 }
 
 export default assets

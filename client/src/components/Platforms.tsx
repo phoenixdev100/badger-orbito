@@ -8,6 +8,7 @@ import {
   SiKaggle,
 } from "react-icons/si";
 import { Github } from "lucide-react";
+import assets from "../assets/assets";
 // CSS-driven hover animations; no JS animation needed
 
 const Platforms: React.FC = () => {
@@ -21,39 +22,32 @@ const Platforms: React.FC = () => {
           Connected Platforms
         </h2>
         <p className="text-white/70 max-w-2xl">
-          We integrate with popular learning and developer ecosystems so your badges and achievements stay in sync.
+          We integrate with popular learning and developer ecosystems so your orbitos and achievements stay in sync.
         </p>
       </div>
       {/* Row 1 */}
       <div className="grid grid-cols-2 divide-x divide-white/10">
         <LinkBox
           Icon={SiCredly}
+          iconColor="#FF6B00"
           href="https://www.credly.com/"
         />
-        <LinkBox Icon={Github} href="https://github.com/singh04ayush" />
+        <LinkBox Icon={Github} iconColor="#fff" href="https://github.com/singh04ayush" />
       </div>
 
       {/* Row 2 */}
       <div className="grid grid-cols-4 divide-x divide-white/10">
-        <LinkBox Icon={SiLeetcode} href="https://leetcode.com/" />
-        <LinkBox Icon={SiGeeksforgeeks} href="https://www.geeksforgeeks.org/" />
-        <LinkBox Icon={SiHackerrank} href="https://www.hackerrank.com/" />
-        <LinkBox Icon={SiCodechef} href="https://www.codechef.com/" />
+        <LinkBox imgSrc={assets.leetcodeWhite} href="https://leetcode.com/" />
+        <LinkBox Icon={SiGeeksforgeeks} iconColor="#2F8D46" href="https://www.geeksforgeeks.org/" />
+        <LinkBox Icon={SiHackerrank} iconColor="#2EC866" href="https://www.hackerrank.com/" />
+        <LinkBox imgSrc={assets.codechefImage} href="https://www.codechef.com/" />
       </div>
 
       {/* Row 3 */}
       <div className="grid grid-cols-3 divide-x divide-white/10">
-        <LinkBox Icon={SiKaggle} href="https://www.kaggle.com" />
-        <LinkBox
-          href=""
-          className="h-6 w-auto object-contain"
-          imgSrc=""
-        />
-        <LinkBox
-          href=""
-          className="h-8 w-auto object-contain"
-          imgSrc=""
-        />
+        <LinkBox Icon={SiKaggle} iconColor="#20BEFF" href="https://www.kaggle.com" />
+        <LinkBox imgSrc={assets.credlyImage} href="https://www.credly.com/" />
+        <LinkBox imgSrc={assets.codolioImage} href="https://www.codolio.com/" />
       </div>
     </div>
   );
@@ -65,11 +59,13 @@ const LinkBox = ({
   href,
   imgSrc,
   className,
+  iconColor,
 }: {
   Icon?: React.ComponentType<any>;
   href: string;
   imgSrc?: string;
   className?: string;
+  iconColor?: string;
 }) => {
   return (
     <a
@@ -86,7 +82,7 @@ const LinkBox = ({
           className={className ?? "max-h-14 sm:max-h-20 md:max-h-24 object-contain"}
         />
       ) : (
-        Icon && <Icon className="text-3xl sm:text-5xl md:text-6xl" />
+        Icon && <Icon className="text-3xl sm:text-5xl md:text-6xl" color={iconColor} />
       )}
 
       {/* Hover Overlay */}
@@ -107,7 +103,7 @@ const LinkBox = ({
             className={className ?? "max-h-14 sm:max-h-20 md:max-h-24 object-contain"}
           />
         ) : (
-          Icon && <Icon className="text-3xl sm:text-5xl md:text-6xl" />
+          Icon && <Icon className="text-3xl sm:text-5xl md:text-6xl" color={iconColor} />
         )}
       </div>
     </a>

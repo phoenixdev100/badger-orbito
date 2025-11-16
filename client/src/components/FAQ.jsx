@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 const faqs = [
   {
-    q: "How does Badger collect my badges?",
-    a: "Badger connects securely with your learning platforms like Credly, LeetCode, or Microsoft Learn to fetch and verify your badges automatically.",
+    q: "How does Orbito collect my badges?",
+    a: "Orbito connects securely with your learning platforms like Credly, LeetCode, or Microsoft Learn to fetch and verify your badges automatically.",
     icon: "🏆",
   },{
   

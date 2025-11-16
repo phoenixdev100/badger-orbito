@@ -4,6 +4,15 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import { Rocket } from "lucide-react";
 import { FiArrowRight } from "react-icons/fi";
 import {
+  SiLeetcode,
+  SiCodechef,
+  SiGeeksforgeeks,
+  SiHackerrank,
+  SiKaggle,
+  SiGithub,
+} from "react-icons/si";
+import assets from "../assets/assets";
+import {
   useMotionTemplate,
   useMotionValue,
   motion,
@@ -51,7 +60,7 @@ const Hero = () => {
           All Your Achivements In One Place
         </h1>
         <p className="my-6 max-w-xl text-center text-base leading-relaxed md:text-lg md:leading-relaxed">
-          From coding platforms to learning hubs- Badger unifies your badges, so you can showcase your skills without chaos
+          From coding platforms to learning hubs - Orbito unifies your badges, so you can showcase your skills without chaos
         </p>
         <motion.button
           style={{
@@ -83,13 +92,85 @@ const Hero = () => {
         <Canvas>
           <Stars radius={50} count={2500} factor={4} fade speed={2} />
         </Canvas>
+        {/* Floating platform icons */}
+        <FloatingPlatformIcons />
       </div>
       {/* Rocket doodle */}
       <div className="pointer-events-none absolute right-6 bottom-6 sm:right-10 sm:bottom-10 z-0 opacity-40">
         <Rocket className="h-16 w-16 text-white/60" strokeWidth={1.2} />
       </div>
-      
-     </motion.section>
+
+    </motion.section>
+  );
+};
+
+// Floating platform icons component
+const floatingIcons = [
+  { type: 'img', src: assets.leetcodeWhite, alt: 'LeetCode', size: 48 },
+  { type: 'img', src: assets.codechefImage, alt: 'CodeChef', size: 48 },
+  { type: 'img', src: assets.credlyImage, alt: 'Credly', size: 48 },
+  { type: 'img', src: assets.codolioImage, alt: 'Codolio', size: 48 },
+  { type: 'icon', Icon: SiGeeksforgeeks, color: '#2F8D46', size: 48 },
+  { type: 'icon', Icon: SiHackerrank, color: '#2EC866', size: 48 },
+  { type: 'icon', Icon: SiKaggle, color: '#20BEFF', size: 48 },
+  { type: 'icon', Icon: SiGithub, color: '#fff', size: 48 },
+];
+
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+const FloatingPlatformIcons = () => {
+  // Arrange icons in a fixed grid to avoid collision and use equal speed/duration
+  const iconCount = floatingIcons.length;
+  const sectionWidth = 90; // vw
+  const sectionHeight = 70; // vh
+  const rowCount = Math.ceil(Math.sqrt(iconCount));
+  const colCount = Math.ceil(iconCount / rowCount);
+  const duration = 20; // seconds, constant for all
+  return (
+    <>
+      {floatingIcons.map((item, idx) => {
+        // Grid position
+        const row = Math.floor(idx / colCount);
+        const col = idx % colCount;
+        const startTop = 10 + (sectionHeight / rowCount) * row; // vh
+        const startLeft = 5 + (sectionWidth / colCount) * col; // vw
+        // End positions: move diagonally out of screen
+        const endTop = startTop + (Math.random() > 0.5 ? -25 : 25); // vh
+        const endLeft = startLeft + (Math.random() > 0.5 ? -25 : 25); // vw
+        // Evenly stagger delays
+        const delay = (duration / iconCount) * idx;
+        return (
+          <div
+            key={idx}
+            style={{
+              position: 'absolute',
+              top: `${startTop}vh`,
+              left: `${startLeft}vw`,
+              zIndex: 1,
+              pointerEvents: 'none',
+              opacity: 0.25,
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.10))',
+              animation: `float-icon-${idx} ${duration}s linear ${delay}s infinite alternate`,
+            }}
+          >
+            {item.type === 'img' ? (
+              <img src={item.src} alt={item.alt} style={{ width: item.size, height: item.size, objectFit: 'contain' }} />
+            ) : (
+              <item.Icon size={item.size} color={item.color} />
+            )}
+            <style>{`
+              @keyframes float-icon-${idx} {
+                0% { transform: translate(0px, 0px) scale(1); opacity: 0.25; }
+                80% { opacity: 0.25; }
+                100% { transform: translate(${endLeft - startLeft}vw, ${endTop - startTop}vh) scale(1.12); opacity: 0.08; }
+              }
+            `}</style>
+          </div>
+        );
+      })}
+    </>
   );
 };
 

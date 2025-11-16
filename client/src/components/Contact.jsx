@@ -60,7 +60,7 @@ const Contact = () => {
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-white/90"><path d="M4 4h16v16H4z" opacity="0"/><path d="M4 4l8 8 8-8"/><path d="M22 6v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6"/></svg>
                     </span>
-                    <span className="text-white/90">badger@support.com</span>
+                    <span className="text-white/90">support@orbito.space</span>
                   </div>
                   <div className="flex items-start gap-4">
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
