@@ -20,6 +20,6 @@ await connectDB()
 app.use('/api/user', userRoutes)
 app.use('/api/platforms', platformRoutes);
 
-app.get('/', (req, res) => res.send("Badger API Working fine"))
+app.get('/', (req, res) => res.send("Orbito API Working fine"))
 
 app.listen(PORT, () => console.log('Server running on port ' + PORT))

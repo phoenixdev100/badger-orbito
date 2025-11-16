@@ -17,10 +17,10 @@ export const linkPlatform = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid platform' });
 
     // Generate a random string of 6 uppercase letters (A-Z)
-    const randomLetters = Array.from({length: 6}, () => 
+    const randomLetters = Array.from({ length: 6 }, () =>
       String.fromCharCode(65 + Math.floor(Math.random() * 26))
     ).join('');
-    const verificationCode = 'BADGER' + randomLetters;
+    const verificationCode = 'ORBITO' + randomLetters;
 
     user.platforms[platform] = {
       username,
@@ -132,7 +132,7 @@ export const deletePlatform = async (req, res) => {
     const user = await userModel.findById(req.userId);
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (!['credly', 'leetcode', 'codechef', 'codestudio'].includes(platform))
+    if (!['credly', 'leetcode', 'codechef', 'codestudio', 'codolio'].includes(platform))
       return res.status(400).json({ success: false, message: 'Invalid platform' });
 
     // Reset platform data
