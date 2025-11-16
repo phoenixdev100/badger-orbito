@@ -1,3 +1,8 @@
+// Polyfill for File object needed by undici
+if (typeof global.File === 'undefined') {
+    global.File = class File { };
+}
+
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
