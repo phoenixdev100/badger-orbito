@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
       username: { type: String, default: null },
       verified: { type: Boolean, default: false },
       verificationCode: { type: String, default: null },
+    },
+    codolio: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
     }
   }
 }, {

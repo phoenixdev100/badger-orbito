@@ -4,6 +4,7 @@ import { fetchCredlyData, verifyCredlyOwnership } from '../services/credlyServic
 import { fetchLeetCodeData, verifyLeetCodeOwnership } from '../services/leetcodeService.js';
 import { verifyCodeChefOwnership } from '../services/codechefService.js';
 import { verifyCodeStudioOwnership } from '../services/codestudioService.js';
+import { verifyCodolioOwnership } from '../services/codolioService.js';
 
 // 1️⃣ Link a username to a platform
 export const linkPlatform = async (req, res) => {
@@ -12,10 +13,14 @@ export const linkPlatform = async (req, res) => {
     const user = await userModel.findById(req.userId);
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (!['credly', 'leetcode', 'codechef', 'codestudio'].includes(platform))
+    if (!['credly', 'leetcode', 'codechef', 'codestudio', 'codolio'].includes(platform))
       return res.status(400).json({ success: false, message: 'Invalid platform' });
 
-    const verificationCode = 'BADGER-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+    // Generate a random string of 6 uppercase letters (A-Z)
+    const randomLetters = Array.from({length: 6}, () => 
+      String.fromCharCode(65 + Math.floor(Math.random() * 26))
+    ).join('');
+    const verificationCode = 'BADGER' + randomLetters;
 
     user.platforms[platform] = {
       username,
@@ -63,7 +68,8 @@ const PLATFORM_VERIFIERS = {
   credly: verifyCredlyOwnership,
   leetcode: verifyLeetCodeOwnership,
   codechef: verifyCodeChefOwnership,
-  codestudio: verifyCodeStudioOwnership
+  codestudio: verifyCodeStudioOwnership,
+  codolio: verifyCodolioOwnership
 };
 
 // 3️⃣ Verify platform ownership
