@@ -82,7 +82,7 @@ const Sidebar = () => {
           <div className="w-full px-2 mb-4">
             <div className="space-y-2">
               {connectedPlatforms.map((platform) => (
-                <div key={platform.id} className="relative group">
+                <div key={platform.id} className="relative">
                   <button
                     className={`
                       w-12 h-12 rounded-2xl flex items-center justify-center
@@ -91,7 +91,6 @@ const Sidebar = () => {
                       hover:bg-gray-700/40 hover:border-gray-600/60
                       hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]
                     `}
-                    title={`${platform.name}: ${platform.username}`}
                   >
                     <img 
                       src={platform.logo} 
@@ -99,9 +98,6 @@ const Sidebar = () => {
                       className="w-6 h-6 object-contain"
                     />
                   </button>
-                  <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
-                    {platform.name}: {platform.username}
-                  </div>
                 </div>
               ))}
             </div>

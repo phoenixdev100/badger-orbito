@@ -401,6 +401,15 @@ const AddPlatform = () => {
 
             {/* Main Content */}
             <div className="relative z-10">
+              {/* Doodle / sketch decoration (header) */}
+              <div className="pointer-events-none select-none absolute -top-10 -right-16 sm:-top-12 sm:-right-20 opacity-90">
+                <div className="relative h-40 w-40 sm:h-48 sm:w-48">
+                  <div className="absolute bottom-0 right-0 h-36 w-36 rounded-full bg-white/10 blur-[1px]" />
+                  <div className="absolute -top-6 -left-4 h-20 w-20 rounded-full bg-white/16" />
+                  <div className="absolute inset-4 rounded-[32px] border border-white/20" />
+                </div>
+              </div>
+
               <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Add Platform
               </h1>
@@ -408,6 +417,25 @@ const AddPlatform = () => {
                 Sync, verify, and flex your platforms in one smooth flow
               </p>
               
+              {/* Body corner doodles */}
+              <div className="pointer-events-none select-none">
+                {/* Top-left subtle doodle */}
+                <div className="absolute -top-6 -left-10 sm:-top-4 sm:-left-6 opacity-60">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+                    <div className="absolute inset-2 rounded-3xl border border-white/10" />
+                    <div className="absolute -bottom-3 -right-2 h-8 w-8 rounded-full bg-white/12" />
+                  </div>
+                </div>
+
+                {/* Bottom-right subtle doodle */}
+                <div className="absolute -bottom-10 right-0 sm:-bottom-14 sm:right-4 opacity-70">
+                  <div className="relative h-28 w-28 sm:h-32 sm:w-32">
+                    <div className="absolute top-0 left-0 h-10 w-10 rounded-full bg-white/10" />
+                    <div className="absolute bottom-0 right-0 h-20 w-20 rounded-[24px] border border-white/14" />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-6">
                 {/* Credly Section */}
                 <div className="relative overflow-hidden rounded-xl p-6 shadow-[12px_12px_30px_#111,-12px_-12px_30px_#222] mb-6">

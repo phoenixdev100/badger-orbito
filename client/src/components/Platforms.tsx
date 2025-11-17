@@ -1,6 +1,5 @@
 import type * as React from "react";
 import {
-  SiCredly,
   SiLeetcode,
   SiGeeksforgeeks,
   SiHackerrank,
@@ -9,7 +8,6 @@ import {
 } from "react-icons/si";
 import { Github } from "lucide-react";
 import assets from "../assets/assets";
-// CSS-driven hover animations; no JS animation needed
 
 const Platforms: React.FC = () => {
   return (
@@ -27,11 +25,7 @@ const Platforms: React.FC = () => {
       </div>
       {/* Row 1 */}
       <div className="grid grid-cols-2 divide-x divide-white/10">
-        <LinkBox
-          Icon={SiCredly}
-          iconColor="#FF6B00"
-          href="https://www.credly.com/"
-        />
+        <LinkBox imgSrc={assets.codolioImage} href="https://www.codolio.com/" />
         <LinkBox Icon={Github} iconColor="#fff" href="https://github.com/singh04ayush" />
       </div>
 
@@ -39,15 +33,21 @@ const Platforms: React.FC = () => {
       <div className="grid grid-cols-4 divide-x divide-white/10">
         <LinkBox imgSrc={assets.leetcodeWhite} href="https://leetcode.com/" />
         <LinkBox Icon={SiGeeksforgeeks} iconColor="#2F8D46" href="https://www.geeksforgeeks.org/" />
+        <LinkBox imgSrc={assets.credlyImage} href="https://www.credly.com/" />
         <LinkBox Icon={SiHackerrank} iconColor="#2EC866" href="https://www.hackerrank.com/" />
-        <LinkBox imgSrc={assets.codechefImage} href="https://www.codechef.com/" />
       </div>
 
       {/* Row 3 */}
       <div className="grid grid-cols-3 divide-x divide-white/10">
         <LinkBox Icon={SiKaggle} iconColor="#20BEFF" href="https://www.kaggle.com" />
-        <LinkBox imgSrc={assets.credlyImage} href="https://www.credly.com/" />
-        <LinkBox imgSrc={assets.codolioImage} href="https://www.codolio.com/" />
+        <LinkBox imgSrc={assets.codechefImage} href="https://www.codechef.com/" />
+        <div className="flex items-center justify-center">
+          <img 
+            src="https://www.google.com/favicon.ico" 
+            alt="Google" 
+            className="h-10 w-10 object-contain"
+          />
+        </div>
       </div>
     </div>
   );
@@ -72,7 +72,7 @@ const LinkBox = ({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative grid h-20 w-full place-content-center sm:h-28 md:h-36 overflow-hidden bg-transparent text-inherit"
+      className="flex h-20 w-full items-center justify-center sm:h-28 md:h-36 bg-transparent text-inherit"
     >
       {/* Base Icon/Image */}
       {imgSrc ? (
@@ -84,28 +84,6 @@ const LinkBox = ({
       ) : (
         Icon && <Icon className="text-3xl sm:text-5xl md:text-6xl" color={iconColor} />
       )}
-
-      {/* Hover Overlay */}
-      <div
-        className="hoverOverlay pointer-events-none absolute inset-0 grid place-content-center origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-        style={{
-          willChange: "transform",
-          transformStyle: "preserve-3d",
-          backfaceVisibility: "hidden",
-          background: "rgba(255,255,255,0.95)",
-          color: "#000000",
-        }}
-      >
-        {imgSrc ? (
-          <img
-            src={imgSrc}
-            alt="hover icon"
-            className={className ?? "max-h-14 sm:max-h-20 md:max-h-24 object-contain"}
-          />
-        ) : (
-          Icon && <Icon className="text-3xl sm:text-5xl md:text-6xl" color={iconColor} />
-        )}
-      </div>
     </a>
   );
 };

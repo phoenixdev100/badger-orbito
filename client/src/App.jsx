@@ -33,7 +33,7 @@ const App = () => {
         <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />} />
         <Route path='/addPlatform' element={isAuthenticated ? <AddPlatform /> : <Navigate to="/" replace />} />
       </Routes>
-      {isHomePage && <Footer />}
+      <Footer />
     </div>
     </>
   )

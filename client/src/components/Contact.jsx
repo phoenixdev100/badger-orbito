@@ -1,6 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: 'General',
+    message: '',
+    subscribe: false
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const response = await axios.post('http://localhost:4000/api/contact/submit', formData);
+      
+      if (response.data.success) {
+        toast.success('Message sent successfully!');
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          subject: 'General',
+          message: '',
+          subscribe: false
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to send message. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <section className="relative w-full bg-black py-16 sm:py-20 md:py-24 text-white">
       {/* Full-width animated grid background (match FAQ) */}
@@ -89,22 +134,44 @@ const Contact = () => {
               </div>
 
               <div className="p-8 sm:p-10">
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="border-b border-white/20 pb-2">
                       <label className="text-sm text-slate-300">Name</label>
-                      <input type="text" className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" placeholder="" />
+                      <input 
+                        type="text" 
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" 
+                        placeholder="Your name"
+                        required
+                      />
                     </div>
                     <div className="border-b border-white/20 pb-2">
                       <label className="text-sm text-slate-300">Email</label>
-                      <input type="email" className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" placeholder="" />
+                      <input 
+                        type="email" 
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" 
+                        placeholder="your.email@example.com"
+                        required
+                      />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="border-b border-white/20 pb-2 sm:col-span-2">
                       <label className="text-sm text-slate-300">Product Question</label>
-                      <select className="mt-2 w-full bg-transparent outline-none text-white">
+                      <select 
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="mt-2 w-full bg-transparent outline-none text-white"
+                      required
+                    >
                         <option className="text-black">General</option>
                         <option className="text-black">Pricing</option>
                         <option className="text-black">Technical</option>
@@ -114,17 +181,36 @@ const Contact = () => {
 
                   <div className="border-b border-white/20 pb-2">
                     <label className="text-sm text-slate-300">Message</label>
-                    <textarea rows={2} className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" placeholder="Write your message.." />
+                    <textarea 
+                      rows={4} 
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" 
+                      placeholder="Write your message.."
+                      required
+                    />
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <input id="subscribe" type="checkbox" className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent" />
+                    <input 
+                      id="subscribe" 
+                      name="subscribe"
+                      type="checkbox" 
+                      checked={formData.subscribe}
+                      onChange={handleChange}
+                      className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent" 
+                    />
                     <label htmlFor="subscribe" className="text-sm text-slate-200">Subscribe to receive the latest news and exclusive offers</label>
                   </div>
 
                   <div>
-                    <button type="button" className="inline-flex items-center justify-center rounded-md bg-white text-black px-6 py-3 text-sm font-medium hover:bg-white/90 transition">
-                      Send Message
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className={`inline-flex items-center justify-center rounded-md bg-white text-black px-6 py-3 text-sm font-medium hover:bg-white/90 transition ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
                     </button>
                   </div>
                 </form>
