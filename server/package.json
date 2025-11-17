@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon server.js"
+    "server": "nodemon --require ./preload.js server.js",
+    "start": "node --require ./preload.js server.js"
   },
   "keywords": [],
   "author": "",
