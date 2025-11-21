@@ -25,7 +25,7 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post('http://localhost:4000/api/contact/submit', formData);
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/contact/submit`, formData);
       
       if (response.data.success) {
         toast.success('Message sent successfully!');
