@@ -1,5 +1,6 @@
 import { LogOut, Settings } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
@@ -11,9 +12,10 @@ type ProfileCardProps = {
   status: "online" | "offline" | "away"
   avatar: string
   followers?: number
+  onClose?: () => void
 }
 
-export default function AnimatedProfileCard() {
+export default function AnimatedProfileCard({ onClose }: { onClose?: () => void }) {
   const storedUser = useMemo(() => {
     try {
       const raw = localStorage.getItem("user")
@@ -29,14 +31,45 @@ export default function AnimatedProfileCard() {
     status: "online",
     avatar: "https://ik.imagekit.io/fpxbgsota/memoji-alex.png?updatedAt=1752933824067",
     followers: undefined,
+    onClose,
   }
 
   return <ProfileCard {...profile} />
 }
 
-function ProfileCard({ name, role, status, avatar, followers }: ProfileCardProps) {
+function ProfileCard({ name, role, status, avatar, followers, onClose }: ProfileCardProps) {
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    // Clear all authentication-related data from localStorage
+    localStorage.clear()
+
+    // Navigate to login page
+    navigate("/")
+  }
+
+  // Handle click outside to close the card
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const card = document.getElementById("profile-card")
+      if (card && !card.contains(event.target as Node)) {
+        // Use setTimeout to avoid race condition with button click
+        setTimeout(() => {
+          onClose?.()
+        }, 0)
+      }
+    }
+
+    if (onClose) {
+      document.addEventListener("mouseup", handleClickOutside)
+      return () => document.removeEventListener("mouseup", handleClickOutside)
+    }
+  }, [onClose])
+
   return (
-    <div className="group relative overflow-hidden rounded-3xl bg-black border border-gray-800 p-6 w-80 shadow-[0_10px_40px_rgba(0,0,0,0.6)] transition-all duration-500 hover:shadow-[0_16px_60px_rgba(0,0,0,0.9)]">
+    <div
+      id="profile-card"
+      className="group relative overflow-hidden rounded-3xl bg-black border border-gray-800 p-6 w-80 shadow-[0_10px_40px_rgba(0,0,0,0.6)] transition-all duration-500 hover:shadow-[0_16px_60px_rgba(0,0,0,0.9)]">
       {/* Status indicator with pulse animation */}
       <div className="absolute right-4 top-4 z-10">
         <div className="relative">
@@ -93,7 +126,9 @@ function ProfileCard({ name, role, status, avatar, followers }: ProfileCardProps
           <Settings className="h-4 w-4" />
           <span>Settings</span>
         </button>
-        <button className="flex-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 border border-red-500/80 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(0,0,0,0.7)] transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:border-red-300 flex items-center justify-center gap-2">
+        <button
+          onClick={handleLogout}
+          className="flex-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 border border-red-500/80 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(0,0,0,0.7)] transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:border-red-300 flex items-center justify-center gap-2">
           <LogOut className="h-4 w-4" />
           <span>Logout</span>
         </button>
