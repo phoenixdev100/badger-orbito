@@ -54,7 +54,7 @@
 % Header and footer
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{Badger: Digital Badge Aggregation Platform}
+\rhead{Orbito: Digital Badge Aggregation Platform}
 \lhead{Project Report}
 \cfoot{\thepage}
 
@@ -103,7 +103,7 @@
     {\large Btech 3rd Year 2025-2026\par}
     \vspace{2cm}
     
-    {\LARGE\bfseries Badger\par}
+    {\LARGE\bfseries Orbito\par}
     \vspace{0.5cm}
     {\LARGE Digital Badge Aggregation Platform\par}
     \vspace{0.5cm}
@@ -133,7 +133,7 @@
 \thispagestyle{plain}
 \begin{abstract}
 \justify
-Professionals and learners accumulate digital badges across multiple platforms (Credly, Google Cloud, LeetCode, Microsoft Learn, AWS), creating significant portfolio management challenges. \textbf{Badger} is a full stack web application that aggregates and visualizes digital badges from diverse credentialing platforms into a unified interface. Built using React Express.js, and MongoDB, the platform implements OAuth2.0 authentication, JWT-based security, and RESTful API design. The system achieved 96.9\% API integration success rate with real credentialing platforms, demonstrating the technical feasibility of unified credential management. This report presents the system architecture, implementation methodology, experimental validation, and results that validate Badger as a practical solution to credential fragmentation.
+Professionals and learners accumulate digital badges across multiple platforms (Credly, Google Cloud, LeetCode, Microsoft Learn, AWS), creating significant portfolio management challenges. \textbf{Orbito} is a full stack web application that aggregates and visualizes digital badges from diverse credentialing platforms into a unified interface. Built using React Express.js, and MongoDB, the platform implements OAuth2.0 authentication, JWT-based security, and RESTful API design. The system achieved 96.9\% API integration success rate with real credentialing platforms, demonstrating the technical feasibility of unified credential management. This report presents the system architecture, implementation methodology, experimental validation, and results that validate Orbito as a practical solution to credential fragmentation.
 
 \vspace{0.2cm}
 \textbf{Keywords:} Digital Badges, Credential Aggregation, REST API, OAuth 2.0, Full-Stack Development, React, Express.js, MongoDB
@@ -170,7 +170,7 @@ The current state of digital credential management presents several critical cha
 \end{enumerate}
 
 \subsection{Proposed Solution}
-Badger addresses these challenges through a comprehensive full-stack web application that serves as a centralized hub for digital badge aggregation and management. The platform provides:
+Orbito addresses these challenges through a comprehensive full-stack web application that serves as a centralized hub for digital badge aggregation and management. The platform provides:
 
 \begin{itemize}[leftmargin=*]
     \item \textbf{Automated Badge Aggregation:} Seamless integration with multiple credentialing platforms through RESTful APIs and OAuth 2.0 authentication, automatically fetching and synchronizing badges from Credly, Google Cloud Skills Boost, Microsoft Learn, LeetCode, and other major platforms.
@@ -182,7 +182,7 @@ Badger addresses these challenges through a comprehensive full-stack web applica
 \end{itemize}
 
 \subsection{Project Objectives}
-The primary objectives of the Badger project are:
+The primary objectives of the Orbito project are:
 
 \begin{enumerate}[leftmargin=*]
     \item To design and implement a scalable full-stack web application architecture capable of integrating with multiple third-party credentialing APIs.
@@ -323,21 +323,21 @@ User experience evaluation limited. \\
 }
 
 \noindent
-\textbf{Research Gap Identified:} While literature covers individual components (badges, REST APIs, OAuth), limited research addresses holistic integration into unified badge aggregation platforms. Badger fills this gap by implementing multi-platform integration with OAuth 2.0 security, data normalization, and user-centric visualization.
+\textbf{Research Gap Identified:} While literature covers individual components (badges, REST APIs, OAuth), limited research addresses holistic integration into unified badge aggregation platforms. Orbito fills this gap by implementing multi-platform integration with OAuth 2.0 security, data normalization, and user-centric visualization.
 
 \newpage
 
 \section{Methodology}
 \justify
 
-This section outlines the systematic approach employed in designing, developing, and implementing the Badger platform. The methodology encompasses the development framework, system architecture, technology stack selection, implementation details for both backend and frontend components, security measures, platform integration strategies, data management procedures, and validation techniques. Each subsection details the specific tools, technologies, and practices that contributed to the successful realization of the badge aggregation system.
+This section outlines the systematic approach employed in designing, developing, and implementing the Orbito platform. The methodology encompasses the development framework, system architecture, technology stack selection, implementation details for both backend and frontend components, security measures, platform integration strategies, data management procedures, and validation techniques. Each subsection details the specific tools, technologies, and practices that contributed to the successful realization of the badge aggregation system.
 
 \subsection{Development Approach}
 The project followed an agile full-stack development methodology with iterative design, implementation, and testing cycles.
 
 \subsection{System Architecture}
 
-Badger employs a three-tier MVC architecture:
+Orbito employs a three-tier MVC architecture:
 
 \begin{enumerate}[leftmargin=*]
     \item \textbf{Presentation Layer:} React 19.1.1 SPA with TailwindCSS, React Router, Context API for state management
@@ -443,7 +443,7 @@ Testing & Postman (API testing) \\
 \section{Observations and Results}
 \justify
 
-The Badger platform underwent comprehensive testing and validation to assess its performance, reliability, and security across multiple dimensions. This section presents the empirical results obtained from systematic evaluation of the authentication system, API integrations, user interface performance, and data normalization capabilities.
+The Orbito platform underwent comprehensive testing and validation to assess its performance, reliability, and security across multiple dimensions. This section presents the empirical results obtained from systematic evaluation of the authentication system, API integrations, user interface performance, and data normalization capabilities.
 
 \subsection{Authentication System Performance}
 
@@ -523,7 +523,7 @@ User experience testing was conducted with a sample group of 20 participants rep
 
 \subsection{Project Summary}
 
-The Badger project successfully demonstrates the feasibility and effectiveness of a unified digital badge aggregation platform that addresses the critical challenge of credential fragmentation in modern digital learning ecosystems. By integrating React 19.1.1 for the frontend user interface, Express.js 5.1.0 for backend API services, and MongoDB for persistent data storage, the platform achieves a robust full-stack architecture capable of managing credentials from multiple disparate sources. The implementation of OAuth 2.0 authentication protocols ensures secure third-party platform integration, while JWT-based session management provides stateless, scalable user authentication. The system's achievement of 96.9\% API integration success rate across real credentialing platforms validates the technical approach and demonstrates practical viability for production deployment.
+The Orbito project successfully demonstrates the feasibility and effectiveness of a unified digital badge aggregation platform that addresses the critical challenge of credential fragmentation in modern digital learning ecosystems. By integrating React 19.1.1 for the frontend user interface, Express.js 5.1.0 for backend API services, and MongoDB for persistent data storage, the platform achieves a robust full-stack architecture capable of managing credentials from multiple disparate sources. The implementation of OAuth 2.0 authentication protocols ensures secure third-party platform integration, while JWT-based session management provides stateless, scalable user authentication. The system's achievement of 96.9\% API integration success rate across real credentialing platforms validates the technical approach and demonstrates practical viability for production deployment.
 
 \subsection{Limitations and Challenges}
 
@@ -531,11 +531,11 @@ The project encountered several technical constraints worth noting. The platform
 
 \subsection{Future Work and Enhancements}
 
-The Badger platform establishes a foundation for continued development across multiple time horizons. Short-term enhancements include expanding platform integration to include Coursera, edX, and Udacity, implementing full-text search and advanced filtering, adding PDF export and social media sharing features, and optimizing performance through Redis caching for improved response times and reduced database load.
+The Orbito platform establishes a foundation for continued development across multiple time horizons. Short-term enhancements include expanding platform integration to include Coursera, edX, and Udacity, implementing full-text search and advanced filtering, adding PDF export and social media sharing features, and optimizing performance through Redis caching for improved response times and reduced database load.
 
 Medium-term enhancements envision intelligent features such as machine learning-based skill gap analysis, personalized learning recommendations, real-time webhook integrations for immediate credential synchronization, and native mobile applications for iOS and Android platforms to extend accessibility and enable on-the-go credential management.
 
-Long-term strategic directions encompass emerging technologies and enterprise integration. Blockchain-based credential verification would provide tamper-proof validation mechanisms, while AI-powered career guidance could analyze credential portfolios and market demand to provide personalized recommendations. Supporting the Open Badges 3.0 specification would ensure continued alignment with evolving industry standards. Integration capabilities with enterprise Learning Management Systems would position Badger as an institutional credential management solution for organizational deployments.
+Long-term strategic directions encompass emerging technologies and enterprise integration. Blockchain-based credential verification would provide tamper-proof validation mechanisms, while AI-powered career guidance could analyze credential portfolios and market demand to provide personalized recommendations. Supporting the Open Badges 3.0 specification would ensure continued alignment with evolving industry standards. Integration capabilities with enterprise Learning Management Systems would position Orbito as an institutional credential management solution for organizational deployments.
 
 \newpage
 
@@ -583,7 +583,7 @@ Fanfarelli \& McDaniel, \textit{Open Badges in Education: A Review}, European Jo
 
 \begin{center}
 \fbox{\parbox{0.95\textwidth}{
-\textbf{\Large BADGER: Digital Badge Aggregation Platform}
+\textbf{\Large Orbito: Digital Badge Aggregation Platform}
 
 \vspace{0.2cm}
 
@@ -624,7 +624,7 @@ Fanfarelli \& McDaniel, \textit{Open Badges in Education: A Review}, European Jo
 
 \vspace{0.5cm}
 
-\textbf{Badger: All Your Achievements In One Place}
+\textbf{Orbito: All Your Achievements In One Place}
 \end{center}
 
 \end{document}
