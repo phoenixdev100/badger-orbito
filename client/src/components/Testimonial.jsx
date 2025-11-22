@@ -3,7 +3,7 @@ import React from "react";
 const testimonials = [
   {
     quote:
-      "Badger brought all my scattered achievements into one clean profile. Now sharing my progress is effortless.",
+      "Orbito brought all my scattered achievements into one clean profile. Now sharing my progress is effortless.",
     name: "Aarav Sharma",
     role: "Full‑stack Developer",
     image: "https://i.pravatar.cc/100?img=12",

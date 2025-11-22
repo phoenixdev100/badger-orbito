@@ -1,9 +1,11 @@
 {
   "name": "server",
+  "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon server.js"
+    "server": "nodemon --require ./preload.cjs server.js",
+    "start": "node --require ./preload.cjs server.js"
   },
   "keywords": [],
   "author": "",
@@ -12,9 +14,11 @@
   "dependencies": {
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
+    "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "express-validator": "^7.3.0",
     "form-data": "^4.0.4",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",

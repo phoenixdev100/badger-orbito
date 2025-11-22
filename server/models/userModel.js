@@ -6,6 +6,33 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   googleId: { type: String },
   profilePicture: { type: String },
+  platforms: {
+    credly: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    leetcode: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    codechef: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    codestudio: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    },
+    codolio: {
+      username: { type: String, default: null },
+      verified: { type: Boolean, default: false },
+      verificationCode: { type: String, default: null },
+    }
+  }
 }, {
   timestamps: true  // Add timestamps for better tracking
 });

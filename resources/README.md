@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="client/public/vite.svg" alt="Badger Logo" width="180"/>
+<img src="client/public/vite.svg" alt="Orbito Logo" width="180"/>
 
-# ✨ Badger - AI Transforming Your Images Magically ✨
+# ✨ Orbito ✨
 
 > 🎨 Where Creativity Meets Technology
 

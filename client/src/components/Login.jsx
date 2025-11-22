@@ -45,6 +45,24 @@ const Login = ({ onClose }) => {
 
   const navigate = useNavigate();
 
+  // Google Identity Services login handler
+  const handleCredentialLogin = (response) => {
+    console.log('GIS response:', response);
+
+    if (response?.credential) {
+      // Store token under "user" key as requested and also keep existing token behavior
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ isLogin: true, token: response.credential })
+      );
+
+      // Optionally, you could exchange this token with your backend here.
+      // For now, just close modal and redirect to dashboard.
+      setShowLogin(false);
+      navigate('/dashboard');
+    }
+  };
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     try {
@@ -88,6 +106,25 @@ const Login = ({ onClose }) => {
     document.body.style.overflow = 'hidden';
     const navbar = document.getElementById('nav-bar');
     if (navbar) navbar.style.opacity = 0.05;
+
+    // Initialize Google Identity Services button when script is available
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      window.google.accounts.id.initialize({
+        client_id: '517052691762-j2j6ukfg3oobksvfobj7sh4u18fi5vin.apps.googleusercontent.com',
+        callback: handleCredentialLogin,
+      });
+
+      const btn = document.getElementById('google-login-button');
+      if (btn) {
+        window.google.accounts.id.renderButton(btn, {
+          theme: 'outline',
+          size: 'large',
+          shape: 'pill',
+          width: 260,
+        });
+      }
+    }
+
     return () => {
       document.body.style.overflow = 'unset';
       if (navbar) navbar.style.opacity = 1;
@@ -156,14 +193,15 @@ const Login = ({ onClose }) => {
           {state === 'Login' ? 'Login' : 'Create Account'}
         </button>
 
-        <button
-          type="button"
-          className="mt-3 w-full border border-white/30 text-white py-2 rounded-full flex items-center justify-center gap-2 hover:bg-white/10"
-          aria-label="Continue with Google"
-        >
-          <IconGoogle />
-          <span>Continue with Google</span>
-        </button>
+        {/* Google Identity Services button container */}
+        <div className="mt-3 w-full flex justify-center">
+          <div
+            id="google-login-button"
+            className="w-full flex items-center justify-center border border-white/20 rounded-full bg-white/5 py-2"
+          >
+            {/* GIS will render the actual button here */}
+          </div>
+        </div>
 
         {state === 'Login' ? (
           <p className="mt-5 text-center">

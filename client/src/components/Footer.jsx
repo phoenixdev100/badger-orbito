@@ -44,7 +44,7 @@ const Footer = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-3">
           {/* Left: copyright */}
-          <p className="text-sm text-white/80">© Copyright Badger {new Date().getFullYear()}</p>
+          <p className="text-sm text-white/80">© Copyright Orbito {new Date().getFullYear()}</p>
 
           {/* Middle: slogan */}
           <p className="text-sm md:text-base text-white/90 text-center">Built for Learners ❤️ Loved by Creators</p>
