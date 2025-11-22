@@ -4,7 +4,7 @@ import { fetchCredlyData, verifyCredlyOwnership } from '../services/credlyServic
 import { fetchLeetCodeData, verifyLeetCodeOwnership } from '../services/leetcodeService.js';
 import { verifyCodeChefOwnership } from '../services/codechefService.js';
 import { verifyCodeStudioOwnership } from '../services/codestudioService.js';
-import { verifyCodolioOwnership } from '../services/codolioService.js';
+import { verifyCodolioOwnership, fetchCodolioData } from '../services/codolioService.js';
 
 // 1️⃣ Link a username to a platform
 export const linkPlatform = async (req, res) => {
@@ -55,6 +55,9 @@ export const fetchAllPlatformsData = async (req, res) => {
 
     if (user.platforms.leetcode?.username && user.platforms.leetcode?.verified)
       results.leetcode = await fetchLeetCodeData(user.platforms.leetcode.username);
+
+    if (user.platforms.codolio?.username && user.platforms.codolio?.verified)
+      results.codolio = await fetchCodolioData(user.platforms.codolio.username);
 
     res.json({ success: true, data: results });
   } catch (err) {

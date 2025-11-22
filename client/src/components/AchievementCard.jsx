@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AchievementCard = ({ title, description, icon, count, color }) => {
+const AchievementCard = ({ title, description, icon, count, color, badgeImage }) => {
   return (
     <div className="relative group w-full h-full min-h-[180px] rounded-xl overflow-hidden">
       {/* Glow effect */}
@@ -10,8 +10,16 @@ const AchievementCard = ({ title, description, icon, count, color }) => {
       <div className="relative h-full bg-black border border-gray-800 rounded-xl p-6 flex flex-col shadow-lg">
         {/* Top section with icon and count */}
         <div className="flex justify-between items-start mb-4">
-          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${color} bg-opacity-20 backdrop-blur-sm`}>
-            {icon}
+          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${color} bg-opacity-20 backdrop-blur-sm overflow-hidden`}>
+            {badgeImage ? (
+              <img
+                src={badgeImage}
+                alt={title}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              icon
+            )}
           </div>
           {count && (
             <div className="px-2 py-1 bg-black/50 text-xs font-medium text-gray-300 rounded-md">

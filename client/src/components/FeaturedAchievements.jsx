@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AchievementCard from './AchievementCard';
 import { Trophy, Award, Code, Star, Plus } from 'lucide-react';
 
-const FeaturedAchievements = () => {
+const FeaturedAchievements = ({ featuredBadgeImages = [] }) => {
   // Sample achievement data - in a real app, this would come from props or a store
   const [achievements, setAchievements] = useState([
     {
@@ -37,6 +37,11 @@ const FeaturedAchievements = () => {
     },
   ]);
 
+  const achievementsWithImages = achievements.map((achievement, index) => ({
+    ...achievement,
+    badgeImage: featuredBadgeImages[index] || null,
+  }));
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
@@ -48,7 +53,7 @@ const FeaturedAchievements = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {achievements.map((achievement) => (
+        {achievementsWithImages.map((achievement) => (
           <AchievementCard
             key={achievement.id}
             title={achievement.title}
@@ -56,6 +61,7 @@ const FeaturedAchievements = () => {
             icon={achievement.icon}
             count={achievement.count}
             color={achievement.color}
+            badgeImage={achievement.badgeImage}
           />
         ))}
       </div>
