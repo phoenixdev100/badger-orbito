@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio'; // you might need to parse HTML
+import * as cheerio from 'cheerio'; 
 
 export const fetchLeetCodeData = async (username) => {
   try {
@@ -30,8 +30,6 @@ export const verifyLeetCodeOwnership = async (username, verificationCode) => {
     const { data } = await axios.get(url);
     console.log(data);
     
-    // Check if verification code exists in the profile HTML
-    // This could be in bio, name, or other profile fields
     const htmlContent = data.toLowerCase();
     const codeToFind = verificationCode.toLowerCase();
     
