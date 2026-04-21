@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon --require ./preload.cjs server.js",
-    "start": "node --require ./preload.cjs server.js"
+    "dev": "nodemon --require ./preload.cjs server.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +21,9 @@
     "express-validator": "^7.3.0",
     "form-data": "^4.0.4",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.1",
+    "mongoose": "^8.18.1"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.10"
   }
 }

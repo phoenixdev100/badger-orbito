@@ -14,10 +14,7 @@ const connectDB = async () => {
             console.log("MongoDB Disconnected");
         });
 
-        await mongoose.connect(`${process.env.MONGODB_URI}/badger`, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        await mongoose.connect(`${process.env.MONGODB_URI}/badger`);
 
         console.log("MongoDB Connection Attempted");
     } catch (error) {
