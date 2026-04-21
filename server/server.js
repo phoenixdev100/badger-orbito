@@ -17,18 +17,23 @@ const app = express()
 
 app.use(express.json())
 
-// Configure CORS with allowed origins from environment
-const allowedOrigins = process.env.ALLOWED_ORIGINS ?
-    process.env.ALLOWED_ORIGINS.split(',') : [];
+// Configure CORS with allowed origins
+const allowedOrigins = (process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:5173', 'http://localhost:3000'])
+    .map(origin => origin.trim());
+
+console.log('Allowed Origins:', allowedOrigins);
 
 const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.error('Blocked by CORS:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -46,4 +51,10 @@ app.use('/api/contact', contactRoutes)
 
 app.get('/', (req, res) => res.send("Orbito API Working fine"))
 
-app.listen(PORT, () => console.log('Server running on port ' + PORT))
+// Only listen to port if not in Vercel environment
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => console.log('Server running on port ' + PORT))
+}
+
+// Export for Vercel serverless
+export default app

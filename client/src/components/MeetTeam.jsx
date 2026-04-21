@@ -3,24 +3,24 @@ import { AnimatedTooltip } from "./ui/animated-tooltip";
 import assets from "../assets/assets";
 
 const teamMembers = [
+  // {
+  //   id: 1,
+  //   name: "Priyanshi Sharma",
+  //   designation: "Co-Founder",
+  //   image: assets.PriyanshiImage,
+  //   link: "https://www.linkedin.com/in/priyanshi1111/",
+  // },
   {
     id: 1,
-    name: "Priyanshi Sharma",
-    designation: "Co-Founder",
-    image: assets.PriyanshiImage,
-    link: "https://www.linkedin.com/in/priyanshi1111/",
-  },
-  {
-    id: 2,
     name: "Ayush Singh",
     designation: "Founder & CEO",
     image: assets.AyushImage,
     link: "https://www.linkedin.com/in/ayush-singh-87b3682a5/",
   },
   {
-    id: 3,
+    id: 2,
     name: "Deepak",
-    designation: "Co-Founder",
+    designation: "Founder & CTO",
     image: assets.DeepakImage,
     link: "https://www.linkedin.com/in/phoenixdev100/",
   },
