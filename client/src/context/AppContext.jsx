@@ -144,6 +144,28 @@ const AppContextProvider = (props) => {
         }
     }
 
+    // Toggle platform public/private visibility
+    const updatePlatformVisibility = async (platform, isPublic) => {
+        try {
+            const response = await axios.patch(
+                `${backendUrl}/api/platforms/visibility`,
+                { platform, isPublic },
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+            if (response.data.success) {
+                toast.success(response.data.message)
+                return { success: true }
+            } else {
+                toast.error(response.data.message)
+                return { success: false }
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to update visibility'
+            toast.error(message)
+            return { success: false, message }
+        }
+    }
+
     // keep localStorage user in sync when setUser is called
     useEffect(() => {
         if (user) {
@@ -152,7 +174,9 @@ const AppContextProvider = (props) => {
     }, [user])
 
     const value = {
-        user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated, linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData
+        user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated,
+        linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData,
+        updatePlatformVisibility,
     }
 
     return (

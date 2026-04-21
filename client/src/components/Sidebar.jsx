@@ -6,6 +6,7 @@ import assets from '../assets/assets.js';
 import AnimatedProfileCard from './info-card';
 
 import {
+  Home,
   User,
   Plus,
   MessageSquare,
@@ -71,8 +72,28 @@ const Sidebar = () => {
   return (
     <div className="fixed left-0 top-0 h-screen w-20 bg-black flex flex-col items-center py-4 z-50 border-r border-gray-800">
       {/* Logo/Brand at top */}
-      <div className="mb-6">
+      <div className="mb-4">
         <a href='/'><img src={assets.websiteLogo} alt="Logo" className="w-10 h-10 rounded-2xl" /></a>
+      </div>
+
+      {/* Home Button below logo */}
+      <div className="mb-6">
+        <button
+          onClick={() => {
+            setActiveItem('dashboard');
+            navigate('/dashboard');
+          }}
+          className={`
+            relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group overflow-hidden
+            bg-gray-800/30 border border-gray-700/50 hover:bg-gray-700/40 hover:border-gray-600/60 hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]
+          `}
+          title="Home"
+        >
+          <Home className="relative z-10 w-5 h-5 text-gray-300 group-hover:text-white transition-colors duration-300" />
+          <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+            Home
+          </div>
+        </button>
       </div>
 
       {/* Navigation Items */}
