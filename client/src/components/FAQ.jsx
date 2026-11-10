@@ -1,21 +1,22 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
     q: "How does Orbito collect my badges?",
     a: "Orbito connects securely with your learning platforms like Credly, LeetCode, or Microsoft Learn to fetch and verify your badges automatically.",
     icon: "🏆",
-  },{
-  
-  q: "Can I add badges manually?",
-  a: "Yes! For unsupported platforms, you can upload badges manually with proof — we’ll keep them safe and stylish.",
-  icon: "🧩",
-},
-{
-  q: "Is my data secure?",
-  a: "Totally. All connections are encrypted, and we never store your login credentials — only verified badge info.",
-  icon: "🔒",
-},
+  },
+  {
+    q: "Can I add badges manually?",
+    a: "Yes! For unsupported platforms, you can upload badges manually with proof — we’ll keep them safe and stylish.",
+    icon: "🧩",
+  },
+  {
+    q: "Is my data secure?",
+    a: "Totally. All connections are encrypted, and we never store your login credentials — only verified badge info.",
+    icon: "🔒",
+  },
   {
     q: "Will my badges update automatically?",
     a: "Absolutely! Once linked, new badges appear in your dashboard as soon as you earn them — no manual refresh needed.",
@@ -26,25 +27,85 @@ const faqs = [
     a: "Of course. Share your achievements to socials with one click and show off your learning journey proudly.",
     icon: "🚀",
   },
-  ,
 ];
-
 
 function Pill({ children, rightIcon, onClick, active }) {
   return (
-    <button
+    <motion.button
+      type="button"
+      whileHover={{ y: -2, scale: 1.008 }}
+      whileTap={{ scale: 0.992 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={onClick}
-      className={`group relative w-full text-left rounded-full bg-white/95 text-slate-900 shadow-sm ring-1 ring-slate-200 px-5 sm:px-6 py-3 sm:py-4 transition hover:shadow-md hover:-translate-y-[1px] ${
-        active ? "ring-slate-300" : ""
+      className={`group relative w-full text-left rounded-full px-5 sm:px-6 py-3.5 sm:py-4 transition-all duration-200 cursor-pointer ${
+        active
+          ? "bg-white text-slate-950 shadow-lg shadow-cyan-500/10 ring-2 ring-cyan-400"
+          : "bg-white/95 text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-white hover:shadow-md hover:ring-slate-300"
       }`}
     >
       <span className="flex items-center gap-3">
         {children}
-        <span className="ml-auto inline-flex items-center justify-center rounded-full text-slate-500 group-hover:text-slate-700 transition">
+        <span className="ml-auto inline-flex items-center justify-center rounded-full transition-colors">
           {rightIcon}
         </span>
       </span>
-    </button>
+    </motion.button>
+  );
+}
+
+function AccordionItem({ item, isOpen, onToggle, contentClassName = "" }) {
+  if (!item) return null;
+
+  return (
+    <div className="w-full">
+      <Pill
+        active={isOpen}
+        onClick={onToggle}
+        rightIcon={
+          <motion.span
+            animate={{ rotate: isOpen ? 45 : 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="inline-flex items-center justify-center text-slate-500 group-hover:text-slate-900"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </motion.span>
+        }
+      >
+        <span className="flex items-center gap-3">
+          {item.icon && <span className="text-xl leading-none">{item.icon}</span>}
+          <span className="text-[1.05rem] sm:text-lg font-medium">{item.q}</span>
+        </span>
+      </Pill>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className={`mt-2.5 text-slate-200/90 ${contentClassName}`}>
+              <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 sm:p-5 backdrop-blur-md">
+                <p className="text-sm sm:text-base leading-relaxed text-slate-300">{item.a}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -64,7 +125,7 @@ export default function FAQ() {
             .corner-element-animate { position: absolute; width: 40px; height: 40px; border: 1px solid rgba(203, 213, 225, 0.2); opacity: 0; animation: word-appear 1s ease-out forwards; }
           `}</style>
 
-          {/* SVG grid background (match Testimonial) */}
+          {/* SVG grid background */}
           <svg className="pointer-events-none absolute inset-0 h-full w-full z-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern id="gridReactDarkResponsiveFAQ" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -102,116 +163,49 @@ export default function FAQ() {
             </div>
 
             {/* Stacked on small screens */}
-            <div className="space-y-5 sm:space-y-6 md:hidden">
-              {faqs.map((f, i) => {
-                const isOpen = open === i;
-                return (
-                  <div key={i} className="relative">
-                    <Pill
-                      active={isOpen}
-                      onClick={() => setOpen((v) => (v === i ? -1 : i))}
-                      rightIcon={
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-5 w-5 transition ${isOpen ? "rotate-45" : ""}`}>
-                          <path d="M12 5v14M5 12h14" />
-                        </svg>
-                      }
-                    >
-                      <span className="flex items-center gap-3">
-                        {f.icon && <span className="text-xl leading-none">{f.icon}</span>}
-                        <span className="text-[1.05rem] sm:text-lg">{f.q}</span>
-                      </span>
-                    </Pill>
-                    {isOpen && (
-                      <div className="ml-4 mr-8 sm:ml-6 sm:mr-10 mt-2 text-slate-200/90">
-                        <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4 sm:p-5">
-                          <p className="text-sm sm:text-base leading-relaxed">{f.a}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="space-y-4 sm:space-y-5 md:hidden">
+              {faqs.map((f, i) => (
+                <AccordionItem
+                  key={i}
+                  item={f}
+                  isOpen={open === i}
+                  onToggle={() => setOpen((v) => (v === i ? -1 : i))}
+                  contentClassName="ml-3 mr-6 sm:ml-5 sm:mr-8"
+                />
+              ))}
             </div>
 
             {/* Two-column alternating layout on md+ */}
-            <div className="hidden md:flex md:flex-col md:gap-6">
+            <div className="hidden md:flex md:flex-col md:gap-5">
               {Array.from({ length: Math.ceil(faqs.length / 2) }).map((_, rowIdx) => {
                 const leftIndex = rowIdx * 2;
                 const rightIndex = leftIndex + 1;
                 const left = faqs[leftIndex];
                 const right = faqs[rightIndex];
-                const leftIsOpen = open === leftIndex;
-                const rightIsOpen = open === rightIndex;
-                const swap = rowIdx % 2 === 1; // odd rows: 30% left, 60% right
-
-                const LeftColumn = () => (
-                  <div className={`flex flex-col ${swap ? 'basis-[35%]' : 'basis-[60%]'} w-full`}>
-                    {left && (
-                      <>
-                        <Pill
-                          active={leftIsOpen}
-                          onClick={() => setOpen((v) => (v === leftIndex ? -1 : leftIndex))}
-                          rightIcon={
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-5 w-5 transition ${leftIsOpen ? 'rotate-45' : ''}`}>
-                              <path d="M12 5v14M5 12h14" />
-                            </svg>
-                          }
-                        >
-                          <span className="flex items-center gap-3">
-                            {left.icon && <span className="text-xl leading-none">{left.icon}</span>}
-                            <span className="text-lg">{left.q}</span>
-                          </span>
-                        </Pill>
-                        {leftIsOpen && (
-                          <div className="mt-2 text-slate-200/90">
-                            <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
-                              <p className="text-base leading-relaxed">{left.a}</p>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-
-                const RightColumn = () => (
-                  <div className={`flex flex-col ${swap ? 'basis-[60%]' : 'basis-[35%]'} w-full`}>
-                    {right && (
-                      <>
-                        <Pill
-                          active={rightIsOpen}
-                          onClick={() => setOpen((v) => (v === rightIndex ? -1 : rightIndex))}
-                          rightIcon={
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-5 w-5 transition ${rightIsOpen ? 'rotate-45' : ''}`}>
-                              <path d="M12 5v14M5 12h14" />
-                            </svg>
-                          }
-                        >
-                          <span className="flex items-center gap-3">
-                            {right.icon && <span className="text-xl leading-none">{right.icon}</span>}
-                            <span className="text-lg">{right.q}</span>
-                          </span>
-                        </Pill>
-                        {rightIsOpen && (
-                          <div className="mt-2 text-slate-200/90">
-                            <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
-                              <p className="text-base leading-relaxed">{right.a}</p>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
+                const swap = rowIdx % 2 === 1; // odd rows: 35% left, 60% right
 
                 return (
                   <div key={rowIdx} className="flex w-full items-start gap-0">
                     {/* Left column */}
-                    <LeftColumn />
-                    {/* Spacer 10% */}
+                    <div className={`flex flex-col ${swap ? "basis-[35%]" : "basis-[60%]"} w-full`}>
+                      <AccordionItem
+                        item={left}
+                        isOpen={open === leftIndex}
+                        onToggle={() => setOpen((v) => (v === leftIndex ? -1 : leftIndex))}
+                      />
+                    </div>
+
+                    {/* Spacer 5% */}
                     <div className="basis-[5%]" />
+
                     {/* Right column */}
-                    <RightColumn />
+                    <div className={`flex flex-col ${swap ? "basis-[60%]" : "basis-[35%]"} w-full`}>
+                      <AccordionItem
+                        item={right}
+                        isOpen={open === rightIndex}
+                        onToggle={() => setOpen((v) => (v === rightIndex ? -1 : rightIndex))}
+                      />
+                    </div>
                   </div>
                 );
               })}

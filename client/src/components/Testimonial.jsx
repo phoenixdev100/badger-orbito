@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 const testimonials = [
   {
@@ -26,24 +27,31 @@ const testimonials = [
 
 function GlowCard({ children }) {
   return (
-    <div className="relative isolate">
-      {/* Outer multicolor glow */}
+    <motion.div
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 320, damping: 22 }}
+      className="group relative isolate cursor-pointer h-full"
+    >
+      {/* Outer multicolor glow that intensifies smoothly on hover */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-[2px] rounded-2xl opacity-60 blur-lg"
+        className="pointer-events-none absolute -inset-[2px] rounded-2xl opacity-40 blur-md group-hover:opacity-90 group-hover:blur-xl transition-all duration-500 ease-out"
         style={{
           background:
-            "conic-gradient(from 180deg at 50% 50%, #3b82f6, #a855f7, #ef4444, #f59e0b, #10b981, #3b82f6)",
+            "conic-gradient(from 180deg at 50% 50%, #06b6d4, #6366f1, #d946ef, #f59e0b, #10b981, #06b6d4)",
         }}
       />
 
-      {/* Card */}
-      <div className="relative rounded-2xl bg-black p-6 sm:p-7 md:p-8 text-white h-60 md:h-64 w-full">
+      {/* Card Body */}
+      <div className="relative rounded-2xl bg-zinc-950/95 border border-white/10 group-hover:border-white/30 p-6 sm:p-7 md:p-8 text-white h-60 md:h-64 w-full flex flex-col justify-between shadow-2xl transition-colors duration-300 overflow-hidden backdrop-blur-xl">
+        {/* Ambient radial reflection on hover */}
+        <div className="pointer-events-none absolute -top-20 -right-20 w-44 h-44 bg-gradient-to-br from-cyan-400/15 via-indigo-500/10 to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+
         {children}
 
-        {/* Small doodle at bottom-right */}
+        {/* Small doodle at bottom-right with interactive hover motion */}
         <svg
-          className="absolute bottom-4 right-5 h-6 w-6 text-white/80"
+          className="absolute bottom-4 right-5 h-6 w-6 text-white/40 group-hover:text-cyan-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -55,7 +63,7 @@ function GlowCard({ children }) {
           <path d="M6 19c3-1.5 6-1.5 9 0" />
         </svg>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -116,17 +124,17 @@ export default function Testimonial() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7 lg:gap-8">
               {testimonials.map((t, i) => (
                 <GlowCard key={i}>
-                  <blockquote className="text-white/90 text-base sm:text-[1.02rem] leading-relaxed">
+                  <blockquote className="text-white/90 group-hover:text-white text-base sm:text-[1.02rem] leading-relaxed transition-colors duration-200">
                     “{t.quote}”
                   </blockquote>
                   <div className="mt-6 flex items-center gap-3">
                     <img
                       src={t.image}
                       alt={t.name}
-                      className="h-9 w-9 rounded-full object-cover border border-white/20"
+                      className="h-10 w-10 rounded-full object-cover border border-white/20 group-hover:border-cyan-400/60 group-hover:scale-105 transition-all duration-300 shadow-sm"
                     />
                     <div>
-                      <p className="text-sm font-semibold text-white">{t.name}</p>
+                      <p className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors duration-200">{t.name}</p>
                       <p className="text-xs text-white/60">{t.role}</p>
                     </div>
                   </div>
