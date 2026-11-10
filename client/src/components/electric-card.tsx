@@ -29,7 +29,7 @@ export type ElectricCardProps = {
  * ElectricCard
  * Animated, dramatic glass/electric card with SVG filters and layered glow.
  *
- * Render multiple instances safely — filter IDs are unique per component.
+ * Render multiple instances safely - filter IDs are unique per component.
  */
 const ElectricCard = ({
   variant = "swirl",

@@ -8,7 +8,7 @@ Use this prompt to generate a complete visual and technical breakdown for the **
 **Description:** 
 A unified "Developer Intelligence Dashboard" that aggregates performance metrics across multiple competitive programming and certification platforms (LeetCode, CodeChef, CodeStudio, Credly, and Codolio). 
 **Key Innovation:** 
-The **Orbito Verification Protocol**—a seamless process where users inject a unique alphanumeric code into their public platform profiles. The backend then performs a secure "scrape-and-validate" operation to prove ownership without requiring OAuth for all platforms.
+The **Orbito Verification Protocol**-a seamless process where users inject a unique alphanumeric code into their public platform profiles. The backend then performs a secure "scrape-and-validate" operation to prove ownership without requiring OAuth for all platforms.
 
 ---
 

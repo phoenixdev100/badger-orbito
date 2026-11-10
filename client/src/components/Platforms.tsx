@@ -95,7 +95,7 @@ const Platforms: React.FC = () => {
           imgSrc={assets.codechefImage}
           href="https://www.codechef.com/"
         />
-        {/* Google — raw img, still wrapped in LinkBox */}
+        {/* Google - raw img, still wrapped in LinkBox */}
         <LinkBox
           id="google"
           externalImgSrc="https://www.google.com/favicon.ico"
@@ -185,7 +185,7 @@ const LinkBox: React.FC<LinkBoxProps> = ({
         }}
       />
 
-      {/* ---- Icon / Image — scale + filter on hover ---- */}
+      {/* ---- Icon / Image - scale + filter on hover ---- */}
       <motion.div
         className="relative z-10 flex flex-col items-center gap-2"
         animate={
@@ -234,7 +234,7 @@ const LinkBox: React.FC<LinkBoxProps> = ({
           )
         )}
 
-        {/* ---- Platform name label — fade in on hover ---- */}
+        {/* ---- Platform name label - fade in on hover ---- */}
         <motion.span
           className="text-xs font-medium tracking-wide select-none"
           style={{ color: theme.glow }}

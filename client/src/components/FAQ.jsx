@@ -9,17 +9,17 @@ const faqs = [
   },
   {
     q: "Can I add badges manually?",
-    a: "Yes! For unsupported platforms, you can upload badges manually with proof — we’ll keep them safe and stylish.",
+    a: "Yes! For unsupported platforms, you can upload badges manually with proof - we’ll keep them safe and stylish.",
     icon: "🧩",
   },
   {
     q: "Is my data secure?",
-    a: "Totally. All connections are encrypted, and we never store your login credentials — only verified badge info.",
+    a: "Totally. All connections are encrypted, and we never store your login credentials - only verified badge info.",
     icon: "🔒",
   },
   {
     q: "Will my badges update automatically?",
-    a: "Absolutely! Once linked, new badges appear in your dashboard as soon as you earn them — no manual refresh needed.",
+    a: "Absolutely! Once linked, new badges appear in your dashboard as soon as you earn them - no manual refresh needed.",
     icon: "🔄",
   },
   {

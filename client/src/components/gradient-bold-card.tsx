@@ -43,7 +43,7 @@ const StatCard: React.FC<StatCardProps> = ({
         {loading ? (
           <span className="inline-block w-8 h-5 bg-white/10 rounded animate-pulse" />
         ) : (
-          value ?? "—"
+          value ?? "-"
         )}
       </div>
     </div>
@@ -80,8 +80,8 @@ const GradientBlobCard: React.FC<GradientBlobCardProps> = ({
     },
     {
       title: "Top Skill",
-      subtitle: topSkill || "—",
-      value: topSkillStars != null ? `${topSkillStars}★` : topSkill ? "✓" : "—",
+      subtitle: topSkill || "-",
+      value: topSkillStars != null ? `${topSkillStars}★` : topSkill ? "✓" : "-",
       gradientColors: "from-yellow-500 via-orange-500 to-red-500",
       delay: "0.4s",
     },
@@ -117,7 +117,7 @@ const GradientBlobCard: React.FC<GradientBlobCardProps> = ({
 
   return (
     <div className="mb-8">
-      {/* Single scrollable row — all 6 cards always in one line */}
+      {/* Single scrollable row - all 6 cards always in one line */}
       <div className="flex flex-row gap-3 overflow-x-auto pb-2 scrollbar-none">
         {stats.map((stat, index) => (
           <StatCard

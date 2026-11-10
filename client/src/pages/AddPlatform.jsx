@@ -6,13 +6,13 @@ import assets from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import { Confetti } from '../components/ui/confetti'
 
-// Platforms that Codolio aggregates — mutually exclusive with codolio
+// Platforms that Codolio aggregates - mutually exclusive with codolio
 const CODOLIO_TRACKED = ['leetcode', 'codechef', 'codestudio']
 
 // ── Visibility Checkbox ────────────────────────────────────────────────────
 const VisibilityCheckbox = ({ platform, isVerified, isPublic, onToggle, disabled }) => {
   if (!isVerified) {
-    // Not connected — grey disabled checkbox
+    // Not connected - grey disabled checkbox
     return (
       <div className="flex items-center gap-1.5 ml-2" title="Connect this platform first">
         <div className="w-4 h-4 rounded border border-gray-700 bg-gray-900 opacity-40 cursor-not-allowed" />
@@ -26,7 +26,7 @@ const VisibilityCheckbox = ({ platform, isVerified, isPublic, onToggle, disabled
       type="button"
       onClick={() => onToggle(platform, !isPublic)}
       disabled={disabled}
-      title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
+      title={isPublic ? 'Public - click to make private' : 'Private - click to make public'}
       className="flex items-center gap-1.5 ml-2 group"
     >
       <div
@@ -224,7 +224,7 @@ const AddPlatform = () => {
 
   // ── Conflict detection ──────────────────────────────────────────────────
   const getConflict = (platform) => {
-    if (verifiedPlatforms[platform]) return null // already connected   — no warning
+    if (verifiedPlatforms[platform]) return null // already connected   - no warning
     if (platform === 'codolio') {
       const conflict = CODOLIO_TRACKED.find((p) => verifiedPlatforms[p])
       return conflict || null
@@ -408,12 +408,12 @@ const AddPlatform = () => {
                   <div className="flex items-center gap-1.5">
                     <div className="w-3.5 h-3.5 rounded border-2 bg-green-500 border-green-400" />
                     <Eye className="w-3 h-3 text-green-400" />
-                    <span>Public — shown on dashboard</span>
+                    <span>Public - shown on dashboard</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3.5 h-3.5 rounded border-2 bg-transparent border-gray-600" />
                     <EyeOff className="w-3 h-3 text-gray-500" />
-                    <span>Private — hidden from dashboard</span>
+                    <span>Private - hidden from dashboard</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-3.5 h-3.5 rounded border border-gray-700 opacity-40" />

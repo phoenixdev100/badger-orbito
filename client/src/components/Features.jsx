@@ -18,12 +18,12 @@ export default function Features() {
 
         {/* Row with TiltedScroll (40%) on the left and FeatureSection (60%) on the right */}
         <div className="flex w-full flex-col md:flex-row items-start gap-6">
-          {/* Left: TiltedScroll — 40% on md+, full width on small screens */}
+          {/* Left: TiltedScroll - 40% on md+, full width on small screens */}
           <div className="w-full md:w-2/5">
             <TiltedScroll />
           </div>
 
-          {/* Right: Feature section — 60% on md+, full width on small screens */}
+          {/* Right: Feature section - 60% on md+, full width on small screens */}
           <div className="w-full md:w-3/5">
             <FeaturesSectionWithHoverEffects />
           </div>

@@ -5,7 +5,7 @@ import { verifyCodeChefOwnership } from '../services/codechefService.js';
 import { verifyCodeStudioOwnership } from '../services/codestudioService.js';
 import { verifyCodolioOwnership, fetchCodolioData } from '../services/codolioService.js';
 
-// Platforms that Codolio aggregates — mutually exclusive with codolio
+// Platforms that Codolio aggregates - mutually exclusive with codolio
 const CODOLIO_TRACKED = ['leetcode', 'codechef', 'codestudio'];
 
 // 1️⃣ Link a username to a platform (with mutual-exclusivity check)

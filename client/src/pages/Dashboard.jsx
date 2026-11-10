@@ -97,8 +97,8 @@ function buildFeaturedAchievements(platforms) {
       achievements.push({
         id: 'cc-feat', platform: 'codechef',
         title: 'CodeChef',
-        description: `Rating ${p.contestRating || '—'}`,
-        count: stars ? `${stars}★` : `${p.contestRating || '—'}`,
+        description: `Rating ${p.contestRating || '-'}`,
+        count: stars ? `${stars}★` : `${p.contestRating || '-'}`,
         badgeImage: p.badges.find((b) => b.icon)?.icon || null,
         color: 'bg-purple-500',
       });
@@ -108,7 +108,7 @@ function buildFeaturedAchievements(platforms) {
       achievements.push({
         id: 'hr-feat', platform: 'hackerrank',
         title: 'HackerRank',
-        description: `${topBadge.title} — ${topBadge.stars}★`,
+        description: `${topBadge.title} - ${topBadge.stars}★`,
         count: `${topBadge.stars}★`,
         badgeImage: topBadge.icon || null,
         icon: <Award className="w-6 h-6 text-green-400" />,
@@ -119,8 +119,8 @@ function buildFeaturedAchievements(platforms) {
       achievements.push({
         id: 'cs-feat', platform: 'codestudio',
         title: 'CodeStudio',
-        description: `Rating ${p.contestRating || '—'} · ${p.userStats.userLevelName || ''}`,
-        count: `${p.contestRating || p.questionsSolved || '—'}`,
+        description: `Rating ${p.contestRating || '-'} · ${p.userStats.userLevelName || ''}`,
+        count: `${p.contestRating || p.questionsSolved || '-'}`,
         badgeImage: p.userStats.titlePhoto || null,
         color: 'bg-red-500',
       });

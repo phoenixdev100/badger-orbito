@@ -26,7 +26,7 @@
 
 ## 📌 Executive Summary
 
-Modern software engineers, competitive programmers, and technical students build their skills across disparate, siloed ecosystems—**LeetCode**, **Credly**, **CodeChef**, **HackerRank**, **Codolio**, and **GitHub**. However, consolidating these verified accomplishments onto resumes or portfolios has traditionally been fragmented, time-consuming, and prone to credential inflation.
+Modern software engineers, competitive programmers, and technical students build their skills across disparate, siloed ecosystems-**LeetCode**, **Credly**, **CodeChef**, **HackerRank**, **Codolio**, and **GitHub**. However, consolidating these verified accomplishments onto resumes or portfolios has traditionally been fragmented, time-consuming, and prone to credential inflation.
 
 **Orbito** solves this fragmentation by providing an automated, real-time developer intelligence engine. With the proprietary **Orbito Verification Protocol (OVP)**, zero-credential platform ownership validation, and real-time GraphQL scraping pipelines, Orbito converts scattered badges into a unified, authenticated, tamper-proof developer portfolio.
 
@@ -269,7 +269,7 @@ Open your browser and navigate to `http://localhost:5173` to explore **Orbito**!
 
 ## 📄 License
 
-This project is licensed under the **MIT License** in the name of **Deepak** — see the [LICENSE](LICENSE) file for full details.
+This project is licensed under the **MIT License** in the name of **Deepak** - see the [LICENSE](LICENSE) file for full details.
 
 ```text
 MIT License

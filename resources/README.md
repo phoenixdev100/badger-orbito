@@ -29,6 +29,6 @@ A full‑stack application with a React + Vite frontend and an Express + MongoDB
 <div align="center">
 
 ### Created with ❤️ by [Deepak](https://github.com/phoenixdev100)
-Founder & CEO — Orbito
+Founder & CEO - Orbito
 
 </div>
