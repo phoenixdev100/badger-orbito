@@ -1,0 +1,23 @@
+# LaTeX compilation artifacts (for project_report.tex)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+*.vrb
+
+# OS & Temp files
+.DS_Store
+Thumbs.db
+*.tmp
+*~
+

@@ -1,0 +1,106 @@
+# ==========================================
+# Root .gitignore for Badger (Orbito)
+# ==========================================
+
+# Dependencies
+node_modules/
+*/node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Environment variables & Secrets
+.env
+.env.*
+*.env
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.cert
+*.crt
+
+# Production & Build Artifacts
+dist/
+dist-ssr/
+build/
+out/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Serverless & Hosting CLI Artifacts
+.vercel/
+.netlify/
+.serverless/
+.turbo/
+
+# Logs & Diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime, PIDs, Coverage
+pids/
+*.pid
+*.seed
+*.pid.lock
+coverage/
+.nyc_output/
+
+# Database dumps & local caches
+*.sqlite
+*.sqlite3
+*.db
+dump.rdb
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDEs & Code Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-project
+*.sublime-workspace
+
+# Temporary & Backup Files
+*.bak
+*.tmp
+*.temp
+*~
+
+# LaTeX Build Artifacts (for reports in resources/)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+*.vrb

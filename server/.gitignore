@@ -1,2 +1,54 @@
+# Dependencies
 node_modules
+
+# Environment variables & secrets
 .env
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Deployment
+.vercel
+
+# Runtime & Process files
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Test & Coverage
+coverage
+.nyc_output
+
+# Local databases & dumps
+*.sqlite
+*.sqlite3
+*.db
+dump.rdb
+
+# Temporary & Backup files
+*.bak
+*.tmp
+*.temp
+*~
+
+# Editor & OS files
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.sw?
