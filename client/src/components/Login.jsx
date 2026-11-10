@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { motion } from 'framer-motion';
+import React, { useContext, useEffect, useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion';
 import Loader from './Loader';
 import axios from 'axios'
 import { toast } from 'react-toastify'
@@ -44,8 +44,54 @@ const Login = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+  const submitBtnRef = useRef(null);
+  const lastRenderedWidthRef = useRef(0);
+  const lastRenderedStateRef = useRef('');
 
-  // Google Identity Services login handler
+  // Calculate the exact width matching the submit button (never wider)
+  const getExactButtonWidth = () => {
+    if (submitBtnRef.current) {
+      const w = Math.floor(submitBtnRef.current.offsetWidth);
+      if (w >= 200 && w <= 400) return w;
+    }
+    const btn = document.getElementById('google-login-button');
+    if (btn) {
+      const w = Math.floor(btn.offsetWidth);
+      if (w >= 200 && w <= 400) return w;
+    }
+    return 326; // Exact content width of max-w-[390px] modal on sm:px-8 screens (390 - 64 = 326)
+  };
+
+  const renderGoogleButton = () => {
+    if (window.google?.accounts?.id) {
+      const btn = document.getElementById('google-login-button');
+      if (btn) {
+        const targetWidth = getExactButtonWidth();
+
+        // Avoid unnecessary re-rendering if dimensions and state are already identical
+        if (
+          lastRenderedWidthRef.current === targetWidth &&
+          lastRenderedStateRef.current === state &&
+          btn.children.length > 0
+        ) {
+          return;
+        }
+
+        lastRenderedWidthRef.current = targetWidth;
+        lastRenderedStateRef.current = state;
+
+        btn.innerHTML = '';
+        window.google.accounts.id.renderButton(btn, {
+          theme: 'outline',
+          size: 'large',
+          shape: 'pill',
+          width: targetWidth,
+          text: state === 'Login' ? 'signin_with' : 'signup_with',
+          logo_alignment: 'left',
+        });
+      }
+    }
+  };
   const handleCredentialLogin = (response) => {
     console.log('GIS response:', response);
 
@@ -59,12 +105,15 @@ const Login = ({ onClose }) => {
       // Optionally, you could exchange this token with your backend here.
       // For now, just close modal and redirect to dashboard.
       setShowLogin(false);
+      onClose?.();
+      toast.success('Welcome to Orbito!');
       navigate('/dashboard');
     }
   };
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
 
       if (state === 'Login') {
@@ -76,6 +125,8 @@ const Login = ({ onClose }) => {
           localStorage.setItem('token', data.token)
           window.scrollTo({ top: 0, behavior: 'smooth' });
           setShowLogin(false)
+          onClose?.();
+          toast.success(`Welcome back, ${data.user?.name || 'Developer'}!`);
           navigate('/dashboard')
         } else {
           toast.error(data.message)
@@ -89,6 +140,8 @@ const Login = ({ onClose }) => {
           setUser(data.user)
           localStorage.setItem('token', data.token)
           setShowLogin(false)
+          onClose?.();
+          toast.success(`Welcome to Orbito, ${data.user?.name || 'Developer'}!`);
           navigate('/dashboard')
         } else {
           toast.error(data.message)
@@ -98,8 +151,9 @@ const Login = ({ onClose }) => {
 
     } catch (error) {
       toast.error(error.message)
+    } finally {
+      setIsLoading(false);
     }
-    onClose?.();
   };
 
   useEffect(() => {
@@ -107,22 +161,30 @@ const Login = ({ onClose }) => {
     const navbar = document.getElementById('nav-bar');
     if (navbar) navbar.style.opacity = 0.05;
 
-    // Initialize Google Identity Services button when script is available
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      window.google.accounts.id.initialize({
-        client_id: '517052691762-j2j6ukfg3oobksvfobj7sh4u18fi5vin.apps.googleusercontent.com',
-        callback: handleCredentialLogin,
-      });
-
-      const btn = document.getElementById('google-login-button');
-      if (btn) {
-        window.google.accounts.id.renderButton(btn, {
-          theme: 'outline',
-          size: 'large',
-          shape: 'pill',
-          width: 260,
+    const initGsi = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: '517052691762-j2j6ukfg3oobksvfobj7sh4u18fi5vin.apps.googleusercontent.com',
+          callback: handleCredentialLogin,
         });
+        renderGoogleButton();
       }
+    };
+
+    if (window.google?.accounts?.id) {
+      initGsi();
+    } else {
+      const timer = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          clearInterval(timer);
+          initGsi();
+        }
+      }, 100);
+      return () => {
+        clearInterval(timer);
+        document.body.style.overflow = 'unset';
+        if (navbar) navbar.style.opacity = 1;
+      };
     }
 
     return () => {
@@ -131,106 +193,213 @@ const Login = ({ onClose }) => {
     };
   }, []);
 
+  // Re-render Google button dynamically whenever switching between Login & Sign Up
+  useEffect(() => {
+    const t = setTimeout(renderGoogleButton, 50);
+    return () => clearTimeout(t);
+  }, [state]);
+
+  // Keep Google button width strictly equal to the submit button at all times
+  useEffect(() => {
+    const submitEl = submitBtnRef.current;
+    if (!submitEl) return;
+
+    let timeoutId;
+    const observer = new ResizeObserver(() => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        renderGoogleButton();
+      }, 30);
+    });
+
+    observer.observe(submitEl);
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 z-[9999] backdrop-blur-sm bg-black/30 flex justify-center items-center">
-      {isLoading ? (
-        <div className="flex justify-center items-center">
-          <Loader />
-        </div>
-      ) : (
-        <motion.form
-          onSubmit={onSubmitHandler}
-          initial={{ opacity: 0.2, y: 50 }}
-          transition={{ duration: 0.3 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative bg-black p-10 rounded-xl text-white shadow-xl w-[90%] max-w-md"
-        >
-        <h1 className="text-center text-2xl text-white font-medium">{state}</h1>
-        <p className="text-sm text-center">Welcome back! Please sign in to continue</p>
-
-        {state !== 'Login' && (
-          <div className="border px-6 py-2 flex items-center gap-2 rounded-full mt-5">
-            <IconUser />
-            <input
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-              type="text"
-              className="outline-none text-sm flex-1 bg-transparent"
-              placeholder="Full Name"
-              required
-            />
-          </div>
-        )}
-
-        <div className="border px-6 py-2 flex items-center gap-2 rounded-full mt-4">
-          <IconMail />
-          <input
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            type="email"
-            className="outline-none text-sm flex-1 bg-transparent"
-            placeholder="Email id"
-            required
-          />
-        </div>
-
-        <div className="border px-6 py-2 flex items-center gap-2 rounded-full mt-4">
-          <IconLock />
-          <input
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            type="password"
-            className="outline-none text-sm flex-1 bg-transparent"
-            placeholder="Password"
-            required
-          />
-        </div>
-
-        <p className="text-sm text-blue-600 my-4 cursor-pointer">Forgot password?</p>
-
-        <button type="submit" className="bg-blue-600 w-full text-white py-2 rounded-full">
-          {state === 'Login' ? 'Login' : 'Create Account'}
-        </button>
-
-        {/* Google Identity Services button container */}
-        <div className="mt-3 w-full flex justify-center">
-          <div
-            id="google-login-button"
-            className="w-full flex items-center justify-center border border-white/20 rounded-full bg-white/5 py-2"
-          >
-            {/* GIS will render the actual button here */}
-          </div>
-        </div>
-
-        {state === 'Login' ? (
-          <p className="mt-5 text-center">
-            Don't have an account?{' '}
-            <span className="text-blue-600 cursor-pointer" onClick={() => setState('Sign Up')}>
-              Sign Up
-            </span>
-          </p>
-        ) : (
-          <p className="mt-5 text-center">
-            Already have an account?{' '}
-            <span className="text-blue-600 cursor-pointer" onClick={() => setState('Login')}>
-              Login
-            </span>
-          </p>
-        )}
-
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      className="fixed inset-0 z-[9999] backdrop-blur-md bg-black/70 flex justify-center items-center px-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          setShowLogin(false);
+          onClose?.();
+        }
+      }}
+    >
+      <motion.form
+        layout
+        onSubmit={onSubmitHandler}
+        initial={{ opacity: 0, scale: 0.94, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 15 }}
+        transition={{ type: "spring", duration: 0.35, bounce: 0.12 }}
+        className="relative bg-zinc-950/95 border border-white/15 px-6 py-7 sm:px-8 sm:py-8 rounded-2xl text-white shadow-2xl shadow-indigo-950/40 w-full max-w-[390px] backdrop-blur-xl"
+      >
         <button
           type="button"
-          onClick={() => onClose?.()}
-          className="absolute top-5 right-5 cursor-pointer text-slate-500 hover:text-slate-700"
+          onClick={() => {
+            setShowLogin(false);
+            onClose?.();
+          }}
+          className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-sm"
           aria-label="Close"
           title="Close"
         >
           ✕
         </button>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={state}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18 }}
+            className="text-center mb-5"
+          >
+            <h1 className="text-2xl sm:text-[26px] font-semibold text-white tracking-tight">
+              {state === 'Login' ? 'Welcome Back' : 'Create an Account'}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 mt-1">
+              {state === 'Login'
+                ? 'Sign in to access your unified developer achievements'
+                : 'Join Orbito and verify your coding badges effortlessly'}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+
+        <AnimatePresence initial={false}>
+          {state !== 'Login' && (
+            <motion.div
+              key="name-field"
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="border border-white/20 focus-within:border-cyan-400 bg-white/5 focus-within:bg-white/10 px-4 py-2 flex items-center gap-2.5 rounded-full transition-colors">
+                <span className="text-slate-400">
+                  <IconUser />
+                </span>
+                <input
+                  onChange={(e) => setName(e.target.value)}
+                  value={name}
+                  type="text"
+                  className="outline-none text-sm flex-1 bg-transparent text-white placeholder-slate-400"
+                  placeholder="Full Name"
+                  required={state !== 'Login'}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="space-y-3">
+          <div className="border border-white/20 focus-within:border-cyan-400 bg-white/5 focus-within:bg-white/10 px-4 py-2 flex items-center gap-2.5 rounded-full transition-colors">
+            <span className="text-slate-400">
+              <IconMail />
+            </span>
+            <input
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+              type="email"
+              className="outline-none text-sm flex-1 bg-transparent text-white placeholder-slate-400"
+              placeholder="Email Address"
+              required
+            />
+          </div>
+
+          <div className="border border-white/20 focus-within:border-cyan-400 bg-white/5 focus-within:bg-white/10 px-4 py-2 flex items-center gap-2.5 rounded-full transition-colors">
+            <span className="text-slate-400">
+              <IconLock />
+            </span>
+            <input
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+              type="password"
+              className="outline-none text-sm flex-1 bg-transparent text-white placeholder-slate-400"
+              placeholder="Password"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end my-2.5">
+          <button
+            type="button"
+            onClick={() => toast.info('Password recovery link sent if email exists.')}
+            className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline font-medium transition-colors cursor-pointer"
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        {/* ── Submit button with full width & proportional height ── */}
+        <motion.button
+          ref={submitBtnRef}
+          type="submit"
+          disabled={isLoading}
+          whileHover={isLoading ? {} : { scale: 1.015 }}
+          whileTap={isLoading ? {} : { scale: 0.985 }}
+          className="relative w-full h-10 rounded-full font-semibold text-sm text-white shadow-md overflow-hidden flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #d946ef 100%)',
+            boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4)',
+          }}
+        >
+          {isLoading ? (
+            <>
+              <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              <span>{state === 'Login' ? 'Signing in…' : 'Creating account…'}</span>
+            </>
+          ) : (
+            <span className="tracking-wide">{state === 'Login' ? 'Login' : 'Create Account'}</span>
+          )}
+        </motion.button>
+
+        {/* Google Identity Services button container (exact width matching submit button) */}
+        <div className="mt-3.5 w-full flex justify-center">
+          <div
+            id="google-login-button"
+            className="w-full flex justify-center min-h-[40px] overflow-hidden"
+          />
+        </div>
+
+        <div className="mt-4 text-center text-xs sm:text-sm text-slate-300">
+          {state === 'Login' ? (
+            <p>
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => setState('Sign Up')}
+                className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline cursor-pointer transition-colors ml-1"
+              >
+                Sign Up
+              </button>
+            </p>
+          ) : (
+            <p>
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => setState('Login')}
+                className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline cursor-pointer transition-colors ml-1"
+              >
+                Login
+              </button>
+            </p>
+          )}
+        </div>
       </motion.form>
-      )}
-    </div>
+    </motion.div>
   );
 };
 

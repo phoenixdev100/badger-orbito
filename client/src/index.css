@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-*{
+* {
   font-family: 'Outfit';
 }
 
@@ -14,35 +14,43 @@
     0% {
       transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg);
     }
+
     100% {
       transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg) translateY(-100%);
     }
   }
+
   @keyframes skew-scroll {
-  0% {
-    transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg);
+    0% {
+      transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg);
     }
-  100% {
-    transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg) translateY(-100%);
+
+    100% {
+      transform: rotateX(20deg) rotateZ(-20deg) skewX(20deg) translateY(-100%);
     }
   }
+
   @keyframes moveDot {
-  0%,
-  100% {
-    top: 10%;
-    right: 10%;
+
+    0%,
+    100% {
+      top: 10%;
+      right: 10%;
     }
-  25% {
-    top: 10%;
-    right: calc(100% - 35px);
+
+    25% {
+      top: 10%;
+      right: calc(100% - 35px);
     }
-  50% {
-    top: calc(100% - 30px);
-    right: calc(100% - 35px);
+
+    50% {
+      top: calc(100% - 30px);
+      right: calc(100% - 35px);
     }
-  75% {
-    top: calc(100% - 30px);
-    right: 10%;
+
+    75% {
+      top: calc(100% - 30px);
+      right: 10%;
     }
   }
 }
@@ -51,7 +59,106 @@
   * {
     @apply border-gray-200 outline-gray-300;
   }
+
   body {
     @apply bg-white text-black;
   }
+}
+
+/* ── Custom Toast Overrides (Orbito Minimal Dark Theme) ───────── */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+  width: auto !important;
+  max-width: calc(100vw - 2rem) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  padding: 12px !important;
+}
+
+.Toastify__toast {
+  width: fit-content !important;
+  max-width: min(420px, 85vw) !important;
+  min-height: unset !important;
+  padding: 9px 14px !important;
+  border-radius: 10px !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(13, 14, 18, 0.95) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  color: #f1f5f9 !important;
+  display: inline-flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.Toastify__toast-body {
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  flex: 0 1 auto !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  color: #f1f5f9 !important;
+}
+
+/* Subtle, sophisticated border tints that match dark UI */
+.Toastify__toast--error {
+  border: 1px solid rgba(244, 63, 94, 0.3) !important;
+}
+
+.Toastify__toast--success {
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.Toastify__toast--warning {
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.Toastify__toast--info {
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+.Toastify__progress-bar--wrp {
+  height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+}
+
+/* Google Sign-In button full-width responsive alignment */
+#google-login-button {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+#google-login-button iframe {
+  margin: 0 auto !important;
+  display: block !important;
+  max-width: 100% !important;
+}
+
+/* ── Dark Theme Input Autofill Override ───────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #161517 inset !important;
+  box-shadow: 0 0 0 1000px #161517 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  transition: background-color 99999s ease-in-out 0s !important;
+}
+
+input:autofill {
+  background-color: #161517 !important;
+  color: #ffffff !important;
 }
