@@ -1,4 +1,3 @@
-import AyushImage from "../assets/AyushImage.png"
 import DeepakImage from "../assets/DeepakImage.jpg"
 import PriyanshiImage from "../assets/PriyanshiImage.jpg"
 import websiteLogo from "../assets/logo.png"
@@ -10,7 +9,6 @@ import credlyImage from "../assets/credly.svg"
 import leetcodeWhite from "../assets/leetcode-white.png"
 
 const assets = {
-    AyushImage,
     DeepakImage,
     PriyanshiImage,
     websiteLogo,
