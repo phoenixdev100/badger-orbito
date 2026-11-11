@@ -162,3 +162,16 @@ input:autofill {
   background-color: #161517 !important;
   color: #ffffff !important;
 }
+
+/* ── Hide scrollbars across all modern & legacy browsers ──────── */
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
