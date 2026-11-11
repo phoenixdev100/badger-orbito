@@ -1,6 +1,9 @@
 import { LogOut, Settings } from "lucide-react"
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
+import { AppContext } from "../context/AppContext"
+import assets from "../assets/assets.js"
+import getDeveloperAvatar from "../utils/avatarHelper.js"
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
@@ -16,6 +19,8 @@ type ProfileCardProps = {
 }
 
 export default function AnimatedProfileCard({ onClose }: { onClose?: () => void }) {
+  const { user, platformData } = useContext(AppContext)
+
   const storedUser = useMemo(() => {
     try {
       const raw = localStorage.getItem("user")
@@ -25,11 +30,14 @@ export default function AnimatedProfileCard({ onClose }: { onClose?: () => void 
     }
   }, [])
 
+  const current = user || storedUser
+  const resolvedAvatar = getDeveloperAvatar(current, platformData)
+
   const profile: ProfileCardProps = {
-    name: storedUser?.name || "Guest",
-    role: storedUser?.email || "Not logged in",
+    name: current?.name || "Developer",
+    role: current?.email || "orbito developer",
     status: "online",
-    avatar: "https://ik.imagekit.io/fpxbgsota/memoji-alex.png?updatedAt=1752933824067",
+    avatar: resolvedAvatar,
     followers: undefined,
     onClose,
   }
@@ -39,37 +47,32 @@ export default function AnimatedProfileCard({ onClose }: { onClose?: () => void 
 
 function ProfileCard({ name, role, status, avatar, followers, onClose }: ProfileCardProps) {
   const navigate = useNavigate()
+  const { logout, user } = useContext(AppContext)
 
   const handleLogout = () => {
-    // Clear all authentication-related data from localStorage
-    localStorage.clear()
-
-    // Navigate to login page
-    navigate("/")
+    onClose?.()
+    logout()
   }
 
-  // Handle click outside to close the card
+  // Handle click outside to close the card reliably
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const card = document.getElementById("profile-card")
-      if (card && !card.contains(event.target as Node)) {
-        // Use setTimeout to avoid race condition with button click
-        setTimeout(() => {
-          onClose?.()
-        }, 0)
+      const trigger = document.getElementById("profile-trigger-btn")
+      if (card && !card.contains(event.target as Node) && !trigger?.contains(event.target as Node)) {
+        onClose?.()
       }
     }
 
-    if (onClose) {
-      document.addEventListener("mouseup", handleClickOutside)
-      return () => document.removeEventListener("mouseup", handleClickOutside)
-    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [onClose])
 
   return (
     <div
       id="profile-card"
-      className="group relative overflow-hidden rounded-3xl bg-black border border-gray-800 p-6 w-80 shadow-[0_10px_40px_rgba(0,0,0,0.6)] transition-all duration-500 hover:shadow-[0_16px_60px_rgba(0,0,0,0.9)]">
+      className="group relative overflow-hidden rounded-3xl bg-black border border-gray-800 p-6 w-80 shadow-[0_10px_40px_rgba(0,0,0,0.6)] transition-all duration-500 hover:shadow-[0_16px_60px_rgba(0,0,0,0.9)] select-none text-white animate-in fade-in zoom-in-95 duration-150"
+    >
       {/* Status indicator with pulse animation */}
       <div className="absolute right-4 top-4 z-10">
         <div className="relative">
@@ -96,7 +99,7 @@ function ProfileCard({ name, role, status, avatar, followers, onClose }: Profile
             <img
               src={avatar}
               alt={name}
-              className="h-full w-full rounded-full object-contain transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
           {/* Glowing ring on hover */}
@@ -106,15 +109,18 @@ function ProfileCard({ name, role, status, avatar, followers, onClose }: Profile
 
       {/* Profile Info with slide-up animation */}
       <div className="text-center relative z-10 transition-transform duration-300 group-hover:-translate-y-1">
-        <h3 className="text-lg font-semibold text-white transition-colors duration-300 group-hover:text-blue-400">
+        <h3 className="text-lg font-semibold text-white transition-colors duration-300 group-hover:text-cyan-400">
           {name}
         </h3>
-        <p className="mt-1 text-sm text-gray-400 transition-colors duration-300 group-hover:text-gray-200">
+        <p className="font-mono text-xs text-cyan-400 mt-0.5">
+          @{user?.username || user?.email?.split('@')[0] || 'developer'}
+        </p>
+        <p className="mt-1 text-xs text-gray-400">
           {role}
         </p>
 
         {followers && (
-          <p className="mt-2 text-xs text-gray-500 transition-all duration-300 group-hover:text-blue-400 group-hover:font-medium">
+          <p className="mt-2 text-xs text-gray-500 transition-all duration-300 group-hover:text-cyan-400 group-hover:font-medium">
             {followers.toLocaleString()} followers
           </p>
         )}
@@ -122,13 +128,21 @@ function ProfileCard({ name, role, status, avatar, followers, onClose }: Profile
 
       {/* Action Buttons: Settings and Logout */}
       <div className="mt-8 flex gap-3 relative z-10">
-        <button className="flex-1 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 border border-gray-600/80 py-3 text-sm font-medium text-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:from-gray-800 hover:to-gray-600 hover:border-gray-400 flex items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            onClose?.()
+            navigate("/settings")
+          }}
+          className="flex-1 rounded-full bg-gradient-to-r from-gray-900 to-gray-700 border border-gray-600/80 py-3 text-sm font-medium text-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-200 hover:from-gray-800 hover:to-gray-600 hover:border-gray-400 flex items-center justify-center gap-2 cursor-pointer"
+        >
           <Settings className="h-4 w-4" />
           <span>Settings</span>
         </button>
         <button
+          type="button"
           onClick={handleLogout}
-          className="flex-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 border border-red-500/80 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(0,0,0,0.7)] transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:border-red-300 flex items-center justify-center gap-2">
+          className="flex-1 rounded-full bg-gradient-to-r from-red-600 to-red-500 border border-red-500/80 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(0,0,0,0.7)] transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:border-red-300 flex items-center justify-center gap-2 cursor-pointer">
           <LogOut className="h-4 w-4" />
           <span>Logout</span>
         </button>

@@ -43,7 +43,9 @@ import GradientBlobCard from '../components/gradient-bold-card';
 import Sidebar from '../components/Sidebar';
 import FeaturedAchievements from '../components/FeaturedAchievements';
 import ContestRatingSection from '../components/ContestRatingSection';
+import ShareProfileModal from '../components/ShareProfileModal';
 import { AppContext } from '../context/AppContext';
+import getDeveloperAvatar from '../utils/avatarHelper.js';
 
 // ─── Platform Metadata & Brand Accents ───────────────────────────────────────
 const PLATFORM_META = {
@@ -750,11 +752,24 @@ const Dashboard = () => {
     fetchData();
   }, [backendUrl, token]);
 
-  // Copy Profile URL action
+  // Handle hash scrolling for quick section jumps
+  useEffect(() => {
+    if (window.location.hash) {
+      const hashId = window.location.hash.replace('#', '');
+      const timer = setTimeout(() => {
+        const el = document.getElementById(hashId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
+  // Share Profile Modal state
+  const [showShareModal, setShowShareModal] = useState(false);
   const handleShareProfile = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    toast.success('Dashboard link copied to clipboard!');
+    setShowShareModal(true);
   };
 
   // ── Aggregation ──────────────────────────────────────────────────────────
@@ -873,11 +888,13 @@ const Dashboard = () => {
               <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 {/* Left: Avatar + Identity */}
                 <div className="flex items-center gap-4 sm:gap-5">
-                  <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[2px] shadow-lg">
-                    <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center overflow-hidden">
-                      <span className="text-2xl font-black text-white">
-                        {(user?.name || 'Developer').charAt(0).toUpperCase()}
-                      </span>
+                  <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[2px] shadow-lg shrink-0">
+                    <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center overflow-hidden p-0.5">
+                      <img
+                        src={getDeveloperAvatar(user, platformData)}
+                        alt={user?.name || 'Developer'}
+                        className="w-full h-full object-cover rounded-2xl"
+                      />
                     </div>
                     {/* Live status dot */}
                     <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-black" title="Verified" />
@@ -1037,7 +1054,7 @@ const Dashboard = () => {
             </div>
 
             {/* ── 6. ENTERPRISE TROPHY ROOM / BADGES SHOWCASE ─────────────────── */}
-            <div className="w-full mt-12 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
+            <div id="trophy-room" className="w-full mt-12 scroll-mt-6 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -1124,7 +1141,7 @@ const Dashboard = () => {
             </div>
 
             {/* ── 7. VERIFIED CERTIFICATES SHOWCASE ──────────────────────────── */}
-            <div className="w-full mt-12 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
+            <div id="certificates-section" className="w-full mt-12 scroll-mt-6 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -1267,6 +1284,12 @@ const Dashboard = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* ── Share Portfolio Modal ────────────────────────────────────────── */}
+      <ShareProfileModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </div>
   );
 };

@@ -15,7 +15,7 @@ const AppContextProvider = (props) => {
     });
     const [showLogin, setShowLogin] = useState(false);
     const [token, setToken] = useState(localStorage.getItem('token'))
-
+    const [platformData, setPlatformData] = useState(null);
 
     const backendUrl = import.meta.env.VITE_BASE_URL
 
@@ -23,12 +23,12 @@ const AppContextProvider = (props) => {
 
     const isAuthenticated = !!token;
 
-
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setToken('');
         setUser(null);
+        setPlatformData(null);
         navigate('/');
     }
 
@@ -126,23 +126,32 @@ const AppContextProvider = (props) => {
     // Fetch all platforms data
     const fetchPlatformsData = async () => {
         try {
+            if (!token) return { success: false };
             const response = await axios.get(
                 `${backendUrl}/api/platforms/data`,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             
             if (response.data.success) {
-                return { success: true, data: response.data.data }
+                setPlatformData(response.data.data);
+                return { success: true, data: response.data.data, userPlatforms: response.data.userPlatforms }
             } else {
                 toast.error(response.data.message)
                 return { success: false }
             }
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to fetch platform data'
-            toast.error(message)
+            console.error('Failed to fetch platform data:', message);
             return { success: false, message }
         }
     }
+
+    // Auto-fetch platforms data when token exists
+    useEffect(() => {
+        if (token) {
+            fetchPlatformsData();
+        }
+    }, [token]);
 
     // Toggle platform public/private visibility
     const updatePlatformVisibility = async (platform, isPublic) => {
@@ -166,18 +175,110 @@ const AppContextProvider = (props) => {
         }
     }
 
+    // Update user profile info
+    const updateProfile = async (name, bio) => {
+        try {
+            const response = await axios.put(
+                `${backendUrl}/api/user/profile`,
+                { name, bio },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                setUser(response.data.user);
+                toast.success(response.data.message || 'Profile updated successfully');
+                return { success: true, user: response.data.user };
+            } else {
+                toast.error(response.data.message || 'Failed to update profile');
+                return { success: false, message: response.data.message };
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to update profile';
+            toast.error(message);
+            return { success: false, message };
+        }
+    };
+
+    // Change user password
+    const changePassword = async (currentPassword, newPassword) => {
+        try {
+            const response = await axios.put(
+                `${backendUrl}/api/user/password`,
+                { currentPassword, newPassword },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                toast.success(response.data.message || 'Password changed successfully');
+                return { success: true };
+            } else {
+                toast.error(response.data.message || 'Failed to change password');
+                return { success: false, message: response.data.message };
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to change password';
+            toast.error(message);
+            return { success: false, message };
+        }
+    };
+
+    // Update custom username with 30-day cooldown & uniqueness
+    const updateUsername = async (username) => {
+        try {
+            const response = await axios.put(
+                `${backendUrl}/api/user/username`,
+                { username },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                setUser(response.data.user);
+                toast.success(response.data.message || 'Username updated successfully');
+                return { success: true, user: response.data.user };
+            } else {
+                toast.error(response.data.message || 'Failed to update username');
+                return { success: false, message: response.data.message };
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to update username';
+            toast.error(message);
+            return { success: false, message };
+        }
+    };
+
+    // Toggle public / private profile visibility
+    const updateVisibility = async (isProfilePublic) => {
+        try {
+            const response = await axios.put(
+                `${backendUrl}/api/user/visibility`,
+                { isProfilePublic },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.data.success) {
+                setUser(response.data.user);
+                toast.success(response.data.message || 'Visibility updated');
+                return { success: true, user: response.data.user };
+            } else {
+                toast.error(response.data.message || 'Failed to update visibility');
+                return { success: false, message: response.data.message };
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to update visibility';
+            toast.error(message);
+            return { success: false, message };
+        }
+    };
+
     // keep localStorage user in sync when setUser is called
     useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
         }
-    }, [user])
+    }, [user]);
 
     const value = {
         user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated,
+        platformData, setPlatformData,
         linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData,
-        updatePlatformVisibility,
-    }
+        updatePlatformVisibility, updateProfile, changePassword, updateUsername, updateVisibility,
+    };
 
     return (
         <AppContext.Provider value={value}>

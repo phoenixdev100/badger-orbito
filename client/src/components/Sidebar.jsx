@@ -1,36 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import assets from '../assets/assets.js';
 import AnimatedProfileCard from './info-card';
+import SyncedPlatformsCard from './SyncedPlatformsCard';
+import ShareProfileModal from './ShareProfileModal';
+import { AppContext } from '../context/AppContext';
+import getDeveloperAvatar from '../utils/avatarHelper.js';
 
 import {
-  Home,
-  User,
+  LayoutDashboard,
+  Trophy,
+  Award,
   Plus,
-  MessageSquare,
-  Calendar,
+  Share2,
+  Layers,
 } from 'lucide-react';
+
+// ─── Compact Sleek Sidebar Tooltip ──────────────────────────────────────────
+const SidebarTooltip = ({ label }) => (
+  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-[99999] pointer-events-none opacity-0 group-hover:opacity-100 -translate-x-1.5 group-hover:translate-x-0 transition-all duration-150 ease-out whitespace-nowrap">
+    <div className="px-2.5 py-1 rounded-lg bg-[#0e1017] border border-white/15 text-xs font-medium text-white shadow-xl backdrop-blur-md">
+      {label}
+    </div>
+  </div>
+);
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState('profile');
+  const { pathname } = useLocation();
+  const { user, platformData } = useContext(AppContext);
+
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showProfileCard, setShowProfileCard] = useState(false);
 
-  // Platform data with their display names and logos
-  const platformData = {
-    leetcode: { name: 'LeetCode', logo: assets.leetcodeImage },
-    codechef: { name: 'CodeChef', logo: assets.codechefImage },
-    credly: { name: 'Credly', logo: assets.credlyImage },
+  // Popups & Modal states
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showSyncedPopup, setShowSyncedPopup] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+
+  // Debounced hover timers for smooth transitions
+  const syncedTimerRef = useRef(null);
+  const profileTimerRef = useRef(null);
+
+  // Platform metadata with official logos
+  const PLATFORM_LOGOS = {
+    leetcode:   { name: 'LeetCode',   logo: assets.leetcodeImage },
+    codechef:   { name: 'CodeChef',   logo: assets.codechefImage },
+    credly:     { name: 'Credly',     logo: assets.credlyImage },
     codestudio: { name: 'CodeStudio', logo: assets.codestudioImage },
-    codolio: { name: 'Codolio', logo: assets.codolioImage },
+    codolio:    { name: 'Codolio',    logo: assets.codolioImage },
   };
 
-  // Fetch user's connected platforms
+  // Fetch user's verified connected platforms
   useEffect(() => {
+    let isMounted = true;
     const fetchUserPlatforms = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -40,14 +64,14 @@ const Sidebar = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (response.data?.success && response.data.platforms) {
+        if (response.data?.success && response.data.platforms && isMounted) {
           const connected = [];
           for (const [platform, data] of Object.entries(response.data.platforms)) {
-            if (data.verified && platformData[platform]) {
+            if (data.verified && PLATFORM_LOGOS[platform]) {
               connected.push({
                 id: platform,
-                name: platformData[platform].name,
-                logo: platformData[platform].logo,
+                name: PLATFORM_LOGOS[platform].name,
+                logo: PLATFORM_LOGOS[platform].logo,
                 username: data.username
               });
             }
@@ -56,160 +80,254 @@ const Sidebar = () => {
         }
       } catch (error) {
         console.error('Error fetching user platforms:', error);
-        toast.error('Failed to load connected platforms');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchUserPlatforms();
+    return () => { isMounted = false; };
   }, []);
 
-  const menuItems = [
-    { id: 'addPlatform', icon: Plus, label: 'Add Platform' },
+  // Hover Handlers for Synced Platforms
+  const handleMouseEnterSynced = () => {
+    clearTimeout(syncedTimerRef.current);
+    setShowProfilePopup(false);
+    setShowSyncedPopup(true);
+  };
+
+  const handleMouseLeaveSynced = () => {
+    syncedTimerRef.current = setTimeout(() => {
+      setShowSyncedPopup(false);
+    }, 220);
+  };
+
+  // Hover Handlers for Profile & Settings
+  const handleMouseEnterProfile = () => {
+    clearTimeout(profileTimerRef.current);
+    setShowSyncedPopup(false);
+    setShowProfilePopup(true);
+  };
+
+  const handleMouseLeaveProfile = () => {
+    profileTimerRef.current = setTimeout(() => {
+      setShowProfilePopup(false);
+    }, 220);
+  };
+
+  // Primary Navigation Actions
+  const primaryNavItems = [
+    {
+      id: 'dashboard',
+      icon: LayoutDashboard,
+      label: 'Dashboard',
+      onClick: () => {
+        if (pathname === '/dashboard') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          navigate('/dashboard');
+        }
+      },
+      isActive: (pathname === '/dashboard' || pathname === '/') && !window.location.hash,
+    },
+    {
+      id: 'trophy',
+      icon: Trophy,
+      label: 'Trophy Room',
+      onClick: () => {
+        if (pathname === '/dashboard') {
+          document.getElementById('trophy-room')?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          navigate('/dashboard#trophy-room');
+        }
+      },
+      isActive: window.location.hash === '#trophy-room',
+    },
+    {
+      id: 'certificates',
+      icon: Award,
+      label: 'Certificates',
+      onClick: () => {
+        if (pathname === '/dashboard') {
+          document.getElementById('certificates-section')?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          navigate('/dashboard#certificates-section');
+        }
+      },
+      isActive: window.location.hash === '#certificates-section',
+    },
+    {
+      id: 'addPlatform',
+      icon: Plus,
+      label: 'Add Platform',
+      onClick: () => navigate('/addPlatform'),
+      isActive: pathname === '/addPlatform',
+    },
+    {
+      id: 'share',
+      icon: Share2,
+      label: 'Share Portfolio',
+      onClick: () => setShowShareModal(true),
+      isActive: false,
+    },
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-20 bg-black flex flex-col items-center py-4 z-50 border-r border-gray-800">
-      {/* Logo/Brand at top */}
-      <div className="mb-4">
-        <a href='/'><img src={assets.websiteLogo} alt="Logo" className="w-10 h-10 rounded-2xl" /></a>
-      </div>
+    <>
+      <div className="fixed left-0 top-0 h-screen w-20 bg-[#07080c]/95 backdrop-blur-2xl flex flex-col items-center py-4 z-50 border-r border-white/10 select-none">
+        {/* ── Brand Logo at Top ── */}
+        <div className="mb-5 relative group">
+          <a
+            href="/dashboard"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center p-1 bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-white/10 transition-all duration-200 group-hover:scale-105"
+          >
+            <img src={assets.websiteLogo} alt="Orbito" className="w-8 h-8 rounded-xl object-contain" />
+          </a>
+          <SidebarTooltip label="Orbito Hub" />
+        </div>
 
-      {/* Home Button below logo */}
-      <div className="mb-6">
-        <button
-          onClick={() => {
-            setActiveItem('dashboard');
-            navigate('/dashboard');
-          }}
-          className={`
-            relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group overflow-hidden
-            bg-gray-800/30 border border-gray-700/50 hover:bg-gray-700/40 hover:border-gray-600/60 hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]
-          `}
-          title="Home"
-        >
-          <Home className="relative z-10 w-5 h-5 text-gray-300 group-hover:text-white transition-colors duration-300" />
-          <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-            Home
-          </div>
-        </button>
-      </div>
+        {/* ── Primary Navigation Items ── */}
+        <nav className="flex flex-col items-center space-y-3">
+          {primaryNavItems.map((item) => {
+            const IconComponent = item.icon;
+            const active = item.isActive;
 
-      {/* Navigation Items */}
-      <nav className="flex-1 flex flex-col items-center space-y-4">
-        {/* Connected Platforms */}
-        {!loading && connectedPlatforms.length > 0 && (
-          <div className="w-full px-2 mb-4">
-            <div className="space-y-2">
-              {connectedPlatforms.map((platform) => (
-                <div key={platform.id} className="relative">
-                  <button
-                    className={`
-                      w-12 h-12 rounded-2xl flex items-center justify-center
-                      transition-all duration-300 overflow-hidden
-                      bg-gray-800/30 border border-gray-700/50
-                      hover:bg-gray-700/40 hover:border-gray-600/60
-                      hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]
-                    `}
-                  >
-                    <img
-                      src={platform.logo}
-                      alt={platform.name}
-                      className="w-6 h-6 object-contain"
-                    />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {menuItems.map((item) => {
-          const IconComponent = item.icon;
-          const isActive = activeItem === item.id;
+            return (
+              <div key={item.id} className="relative group">
+                <button
+                  type="button"
+                  onClick={item.onClick}
+                  className={`
+                    relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden
+                    ${active
+                      ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.25)] border border-white'
+                      : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20'
+                    }
+                  `}
+                  aria-label={item.label}
+                >
+                  <IconComponent
+                    className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
+                      active ? 'text-black stroke-[2.3]' : 'text-slate-300 group-hover:text-white stroke-[1.8]'
+                    }`}
+                  />
+                </button>
 
-          return (
+                <SidebarTooltip label={item.label} />
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* ── Bottom Section: Synced Platforms + Profile & Settings ── */}
+        <div className="mt-auto flex flex-col items-center space-y-3 pt-3">
+          {/* 1. SYNCED PLATFORMS ICON (Just Above Profile) */}
+          <div
+            className="relative group"
+            onMouseEnter={handleMouseEnterSynced}
+            onMouseLeave={handleMouseLeaveSynced}
+          >
             <button
-              key={item.id}
+              id="synced-trigger-btn"
+              type="button"
               onClick={() => {
-                setActiveItem(item.id)
-                navigate(`/${item.id}`)
+                setShowProfilePopup(false);
+                setShowSyncedPopup((prev) => !prev);
               }}
               className={`
-                relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group overflow-hidden
-                ${isActive
-                  ? 'shadow-[8px_8px_20px_#111,-8px_-8px_20px_#222] border border-gray-600/50'
-                  : 'bg-gray-800/30 border border-gray-700/50 hover:bg-gray-700/40 hover:border-gray-600/60 hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]'
+                relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer
+                ${showSyncedPopup
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.3)]'
+                  : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20'
                 }
               `}
-              title={item.label}
+              aria-label="Synced Platforms"
             >
-              {/* Glass morphism background for active state */}
-              {isActive && (
-                <div className="absolute inset-[2px] bg-black/60 backdrop-blur-[12px] rounded-[14px] border border-gray-600/30"></div>
+              <Layers className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+
+              {/* Connected count indicator dot */}
+              {connectedPlatforms.length > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#07080c] shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
               )}
-              <IconComponent
-                className={`
-                  relative z-10 w-5 h-5 transition-colors duration-300
-                  ${isActive ? 'text-white' : 'text-gray-300 group-hover:text-white'}
-                `}
-              />
-
-              {/* Tooltip */}
-              <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-                {item.label}
-              </div>
             </button>
-          );
-        })}
-      </nav>
 
-      {/* Profile at bottom */}
-      <div className="mt-auto mb-4">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setActiveItem('profile');
-            setShowProfileCard((prev) => !prev);
-          }}
-          className={`
-            relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group overflow-hidden
-            ${activeItem === 'profile'
-              ? 'shadow-[8px_8px_20px_#111,-8px_-8px_20px_#222] border border-gray-600/50'
-              : 'bg-gray-800/30 border border-gray-700/50 hover:bg-gray-700/40 hover:border-gray-600/60 hover:shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]'
-            }
-          `}
-          title="Profile"
-        >
-          {activeItem === 'profile' && (
-            <div className="absolute inset-[2px] bg-black/60 backdrop-blur-[12px] rounded-[14px] border border-gray-600/30"></div>
-          )}
-          <User
-            className={`
-              relative z-10 w-5 h-5 transition-colors duration-300
-              ${activeItem === 'profile' ? 'text-white' : 'text-gray-300 group-hover:text-white'}
-            `}
-          />
-          <div className="absolute left-full ml-3 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
-            Profile
+            {!showSyncedPopup && (
+              <SidebarTooltip label="Synced Platforms" />
+            )}
           </div>
-        </button>
+
+          {/* 2. PROFILE & SETTINGS ICON (At Very Bottom) */}
+          <div
+            className="relative group"
+            onMouseEnter={handleMouseEnterProfile}
+            onMouseLeave={handleMouseLeaveProfile}
+          >
+            <button
+              id="profile-trigger-btn"
+              type="button"
+              onClick={() => {
+                setShowSyncedPopup(false);
+                setShowProfilePopup((prev) => !prev);
+              }}
+              className={`
+                relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 cursor-pointer group
+                ${showProfilePopup
+                  ? 'p-[1.5px] bg-gradient-to-tr from-cyan-400 via-indigo-500 to-emerald-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                  : 'p-[1px] bg-white/10 hover:bg-gradient-to-tr hover:from-cyan-500/60 hover:to-indigo-500/60'
+                }
+              `}
+              aria-label="Profile and Settings Menu"
+            >
+              <div className="w-full h-full rounded-[14px] bg-[#0c0d12] flex items-center justify-center overflow-hidden relative group-hover:bg-[#12141c] transition-colors p-0.5">
+                <img
+                  src={getDeveloperAvatar(user, platformData)}
+                  alt={user?.name || 'Developer'}
+                  className="w-full h-full object-cover rounded-[12px]"
+                />
+              </div>
+
+              {/* Active session green dot */}
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#07080c] shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            </button>
+
+            {!showProfilePopup && (
+              <SidebarTooltip label="Profile & Settings" />
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Bottom-left profile dialog */}
-      {showProfileCard && (
+      {/* ── SYNCED PLATFORMS BLACK CARD UI ── */}
+      {showSyncedPopup && (
         <div
-          className="fixed left-24 bottom-4 z-40"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowProfileCard(false);
-            }
-          }}
+          onMouseEnter={handleMouseEnterSynced}
+          onMouseLeave={handleMouseLeaveSynced}
+          className="fixed left-24 bottom-20 z-[99999]"
         >
-          <AnimatedProfileCard onClose={() => setShowProfileCard(false)} />
+          <SyncedPlatformsCard
+            connectedPlatforms={connectedPlatforms}
+            onClose={() => setShowSyncedPopup(false)}
+          />
         </div>
       )}
-    </div>
+
+      {/* ── ORIGINAL BLACK PROFILE CARD UI (With Memoji Photo & 2 Options) ── */}
+      {showProfilePopup && (
+        <div
+          onMouseEnter={handleMouseEnterProfile}
+          onMouseLeave={handleMouseLeaveProfile}
+          className="fixed left-24 bottom-4 z-[99999]"
+        >
+          <AnimatedProfileCard onClose={() => setShowProfilePopup(false)} />
+        </div>
+      )}
+
+      {/* ── Share Portfolio Modal ── */}
+      <ShareProfileModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
+    </>
   );
 };
 
