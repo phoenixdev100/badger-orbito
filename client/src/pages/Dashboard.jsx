@@ -386,7 +386,7 @@ const BadgeCard = ({ badge, onClick }) => {
       whileHover={{ y: -4, scale: 1.025 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-      className="group relative flex flex-col items-center justify-between rounded-2xl bg-[#0c0d12]/90 border border-white/10 hover:border-white/25 p-3 sm:p-3.5 w-full h-[160px] sm:h-[170px] shadow-lg backdrop-blur-xl transition-colors text-left cursor-pointer overflow-hidden"
+      className="group relative flex flex-col items-center justify-center rounded-2xl bg-[#0c0d12]/90 border border-white/10 hover:border-white/25 p-2.5 sm:p-3 w-full h-[135px] sm:h-[145px] shadow-lg backdrop-blur-xl transition-colors text-center cursor-pointer overflow-hidden"
     >
       {/* Subtle hover glow ring */}
       <div
@@ -395,7 +395,7 @@ const BadgeCard = ({ badge, onClick }) => {
       />
 
       {/* Badge Icon or Smart Topic Emblem */}
-      <div className="relative z-10 w-13 h-13 sm:w-15 sm:h-15 rounded-2xl flex items-center justify-center p-1 bg-black/60 border border-white/10 shadow-inner group-hover:scale-105 transition-transform duration-200">
+      <div className="relative z-10 w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center p-1 bg-black/60 border border-white/10 shadow-inner group-hover:scale-105 transition-transform duration-200 shrink-0">
         {badge.icon && !imgError ? (
           <img
             src={badge.icon}
@@ -522,112 +522,177 @@ const BadgeDetailModal = ({ badge, onClose }) => {
 };
 
 // ─── Certificate Inspection Modal ───────────────────────────────────────────
-const CertificateDetailModal = ({ cert, onClose }) => {
+// ─── Certificate Inspection Modal (High-Resolution Enterprise Diploma) ──────
+const CertificateDetailModal = ({ cert, onClose, userName }) => {
   if (!cert) return null;
   const meta = PLATFORM_META[cert.platform] || { label: cert.platform || 'Platform', color: '#10b981' };
   const [imgError, setImgError] = useState(false);
+  const certImage = (cert.image || cert.imageUrl) && !imgError ? (cert.image || cert.imageUrl) : null;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+      className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-y-auto"
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        initial={{ opacity: 0, scale: 0.93, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.92, y: 12 }}
-        transition={{ type: 'spring', duration: 0.3, bounce: 0.15 }}
+        exit={{ opacity: 0, scale: 0.93, y: 16 }}
+        transition={{ type: 'spring', duration: 0.35, bounce: 0.12 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg rounded-2xl bg-[#0c0d12] border border-white/15 p-6 sm:p-8 shadow-2xl text-white overflow-hidden"
+        className="relative w-full max-w-4xl rounded-3xl bg-[#090a0f] border border-white/20 p-4 sm:p-7 md:p-8 shadow-2xl text-white my-auto overflow-hidden"
       >
-        {/* Glow ambient accent */}
+        {/* Ambient background glow accents */}
         <div
-          className="absolute -top-24 -left-24 w-60 h-60 rounded-full blur-3xl opacity-20 pointer-events-none"
+          className="absolute -top-32 -left-32 w-80 h-80 rounded-full blur-3xl opacity-25 pointer-events-none"
           style={{ backgroundColor: meta.color }}
         />
+        <div
+          className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full blur-3xl opacity-20 pointer-events-none"
+          style={{ backgroundColor: '#10b981' }}
+        />
 
+        {/* Modal Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-10"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-20"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
 
-        <div className="flex flex-col items-center text-center relative z-0">
-          {/* Certificate Image or Shield Icon */}
-          <div
-            className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl p-3 flex items-center justify-center border border-white/15 shadow-2xl mb-4"
-            style={{ backgroundColor: `${meta.color}15` }}
-          >
-            {(cert.image || cert.imageUrl) && !imgError ? (
-              <img
-                src={cert.image || cert.imageUrl}
-                alt={cert.name}
-                className="w-full h-full object-contain filter drop-shadow-md"
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <ShieldCheck className="w-14 h-14" style={{ color: meta.color }} />
-            )}
+        {/* ── Standard Master Diploma Canvas ────────────────────────── */}
+        <div className="relative w-full rounded-2xl bg-gradient-to-b from-[#0f1118] via-[#090b10] to-[#08090d] border-2 border-amber-500/30 p-6 sm:p-9 md:p-11 shadow-2xl overflow-hidden">
+          {/* Ornate Corner Accents */}
+          <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-amber-400/60 pointer-events-none" />
+          <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-amber-400/60 pointer-events-none" />
+          <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-amber-400/60 pointer-events-none" />
+          <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-amber-400/60 pointer-events-none" />
+
+          {/* Watermark Security Emblem */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
+            <Award className="w-96 h-96 text-white" />
           </div>
 
-          {/* Platform Verified Pill */}
-          <span
-            className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10 mb-2 inline-flex items-center gap-1.5"
-            style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
-          >
-            <CheckCircle className="w-3.5 h-3.5" />
-            {meta.label} Verified Certification
-          </span>
-
-          {/* Certificate Title */}
-          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1">
-            {cert.name}
-          </h3>
-
-          {/* Issuer / Date info */}
-          {(cert.issuer || cert.issued_on || cert.type) && (
-            <p className="text-xs text-slate-400 mt-2 font-mono flex items-center gap-1.5 justify-center flex-wrap">
-              {cert.issuer && (
-                <span>Issued by <span className="text-slate-200 font-sans font-semibold">{cert.issuer}</span></span>
-              )}
-              {cert.issuer && cert.issued_on && <span className="text-slate-600">•</span>}
-              {cert.issued_on && <span>{cert.issued_on}</span>}
-              {!cert.issued_on && cert.type && <span>Credential: {cert.type}</span>}
-            </p>
-          )}
-
-          {/* Description */}
-          {cert.description && (
-            <p className="text-sm text-slate-300 mt-3 leading-relaxed max-h-36 overflow-y-auto scrollbar-none px-2">
-              {cert.description}
-            </p>
-          )}
-
-          {/* Associated Skills */}
-          {cert.skills?.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5 justify-center">
-              {cert.skills.map((skill, idx) => (
-                <span
-                  key={idx}
-                  className="px-2.5 py-0.5 rounded-md bg-white/10 text-xs text-slate-200 border border-white/5"
-                >
-                  {skill}
-                </span>
-              ))}
+          <div className="relative z-10 flex flex-col items-center text-center">
+            {/* Top Authority Header */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-amber-400 font-bold">
+                Orbito Verified Credential · Official Certificate
+              </p>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             </div>
-          )}
 
-          {/* Authenticated via Orbito - Centered */}
-          <div className="w-full mt-7 pt-4 border-t border-white/10 flex items-center justify-center text-xs text-slate-400">
-            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
-              <CheckCircle className="w-4 h-4 text-emerald-400" /> Authenticated via Orbito
-            </span>
+            {/* Platform Emblem & Badge if image exists */}
+            <div className="my-3 flex items-center justify-center">
+              {certImage ? (
+                <div
+                  className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl p-2.5 flex items-center justify-center border border-white/20 shadow-2xl backdrop-blur-md"
+                  style={{ backgroundColor: `${meta.color}15` }}
+                >
+                  <img
+                    src={certImage}
+                    alt={cert.name}
+                    className="w-full h-full object-contain filter drop-shadow-lg"
+                    onError={() => setImgError(true)}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl p-3 flex items-center justify-center border border-amber-500/30 shadow-2xl"
+                  style={{ backgroundColor: `${meta.color}18` }}
+                >
+                  <Award className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400" />
+                </div>
+              )}
+            </div>
+
+            {/* Certificate Header Prose */}
+            <p className="text-xs sm:text-sm text-slate-400 uppercase tracking-widest mt-1 font-mono">
+              This is officially awarded to
+            </p>
+
+            {/* Recipient Full Name */}
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight mt-1.5 font-serif capitalize">
+              {userName || 'Verified Developer'}
+            </h2>
+
+            <div className="w-28 h-0.5 bg-gradient-to-r from-transparent via-amber-400/80 to-transparent my-3" />
+
+            <p className="text-xs sm:text-sm text-slate-400">
+              for successfully demonstrating technical proficiency and verified achievement in
+            </p>
+
+            {/* Certificate Title */}
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent mt-2 tracking-tight">
+              {cert.name}
+            </h3>
+
+            {/* Description if available */}
+            {cert.description && (
+              <p className="text-xs sm:text-sm text-slate-300/90 mt-2.5 max-w-2xl leading-relaxed">
+                {cert.description}
+              </p>
+            )}
+
+            {/* Skills Pills */}
+            {cert.skills?.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-1.5 justify-center max-w-xl">
+                {cert.skills.map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-0.5 rounded-md bg-white/10 text-[11px] text-slate-200 border border-white/10 font-mono"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Three-Column Diploma Verification Footer */}
+            <div className="w-full mt-8 pt-6 border-t border-amber-500/20 grid grid-cols-1 sm:grid-cols-3 gap-4 items-center text-xs">
+              {/* Left Column: Issuer */}
+              <div className="text-center sm:text-left">
+                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">Verified Issuer</p>
+                <p className="text-sm font-bold text-white mt-0.5 flex items-center justify-center sm:justify-start gap-1.5">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
+                  {cert.issuer || meta.label}
+                </p>
+                <p className="text-[11px] text-slate-500 font-mono mt-0.5">Platform: {meta.label}</p>
+              </div>
+
+              {/* Center Column: Golden Cryptographic Seal */}
+              <div className="flex flex-col items-center justify-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-amber-400/60 bg-gradient-to-b from-amber-500/20 to-yellow-600/10 flex flex-col items-center justify-center shadow-lg shadow-amber-500/10 p-1">
+                  <ShieldCheck className="w-5 h-5 text-amber-400" />
+                  <span className="text-[8px] font-bold tracking-tighter text-amber-300 font-mono mt-0.5 uppercase">Verified</span>
+                </div>
+                <span className="text-[9px] text-amber-400/80 font-mono tracking-widest mt-1">SEAL OF AUTHENTICITY</span>
+              </div>
+
+              {/* Right Column: Date & Credential ID */}
+              <div className="text-center sm:text-right">
+                <p className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">Date Issued</p>
+                <p className="text-sm font-bold text-white mt-0.5 font-mono">
+                  {cert.issued_on || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+                <p className="text-[10px] text-slate-500 font-mono mt-0.5 truncate max-w-[200px] sm:ml-auto">
+                  ID: {cert.id || `ORB-${Math.abs(cert.name.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)).toString(16).toUpperCase()}`}
+                </p>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Authenticated via Orbito - Centered Bottom of Modal */}
+        <div className="w-full mt-6 flex items-center justify-center text-xs text-slate-400">
+          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+            <CheckCircle className="w-4 h-4 text-emerald-400" /> Authenticated via Orbito
+          </span>
         </div>
       </motion.div>
     </motion.div>
@@ -1032,7 +1097,7 @@ const Dashboard = () => {
               {loading && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3.5 sm:gap-4 w-full">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                    <div key={i} className="w-full h-[160px] sm:h-[170px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+                    <div key={i} className="w-full h-[135px] sm:h-[145px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
                   ))}
                 </div>
               )}
@@ -1197,6 +1262,7 @@ const Dashboard = () => {
         {selectedCert && (
           <CertificateDetailModal
             cert={selectedCert}
+            userName={user?.name || 'Verified Developer'}
             onClose={() => setSelectedCert(null)}
           />
         )}
