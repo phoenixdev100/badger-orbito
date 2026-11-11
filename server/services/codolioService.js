@@ -20,19 +20,41 @@ const HACKERRANK_SKILL_ICONS = {
 
 // CodeStudio topic badge displayName → devicon / icon URL
 const CODESTUDIO_TOPIC_ICONS = {
-  'arrays':          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
-  'strings':         'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
-  'math':            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/matlab/matlab-original.svg',
-  'number theory':   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/matlab/matlab-original.svg',
-  'greedy':          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
-  'bit manipulation':'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg',
-  'dynamic programming': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
-  'graphs':          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/neo4j/neo4j-original.svg',
-  'trees':           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg',
-  'linked lists':    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
-  'backtracking':    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
-  'sorting':         'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
-  'binary search':   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'arrays':                 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
+  'strings':                'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'math':                   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/matlab/matlab-original.svg',
+  'number theory':          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/matlab/matlab-original.svg',
+  'greedy':                 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
+  'bit manipulation':       'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg',
+  'dynamic programming':    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'graph':                  'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/neo4j/neo4j-original.svg',
+  'graphs':                 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/neo4j/neo4j-original.svg',
+  'trees':                  'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg',
+  'tree':                   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg',
+  'binary trees':           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+  'binary tree':            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+  'binary search trees':    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+  'binary search tree':     'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+  'tries':                  'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+  'trie':                   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+  'linked lists':           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
+  'linked list':            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
+  'backtracking':           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'sorting':                'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
+  'binary search':          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'breadth-first search':   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/neo4j/neo4j-original.svg',
+  'depth-first search':     'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/neo4j/neo4j-original.svg',
+  'computational geometry': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/threejs/threejs-original.svg',
+  'hash table':             'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg',
+  'heap':                   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/apachekafka/apachekafka-original.svg',
+  'matrices (2d arrays)':   'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/numpy/numpy-original.svg',
+  'matrices':               'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/numpy/numpy-original.svg',
+  'recursion':              'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'sql':                    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg',
+  'stacks & queues':        'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg',
+  'two pointers':           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg',
+  'ad-hoc':                 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
+  'ad hoc':                 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
 };
 
 // Resolve icon URL for a no-icon badge (HackerRank or CodeStudio)
@@ -42,7 +64,13 @@ const resolveIconForBadge = (platform, badgeName, displayName) => {
     return HACKERRANK_SKILL_ICONS[key] || HACKERRANK_SKILL_ICONS[badgeName?.toLowerCase()] || null;
   }
   if (platform === 'codestudio') {
-    return CODESTUDIO_TOPIC_ICONS[key] || null;
+    if (CODESTUDIO_TOPIC_ICONS[key]) return CODESTUDIO_TOPIC_ICONS[key];
+    const bName = (badgeName || '').toLowerCase().trim();
+    if (CODESTUDIO_TOPIC_ICONS[bName]) return CODESTUDIO_TOPIC_ICONS[bName];
+    // Partial substring lookup
+    for (const [topic, iconUrl] of Object.entries(CODESTUDIO_TOPIC_ICONS)) {
+      if (key.includes(topic) || topic.includes(key)) return iconUrl;
+    }
   }
   return null;
 };
@@ -89,6 +117,31 @@ const getProfileUrl = (platform, handle) => {
     default:
       return null;
   }
+};
+
+// Known verified tech certificate images & badges from trusted CDN
+const KNOWN_CERT_ICONS = {
+  'python':          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+  'java':            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg',
+  'sql':             'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg',
+  'javascript':      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg',
+  'problem solving': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
+  'react':           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg',
+  'node':            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg',
+  'css':             'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg',
+  'c#':              'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/csharp/csharp-original.svg',
+  'c++':             'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg',
+  'go':              'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/go/go-original.svg',
+  'r':               'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/r/r-original.svg',
+};
+
+const resolveCertificateImage = (certName, rawImage) => {
+  if (rawImage && String(rawImage).startsWith('http')) return rawImage;
+  const lower = (certName || '').toLowerCase();
+  for (const [key, iconUrl] of Object.entries(KNOWN_CERT_ICONS)) {
+    if (lower.includes(key)) return iconUrl;
+  }
+  return null;
 };
 
 // Count unique active days from the submissionCalendar object
@@ -165,7 +218,7 @@ export const fetchCodolioData = async (userKey) => {
         id:       `${platform}-cert-${c.name}`,
         name:     c.name || 'Certificate',
         type:     c.type,
-        imageUrl: c.imageUrl || null,
+        imageUrl: resolveCertificateImage(c.name, c.imageUrl),
         platform,
         platformColor: color,
       }));

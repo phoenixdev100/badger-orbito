@@ -8,11 +8,15 @@ const platformSchema = {
 };
 
 const userSchema = new mongoose.Schema({
-  name:           { type: String, required: true },
-  email:          { type: String, required: true, unique: true },
-  password:       { type: String, required: true },
-  googleId:       { type: String },
-  profilePicture: { type: String },
+  name:                  { type: String, required: true },
+  email:                 { type: String, required: true, unique: true },
+  password:              { type: String, required: true },
+  username:              { type: String, unique: true, sparse: true, trim: true, lowercase: true },
+  usernameLastChangedAt: { type: Date, default: null },
+  isProfilePublic:       { type: Boolean, default: true },
+  googleId:              { type: String },
+  profilePicture:        { type: String },
+  bio:                   { type: String, default: '' },
   platforms: {
     credly:     platformSchema,
     leetcode:   platformSchema,
