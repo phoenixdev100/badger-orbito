@@ -100,7 +100,16 @@ export const fetchAllPlatformsData = async (req, res) => {
       results.codolio = await fetchCodolioData(user.platforms.codolio.username);
     }
 
-    res.json({ success: true, data: results });
+    // Verified/linked usernames for direct profile linking on the frontend (sent at root level)
+    const userPlatforms = {
+      credly:     user.platforms.credly?.username     || null,
+      leetcode:   user.platforms.leetcode?.username   || null,
+      codechef:   user.platforms.codechef?.username   || null,
+      codestudio: user.platforms.codestudio?.username || null,
+      codolio:    user.platforms.codolio?.username    || null,
+    };
+
+    res.json({ success: true, data: results, userPlatforms });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to fetch platform data' });
