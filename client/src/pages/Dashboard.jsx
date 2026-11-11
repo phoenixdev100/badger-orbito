@@ -432,10 +432,9 @@ const BadgeCard = ({ badge, onClick }) => {
 };
 
 // ─── Badge Inspection Modal ─────────────────────────────────────────────────
-const BadgeDetailModal = ({ badge, onClose, userPlatforms, platformData }) => {
+const BadgeDetailModal = ({ badge, onClose }) => {
   if (!badge) return null;
   const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Platform', color: '#06b6d4' };
-  const platformUrl = badge.platformUrl || getPlatformProfileUrl(badge.platform, badge, userPlatforms, platformData);
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -510,20 +509,124 @@ const BadgeDetailModal = ({ badge, onClose, userPlatforms, platformData }) => {
             </div>
           )}
 
-          <div className="w-full mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <CheckCircle className="w-3.5 h-3.5" /> Authenticated via Orbito
+          {/* Authenticated via Orbito - Centered */}
+          <div className="w-full mt-6 pt-4 border-t border-white/10 flex items-center justify-center text-xs text-slate-400">
+            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+              <CheckCircle className="w-4 h-4 text-emerald-400" /> Authenticated via Orbito
             </span>
-            {(platformUrl || meta.url) && (
-              <a
-                href={platformUrl || meta.url}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-white transition-colors flex items-center gap-1"
-              >
-                View Platform Profile <ExternalLink className="w-3 h-3" />
-              </a>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// ─── Certificate Inspection Modal ───────────────────────────────────────────
+const CertificateDetailModal = ({ cert, onClose }) => {
+  if (!cert) return null;
+  const meta = PLATFORM_META[cert.platform] || { label: cert.platform || 'Platform', color: '#10b981' };
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: 12 }}
+        transition={{ type: 'spring', duration: 0.3, bounce: 0.15 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg rounded-2xl bg-[#0c0d12] border border-white/15 p-6 sm:p-8 shadow-2xl text-white overflow-hidden"
+      >
+        {/* Glow ambient accent */}
+        <div
+          className="absolute -top-24 -left-24 w-60 h-60 rounded-full blur-3xl opacity-20 pointer-events-none"
+          style={{ backgroundColor: meta.color }}
+        />
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-10"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="flex flex-col items-center text-center relative z-0">
+          {/* Certificate Image or Shield Icon */}
+          <div
+            className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl p-3 flex items-center justify-center border border-white/15 shadow-2xl mb-4"
+            style={{ backgroundColor: `${meta.color}15` }}
+          >
+            {(cert.image || cert.imageUrl) && !imgError ? (
+              <img
+                src={cert.image || cert.imageUrl}
+                alt={cert.name}
+                className="w-full h-full object-contain filter drop-shadow-md"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <ShieldCheck className="w-14 h-14" style={{ color: meta.color }} />
             )}
+          </div>
+
+          {/* Platform Verified Pill */}
+          <span
+            className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10 mb-2 inline-flex items-center gap-1.5"
+            style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
+          >
+            <CheckCircle className="w-3.5 h-3.5" />
+            {meta.label} Verified Certification
+          </span>
+
+          {/* Certificate Title */}
+          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1">
+            {cert.name}
+          </h3>
+
+          {/* Issuer / Date info */}
+          {(cert.issuer || cert.issued_on || cert.type) && (
+            <p className="text-xs text-slate-400 mt-2 font-mono flex items-center gap-1.5 justify-center flex-wrap">
+              {cert.issuer && (
+                <span>Issued by <span className="text-slate-200 font-sans font-semibold">{cert.issuer}</span></span>
+              )}
+              {cert.issuer && cert.issued_on && <span className="text-slate-600">•</span>}
+              {cert.issued_on && <span>{cert.issued_on}</span>}
+              {!cert.issued_on && cert.type && <span>Credential: {cert.type}</span>}
+            </p>
+          )}
+
+          {/* Description */}
+          {cert.description && (
+            <p className="text-sm text-slate-300 mt-3 leading-relaxed max-h-36 overflow-y-auto scrollbar-none px-2">
+              {cert.description}
+            </p>
+          )}
+
+          {/* Associated Skills */}
+          {cert.skills?.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5 justify-center">
+              {cert.skills.map((skill, idx) => (
+                <span
+                  key={idx}
+                  className="px-2.5 py-0.5 rounded-md bg-white/10 text-xs text-slate-200 border border-white/5"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Authenticated via Orbito - Centered */}
+          <div className="w-full mt-7 pt-4 border-t border-white/10 flex items-center justify-center text-xs text-slate-400">
+            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+              <CheckCircle className="w-4 h-4 text-emerald-400" /> Authenticated via Orbito
+            </span>
           </div>
         </div>
       </motion.div>
@@ -546,6 +649,7 @@ const Dashboard = () => {
   const [badgeFilter, setBadgeFilter] = useState('all');
   const [badgeSearch, setBadgeSearch] = useState('');
   const [selectedBadge, setSelectedBadge] = useState(null);
+  const [selectedCert, setSelectedCert] = useState(null);
 
   // Fetch full developer achievements
   const fetchData = async (isSync = false) => {
@@ -982,7 +1086,8 @@ const Dashboard = () => {
                 {credlyBadges.map((badge) => (
                   <div
                     key={badge.id}
-                    className="group rounded-2xl bg-[#0e0f14] border border-white/10 hover:border-white/25 p-5 shadow-lg transition-all duration-200 flex flex-col justify-between"
+                    onClick={() => setSelectedCert({ ...badge, platform: 'credly' })}
+                    className="group rounded-2xl bg-[#0e0f14] border border-white/10 hover:border-emerald-500/40 hover:bg-[#12141c] p-5 shadow-lg transition-all duration-200 flex flex-col justify-between cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5"
                   >
                     <div className="flex items-start gap-4">
                       <div className="w-14 h-14 rounded-xl bg-black/60 border border-white/10 p-2 flex items-center justify-center shrink-0">
@@ -1032,7 +1137,8 @@ const Dashboard = () => {
                   return (
                     <div
                       key={cert.id || index}
-                      className="group rounded-2xl bg-[#0e0f14] border border-white/10 hover:border-white/25 p-5 shadow-lg transition-all duration-200 flex flex-col justify-between"
+                      onClick={() => setSelectedCert(cert)}
+                      className="group rounded-2xl bg-[#0e0f14] border border-white/10 hover:border-emerald-500/40 hover:bg-[#12141c] p-5 shadow-lg transition-all duration-200 flex flex-col justify-between cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5"
                     >
                       <div className="flex items-start gap-4">
                         <div className="w-14 h-14 rounded-xl bg-black/60 border border-white/10 p-2 flex items-center justify-center shrink-0">
@@ -1082,8 +1188,16 @@ const Dashboard = () => {
           <BadgeDetailModal
             badge={selectedBadge}
             onClose={() => setSelectedBadge(null)}
-            userPlatforms={userPlatforms}
-            platformData={platformData}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Certificate Detail Modal ─────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedCert && (
+          <CertificateDetailModal
+            cert={selectedCert}
+            onClose={() => setSelectedCert(null)}
           />
         )}
       </AnimatePresence>
