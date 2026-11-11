@@ -1,6 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from 'axios';
 import { toast } from 'react-toastify';
+
+const SUBJECT_OPTIONS = [
+  { value: "General", label: "General" },
+  { value: "Pricing", label: "Pricing" },
+  { value: "Technical", label: "Technical" },
+];
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +18,29 @@ const Contact = () => {
     subscribe: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -163,19 +193,72 @@ const Contact = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="border-b border-white/20 pb-2 sm:col-span-2">
-                      <label className="text-sm text-slate-300">Product Question</label>
-                      <select 
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="mt-2 w-full bg-transparent outline-none text-white"
-                      required
-                    >
-                        <option className="text-black">General</option>
-                        <option className="text-black">Pricing</option>
-                        <option className="text-black">Technical</option>
-                      </select>
+                    <div ref={dropdownRef} className="relative border-b border-white/20 pb-2 sm:col-span-2">
+                      <label className="text-sm text-slate-300 block">Product Question</label>
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(prev => !prev)}
+                        className="mt-2 w-full flex items-center justify-between bg-transparent outline-none text-white text-left cursor-pointer"
+                        aria-haspopup="listbox"
+                        aria-expanded={isDropdownOpen}
+                      >
+                        <span className="text-base text-white">{formData.subject}</span>
+                        <motion.svg
+                          animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4 text-white/70"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </motion.svg>
+                      </button>
+
+                      {/* Continuous theme-matched dark dropdown list */}
+                      <AnimatePresence>
+                        {isDropdownOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                            transition={{ duration: 0.16, ease: "easeOut" }}
+                            className="absolute left-0 right-0 top-full mt-1.5 z-30 rounded-xl bg-[#0b0b0d] border border-white/20 shadow-2xl py-1 overflow-hidden backdrop-blur-xl"
+                            role="listbox"
+                          >
+                            {SUBJECT_OPTIONS.map((opt) => {
+                              const isSelected = formData.subject === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, subject: opt.value }));
+                                    setIsDropdownOpen(false);
+                                  }}
+                                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-white/15 text-white font-medium'
+                                      : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                                  }`}
+                                  role="option"
+                                  aria-selected={isSelected}
+                                >
+                                  <span>{opt.label}</span>
+                                  {isSelected && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <input type="hidden" name="subject" value={formData.subject} />
                     </div>
                   </div>
 
@@ -186,7 +269,7 @@ const Contact = () => {
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60" 
+                      className="mt-2 w-full bg-transparent outline-none text-white placeholder-white/60 resize-none" 
                       placeholder="Write your message.."
                       required
                     />

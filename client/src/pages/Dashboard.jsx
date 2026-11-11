@@ -1,125 +1,307 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import {
+  ArrowLeftRight,
+  ArrowUpDown,
+  Award,
+  Binary,
+  Boxes,
+  Brackets,
+  Calculator,
+  CheckCircle,
+  Cpu,
+  Database,
+  ExternalLink,
+  FileCode2,
+  Flame,
+  GitFork,
+  Globe,
+  Layers,
+  Link2,
+  Network,
+  Plus,
+  RefreshCw,
+  Repeat,
+  Search,
+  Shapes,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  Table,
+  TrendingUp,
+  Trophy,
+  Undo2,
+  User,
+  X,
+  Zap,
+} from 'lucide-react';
+
 import GradientBlobCard from '../components/gradient-bold-card';
 import Sidebar from '../components/Sidebar';
 import FeaturedAchievements from '../components/FeaturedAchievements';
 import ContestRatingSection from '../components/ContestRatingSection';
-import { XCard } from '../components/ui/x-gradient-card';
 import { AppContext } from '../context/AppContext';
-import { Award } from 'lucide-react';
 
-// ─── Platform display metadata ─────────────────────────────────────────────
+// ─── Platform Metadata & Brand Accents ───────────────────────────────────────
 const PLATFORM_META = {
-  leetcode:      { label: 'LeetCode',      color: '#FFA116' },
-  codechef:      { label: 'CodeChef',      color: '#6B3FA0' },
-  codestudio:    { label: 'CodeStudio',    color: '#DD4015' },
-  hackerrank:    { label: 'HackerRank',    color: '#2EC866' },
-  geeksforgeeks: { label: 'GeeksForGeeks', color: '#2F8D46' },
-  codeforces:    { label: 'Codeforces',    color: '#1F8ACB' },
-  atcoder:       { label: 'AtCoder',       color: '#7B7B7B' },
-  credly:        { label: 'Credly',        color: '#FF6B00' },
+  leetcode:      { label: 'LeetCode',      color: '#FFA116', bg: '#FFA11618', url: 'https://leetcode.com' },
+  codechef:      { label: 'CodeChef',      color: '#6B3FA0', bg: '#6B3FA018', url: 'https://codechef.com' },
+  codestudio:    { label: 'CodeStudio',    color: '#DD4015', bg: '#DD401518', url: 'https://naukri.com/code360' },
+  hackerrank:    { label: 'HackerRank',    color: '#2EC866', bg: '#2EC86618', url: 'https://hackerrank.com' },
+  geeksforgeeks: { label: 'GeeksForGeeks', color: '#2F8D46', bg: '#2F8D4618', url: 'https://geeksforgeeks.org' },
+  codeforces:    { label: 'Codeforces',    color: '#1F8ACB', bg: '#1F8ACB18', url: 'https://codeforces.com' },
+  atcoder:       { label: 'AtCoder',       color: '#7B7B7B', bg: '#7B7B7B18', url: 'https://atcoder.jp' },
+  credly:        { label: 'Credly',        color: '#FF6B00', bg: '#FF6B0018', url: 'https://credly.com' },
 };
 
-// ─── Badge with image icon ─────────────────────────────────────────────────
-const ImageBadge = ({ badge }) => (
-  <div className="flex flex-col items-center justify-center rounded-xl bg-slate-900/40 border border-slate-800/60 px-3 py-4 min-w-[90px] max-w-[110px] transition-all duration-200 hover:border-slate-600/60 hover:bg-slate-900/60">
-    <div className="w-14 h-14 rounded-full bg-slate-900/80 flex items-center justify-center overflow-hidden mb-2 ring-1 ring-slate-700/50">
-      <img
-        src={badge.icon}
-        alt={badge.title || 'Badge'}
-        className="w-full h-full object-contain p-1"
-        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-      />
-    </div>
-    <p className="text-[10px] text-center text-slate-200 leading-tight line-clamp-2 font-medium">
-      {badge.title || 'Badge'}
-    </p>
-    {badge.stars != null && (
-      <p className="text-[9px] mt-0.5" style={{ color: '#F6C90E' }}>
-        {'★'.repeat(badge.stars)}{'☆'.repeat(Math.max(0, 5 - badge.stars))}
-      </p>
-    )}
-    {badge.platform && (
-      <p className="text-[9px] text-slate-500 mt-0.5 capitalize">
-        {PLATFORM_META[badge.platform]?.label || badge.platform}
-      </p>
-    )}
-  </div>
-);
+// ─── Smart Topic & Badge Icon Resolver ───────────────────────────────────────
+// If no image icon exists (or fails to load), maps topic keywords to glowing vector emblems
+function renderTopicIcon(title = '', meta) {
+  const t = title.toLowerCase();
 
-// ─── Badge without image (truly unknown placeholder) ───────────────────────
-const FallbackBadge = ({ badge }) => {
-  const color   = badge.platformColor || '#888';
-  const initial = (badge.title || '?').charAt(0).toUpperCase();
-  const stars   = badge.stars;
+  // Trees, BST, Tries
+  if (t.includes('tree') || t.includes('trie')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400">
+        <GitFork className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Graphs, BFS, DFS
+  if (t.includes('graph') || t.includes('breadth') || t.includes('depth') || (t.includes('first') && t.includes('search'))) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-400">
+        <Network className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Bit Manipulation, Binary Code
+  if (t.includes('bit') || (t.includes('binary') && !t.includes('search'))) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-sky-500/20 to-blue-500/20 border border-sky-500/30 text-sky-400">
+        <Binary className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Geometry / Computational Geometry
+  if (t.includes('geometr')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400">
+        <Shapes className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Hash Table, Maps
+  if (t.includes('hash') || t.includes('map')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-rose-500/20 to-pink-500/20 border border-rose-500/30 text-rose-400">
+        <Table className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Heap, Priority Queue
+  if (t.includes('heap') || t.includes('priority')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-400">
+        <Layers className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Linked List
+  if (t.includes('linked list') || (t.includes('list') && !t.includes('hash'))) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-teal-500/20 to-cyan-500/20 border border-teal-500/30 text-teal-400">
+        <Link2 className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Math, Number Theory
+  if (t.includes('math') || t.includes('number')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 border border-blue-500/30 text-blue-400">
+        <Calculator className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Matrices (2D Arrays)
+  if (t.includes('matric') || t.includes('matrix') || t.includes('2d')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-400">
+        <Boxes className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Recursion, Backtracking
+  if (t.includes('recursion') || t.includes('backtrack')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-red-500/20 to-rose-500/20 border border-rose-500/30 text-rose-400">
+        <Repeat className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // SQL, Database
+  if (t.includes('sql') || t.includes('data') || t.includes('db')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-400">
+        <Database className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Stacks & Queues
+  if (t.includes('stack') || t.includes('queue')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-violet-500/20 to-purple-500/20 border border-violet-500/30 text-violet-400">
+        <Layers className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Two Pointers, Sliding Window
+  if (t.includes('pointer') || t.includes('window')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400">
+        <ArrowLeftRight className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Greedy
+  if (t.includes('greedy')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400">
+        <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Sorting
+  if (t.includes('sort')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-400">
+        <ArrowUpDown className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Searching, Binary Search
+  if (t.includes('search')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-sky-500/20 to-indigo-500/20 border border-sky-500/30 text-sky-400">
+        <Search className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Dynamic Programming (DP)
+  if (t.includes('dynamic') || t.includes('dp')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 text-fuchsia-400">
+        <Cpu className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Strings
+  if (t.includes('string')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-amber-500/20 to-yellow-500/20 border border-amber-500/30 text-amber-400">
+        <FileCode2 className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Arrays
+  if (t.includes('array')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 border border-blue-500/30 text-blue-400">
+        <Brackets className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Ad-Hoc
+  if (t.includes('ad-hoc') || t.includes('adhoc')) {
+    return (
+      <div className="w-full h-full rounded-xl flex items-center justify-center bg-gradient-to-tr from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 text-yellow-400">
+        <Zap className="w-6 h-6 sm:w-7 sm:h-7" />
+      </div>
+    );
+  }
+
+  // Default Fallback Developer Medal
   return (
     <div
-      className="flex flex-col items-center justify-center rounded-xl border border-slate-800/60 px-3 py-4 min-w-[90px] max-w-[110px] transition-all duration-200"
-      style={{ background: `${color}11` }}
+      className="w-full h-full rounded-xl flex items-center justify-center border shadow-inner"
+      style={{
+        backgroundColor: `${meta.color}18`,
+        borderColor: `${meta.color}40`,
+        color: meta.color,
+      }}
     >
-      <div
-        className="w-14 h-14 rounded-full flex items-center justify-center mb-2 text-xl font-bold"
-        style={{ background: `${color}22`, color, border: `1.5px solid ${color}55` }}
-      >
-        {initial}
-      </div>
-      <p className="text-[10px] text-center text-slate-200 leading-tight line-clamp-2 font-medium">
-        {badge.title}
-      </p>
-      {badge.level && (
-        <p className="text-[9px] capitalize mt-0.5" style={{ color }}>{badge.level}</p>
-      )}
-      {stars != null && (
-        <p className="text-[9px] mt-0.5" style={{ color: '#F6C90E' }}>
-          {'★'.repeat(stars)}{'☆'.repeat(Math.max(0, 5 - stars))}
-        </p>
-      )}
+      <Award className="w-6 h-6 sm:w-7 sm:h-7" />
     </div>
   );
-};
+}
 
-// ─── Build featured achievements ───────────────────────────────────────────
+// ─── Build Featured Achievements ─────────────────────────────────────────────
 function buildFeaturedAchievements(platforms) {
   const achievements = [];
   platforms.forEach((p) => {
     if (p.platform === 'leetcode' && p.questionsSolved > 0) {
       achievements.push({
-        id: 'lc-feat', platform: 'leetcode',
+        id: 'lc-feat',
+        platform: 'leetcode',
         title: 'LeetCode',
         description: `${p.questionsSolved} problems solved`,
         count: p.contestRating ? `${p.contestRating}` : `${p.questionsSolved}`,
-        badgeImage: p.badges.find((b) => b.icon)?.icon || null,
+        badgeImage: p.badges?.find((b) => b.icon)?.icon || null,
         color: 'bg-orange-500',
       });
     }
     if (p.platform === 'codechef' && p.userStats) {
       const stars = p.userStats.stars;
       achievements.push({
-        id: 'cc-feat', platform: 'codechef',
+        id: 'cc-feat',
+        platform: 'codechef',
         title: 'CodeChef',
-        description: `Rating ${p.contestRating || '-'}`,
+        description: `Rating ${p.contestRating || '-'} · ${p.userStats.globalRank ? `Rank #${p.userStats.globalRank}` : 'Competitive'}`,
         count: stars ? `${stars}★` : `${p.contestRating || '-'}`,
-        badgeImage: p.badges.find((b) => b.icon)?.icon || null,
+        badgeImage: p.badges?.find((b) => b.icon)?.icon || null,
         color: 'bg-purple-500',
       });
     }
-    if (p.platform === 'hackerrank' && p.badges.length > 0) {
+    if (p.platform === 'hackerrank' && p.badges?.length > 0) {
       const topBadge = [...p.badges].sort((a, b) => (b.stars || 0) - (a.stars || 0))[0];
       achievements.push({
-        id: 'hr-feat', platform: 'hackerrank',
+        id: 'hr-feat',
+        platform: 'hackerrank',
         title: 'HackerRank',
-        description: `${topBadge.title} - ${topBadge.stars}★`,
+        description: `${topBadge.title} · ${topBadge.stars}★ Certified`,
         count: `${topBadge.stars}★`,
         badgeImage: topBadge.icon || null,
-        icon: <Award className="w-6 h-6 text-green-400" />,
         color: 'bg-green-500',
       });
     }
     if (p.platform === 'codestudio' && p.userStats) {
       achievements.push({
-        id: 'cs-feat', platform: 'codestudio',
+        id: 'cs-feat',
+        platform: 'codestudio',
         title: 'CodeStudio',
-        description: `Rating ${p.contestRating || '-'} · ${p.userStats.userLevelName || ''}`,
+        description: `Rating ${p.contestRating || '-'} · ${p.userStats.userLevelName || 'Ranked'}`,
         count: `${p.contestRating || p.questionsSolved || '-'}`,
         badgeImage: p.userStats.titlePhoto || null,
         color: 'bg-red-500',
@@ -127,18 +309,20 @@ function buildFeaturedAchievements(platforms) {
     }
     if (p.platform === 'geeksforgeeks' && p.questionsSolved > 0) {
       achievements.push({
-        id: 'gfg-feat', platform: 'geeksforgeeks',
+        id: 'gfg-feat',
+        platform: 'geeksforgeeks',
         title: 'GeeksForGeeks',
-        description: `${p.questionsSolved} problems solved`,
+        description: `${p.questionsSolved} practice problems completed`,
         count: `${p.questionsSolved}`,
-        color: 'bg-green-600',
+        color: 'bg-emerald-600',
       });
     }
     if (p.platform === 'codeforces' && p.userStats?.currentRating) {
       achievements.push({
-        id: 'cf-feat', platform: 'codeforces',
+        id: 'cf-feat',
+        platform: 'codeforces',
         title: 'Codeforces',
-        description: `Rating ${p.userStats.currentRating} · ${p.userStats.rank || ''}`,
+        description: `Rating ${p.userStats.currentRating} · ${p.userStats.rank || 'Coder'}`,
         count: `${p.userStats.currentRating}`,
         badgeImage: p.userStats.titlePhoto || null,
         color: 'bg-blue-500',
@@ -148,37 +332,214 @@ function buildFeaturedAchievements(platforms) {
   return achievements.slice(0, 4);
 }
 
-// ─── Dashboard ─────────────────────────────────────────────────────────────
+// ─── Badge Card Component ───────────────────────────────────────────────────
+const BadgeCard = ({ badge, onClick }) => {
+  const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Award', color: '#06b6d4' };
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <motion.button
+      type="button"
+      onClick={() => onClick(badge)}
+      whileHover={{ y: -4, scale: 1.025 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+      className="group relative flex flex-col items-center justify-between rounded-2xl bg-[#0c0d12]/90 border border-white/10 hover:border-white/25 p-3 sm:p-3.5 w-full h-[160px] sm:h-[170px] shadow-lg backdrop-blur-xl transition-colors text-left cursor-pointer overflow-hidden"
+    >
+      {/* Subtle hover glow ring */}
+      <div
+        className="pointer-events-none absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300"
+        style={{ backgroundColor: meta.color }}
+      />
+
+      {/* Badge Icon or Smart Topic Emblem */}
+      <div className="relative z-10 w-13 h-13 sm:w-15 sm:h-15 rounded-2xl flex items-center justify-center p-1 bg-black/60 border border-white/10 shadow-inner group-hover:scale-105 transition-transform duration-200">
+        {badge.icon && !imgError ? (
+          <img
+            src={badge.icon}
+            alt={badge.title || 'Badge'}
+            className="w-full h-full object-contain filter drop-shadow"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          renderTopicIcon(badge.title, meta)
+        )}
+      </div>
+
+      {/* Title & Platform Tag */}
+      <div className="relative z-10 w-full text-center mt-2 flex flex-col items-center">
+        <p className="text-[11px] sm:text-xs text-white font-medium leading-tight line-clamp-2 w-full group-hover:text-cyan-300 transition-colors">
+          {badge.title || 'Achievement'}
+        </p>
+
+        {badge.stars != null && (
+          <p className="text-[10px] mt-0.5 font-bold tracking-widest text-amber-400">
+            {'★'.repeat(Math.min(badge.stars, 5))}
+          </p>
+        )}
+
+        <span
+          className="mt-1 px-1.5 py-0.2 rounded-md text-[9px] font-semibold tracking-wider uppercase border border-white/10"
+          style={{ backgroundColor: `${meta.color}15`, color: meta.color }}
+        >
+          {meta.label}
+        </span>
+      </div>
+    </motion.button>
+  );
+};
+
+// ─── Badge Inspection Modal ─────────────────────────────────────────────────
+const BadgeDetailModal = ({ badge, onClose }) => {
+  if (!badge) return null;
+  const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Platform', color: '#06b6d4' };
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[99999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: 12 }}
+        transition={{ type: 'spring', duration: 0.3, bounce: 0.15 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md rounded-2xl bg-[#0c0d12] border border-white/15 p-6 sm:p-7 shadow-2xl text-white"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="flex flex-col items-center text-center">
+          <div
+            className="w-24 h-24 rounded-2xl p-3 flex items-center justify-center border border-white/15 shadow-xl mb-4"
+            style={{ backgroundColor: `${meta.color}15` }}
+          >
+            {badge.icon && !imgError ? (
+              <img
+                src={badge.icon}
+                alt={badge.title}
+                className="w-full h-full object-contain"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              renderTopicIcon(badge.title, meta)
+            )}
+          </div>
+
+          <span
+            className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/10 mb-2"
+            style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
+          >
+            {meta.label} Verified
+          </span>
+
+          <h3 className="text-xl font-bold text-white tracking-tight">{badge.title}</h3>
+
+          {badge.description && (
+            <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+              {badge.description}
+            </p>
+          )}
+
+          {badge.stars != null && (
+            <div className="mt-3 text-amber-400 text-sm font-bold tracking-widest">
+              {'★'.repeat(badge.stars)}{'☆'.repeat(Math.max(0, 5 - badge.stars))}
+            </div>
+          )}
+
+          {badge.skills?.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5 justify-center">
+              {badge.skills.map((skill, idx) => (
+                <span key={idx} className="px-2 py-0.5 rounded-md bg-white/10 text-xs text-slate-200">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="w-full mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <CheckCircle className="w-3.5 h-3.5" /> Authenticated via Orbito
+            </span>
+            {meta.url && (
+              <a
+                href={meta.url}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-white transition-colors flex items-center gap-1"
+              >
+                View Platform <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// ─── Main Dashboard Page ────────────────────────────────────────────────────
 const Dashboard = () => {
-  const { backendUrl, token } = useContext(AppContext);
+  const { backendUrl, token, user } = useContext(AppContext);
+  const navigate = useNavigate();
+
   const [platformData, setPlatformData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!token) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axios.get(`${backendUrl}/api/platforms/data`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data.success) {
-          setPlatformData(response.data.data || {});
-        } else {
-          setPlatformData({});
-        }
-      } catch (err) {
-        console.error('Failed to fetch platform data:', err);
-        setError('Failed to load platform data');
+  // Filter & Search states for Trophy Room
+  const [badgeFilter, setBadgeFilter] = useState('all');
+  const [badgeSearch, setBadgeSearch] = useState('');
+  const [selectedBadge, setSelectedBadge] = useState(null);
+
+  // Fetch full developer achievements
+  const fetchData = async (isSync = false) => {
+    if (!token) return;
+    if (isSync) setSyncing(true);
+    else setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`${backendUrl}/api/platforms/data`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setPlatformData(response.data.data || {});
+        if (isSync) toast.success('Platforms synchronized successfully!');
+      } else {
         setPlatformData({});
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error('Failed to fetch platform data:', err);
+      setError('Failed to load platform data');
+      setPlatformData({});
+    } finally {
+      setLoading(false);
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [backendUrl, token]);
+
+  // Copy Profile URL action
+  const handleShareProfile = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    toast.success('Dashboard link copied to clipboard!');
+  };
 
   // ── Aggregation ──────────────────────────────────────────────────────────
   const codolio          = platformData?.codolio || {};
@@ -186,64 +547,232 @@ const Dashboard = () => {
   const codolioplatforms = codolio.platforms || [];
   const credlyBadges     = platformData?.credly?.badges || [];
 
-  // Correct connected-platforms count = actual Badger-verified accounts
   const connectedPlatforms = Object.keys(platformData || {}).length;
-
   const totalBadges       = (codolioSummary.totalBadges || 0) + (platformData?.credly?.badgeCount || 0);
-  const totalCertificates = codolioSummary.totalCertificates || 0;
+  const totalCertificates = (codolioSummary.totalCertificates || 0) + credlyBadges.length;
   const totalQuestions    = codolioSummary.totalQuestionsSolved || 0;
   const totalActiveDays   = codolioSummary.totalActiveDays || 0;
   const topSkill          = codolioSummary.topSkill || null;
   const topSkillStars     = codolioSummary.topSkillStars ?? null;
 
-  // ── Badges split: has icon vs. fallback ──────────────────────────────────
-  const codolioBadgesWithIcon  = codolioplatforms.flatMap((p) => (p.badges || []).filter((b) => b.icon));
-  const codolioBadgesNoIcon    = codolioplatforms.flatMap((p) => (p.badges || []).filter((b) => !b.icon));
-  const credlyBadgesNormalized = credlyBadges.map((b) => ({
-    id: b.id, icon: b.image, title: b.name, platform: 'credly',
-  }));
-  const allBadgesWithIcon = [...credlyBadgesNormalized, ...codolioBadgesWithIcon];
+  // Normalized Badges List
+  const allBadges = useMemo(() => {
+    const list = [];
 
-  // Certificates
+    // Credly badges
+    credlyBadges.forEach((b) => {
+      list.push({
+        id: b.id || `credly-${b.name}`,
+        title: b.name,
+        icon: b.image,
+        platform: 'credly',
+        description: b.description,
+        issuer: b.issuer,
+        skills: b.skills || [],
+        issued_on: b.issued_on,
+      });
+    });
+
+    // Codolio platform badges
+    codolioplatforms.forEach((p) => {
+      (p.badges || []).forEach((b, i) => {
+        list.push({
+          id: b.id || `${p.platform}-${i}`,
+          title: b.title || 'Platform Badge',
+          icon: b.icon || null,
+          platform: p.platform || 'codolio',
+          stars: b.stars,
+          level: b.level,
+        });
+      });
+    });
+
+    return list;
+  }, [credlyBadges, codolioplatforms]);
+
+  // Filtered badges based on active tab and search query
+  const filteredBadges = useMemo(() => {
+    return allBadges.filter((b) => {
+      const matchesTab =
+        badgeFilter === 'all'
+          ? true
+          : badgeFilter === 'other'
+          ? !['leetcode', 'credly', 'codechef', 'hackerrank'].includes(b.platform)
+          : b.platform === badgeFilter;
+
+      const query = badgeSearch.toLowerCase().trim();
+      const matchesSearch =
+        !query ||
+        b.title?.toLowerCase().includes(query) ||
+        b.platform?.toLowerCase().includes(query) ||
+        (b.skills && b.skills.some((s) => s.toLowerCase().includes(query)));
+
+      return matchesTab && matchesSearch;
+    });
+  }, [allBadges, badgeFilter, badgeSearch]);
+
+  // Certificates list
   const codolioCertificates = codolioplatforms.flatMap((p) => p.certificates || []);
-
-  // Featured achievements
   const featuredAchievements = buildFeaturedAchievements(codolioplatforms);
 
+  // Dynamic developer level calculation
+  const devLevel = Math.min(99, Math.max(1, Math.floor(totalQuestions / 40 + totalBadges * 2) || 1));
+  const devTitle =
+    totalQuestions > 600
+      ? 'Senior Systems Architect'
+      : totalQuestions > 300
+      ? 'Full-Stack Software Engineer'
+      : totalQuestions > 100
+      ? 'Competitive Programmer'
+      : 'Junior Developer';
+
   return (
-    <div className="w-full bg-black min-h-screen">
+    <div className="w-full bg-black min-h-screen text-white">
       <Sidebar />
-      <div className="ml-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
-          <div className="relative overflow-visible text-white">
-            <style>{`
-              @keyframes grid-draw { 0%{stroke-dashoffset:1000;opacity:0} 50%{opacity:.5} 100%{stroke-dashoffset:0;opacity:.3} }
-              @keyframes pulse-glow { 0%,100%{opacity:.1;transform:scale(1)} 50%{opacity:.3;transform:scale(1.1)} }
-              .grid-line{stroke:#94a3b8;stroke-width:.5;opacity:0;stroke-dasharray:5 5;stroke-dashoffset:1000;animation:grid-draw 2s ease-out forwards}
-              .detail-dot{fill:#cbd5e1;opacity:0;animation:pulse-glow 3s ease-in-out infinite}
-            `}</style>
 
-            {/* Grid background */}
-            <svg className="pointer-events-none absolute inset-0 h-full w-full z-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <pattern id="gridDashboard" width="60" height="60" patternUnits="userSpaceOnUse">
-                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(100,116,139,0.25)" strokeWidth="0.5"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#gridDashboard)" />
-              <line x1="0" y1="20%" x2="100%" y2="20%" className="grid-line" style={{ animationDelay: '0.5s' }} />
-              <line x1="0" y1="80%" x2="100%" y2="80%" className="grid-line" style={{ animationDelay: '1s' }} />
-              <line x1="20%" y1="0" x2="20%" y2="100%" className="grid-line" style={{ animationDelay: '1.5s' }} />
-              <line x1="80%" y1="0" x2="80%" y2="100%" className="grid-line" style={{ animationDelay: '2s' }} />
-              <circle cx="20%" cy="20%" r="1.5" className="detail-dot" style={{ animationDelay: '3s' }} />
-              <circle cx="80%" cy="20%" r="1.5" className="detail-dot" style={{ animationDelay: '3.2s' }} />
-              <circle cx="20%" cy="80%" r="1.5" className="detail-dot" style={{ animationDelay: '3.4s' }} />
-              <circle cx="80%" cy="80%" r="1.5" className="detail-dot" style={{ animationDelay: '3.6s' }} />
-            </svg>
+      {/* Main Content Pane - Fully Utilizing Screen Width */}
+      <div className="ml-0 md:ml-20">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-8 sm:py-10">
+          <div className="relative overflow-visible space-y-8">
 
-            <div className="relative z-10 space-y-8">
+            {/* ── 1. DEVELOPER COMMAND HEADER ─────────────────────────────────── */}
+            <div className="relative w-full rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-6 sm:p-7 shadow-2xl backdrop-blur-xl overflow-hidden">
+              {/* Background ambient lighting */}
+              <div className="pointer-events-none absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
 
-              {/* ── Stat Cards (single row) ── */}
+              <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                {/* Left: Avatar + Identity */}
+                <div className="flex items-center gap-4 sm:gap-5">
+                  <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[2px] shadow-lg">
+                    <div className="w-full h-full rounded-2xl bg-black flex items-center justify-center overflow-hidden">
+                      <span className="text-2xl font-black text-white">
+                        {(user?.name || 'Developer').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    {/* Live status dot */}
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-black" title="Verified" />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                        {user?.name || 'Developer'}
+                      </h1>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <CheckCircle className="w-3.5 h-3.5" /> Verified Developer
+                      </span>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-400 mt-1 flex items-center gap-3 flex-wrap">
+                      <span className="font-mono text-cyan-400">@{user?.email?.split('@')[0] || 'orbito'}</span>
+                      <span className="text-slate-600">•</span>
+                      <span className="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 text-xs font-medium">
+                        Level {devLevel} · {devTitle}
+                      </span>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-slate-400">{connectedPlatforms} Platforms Connected</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Quick Action Controls */}
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <button
+                    type="button"
+                    onClick={handleShareProfile}
+                    className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-sm font-semibold text-white transition-all cursor-pointer hover:shadow-lg"
+                  >
+                    <Share2 className="w-4 h-4 text-cyan-400" />
+                    <span>Share Profile</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fetchData(true)}
+                    disabled={syncing}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-sm font-semibold text-cyan-400 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                    <span className="hidden sm:inline">{syncing ? 'Syncing...' : 'Sync Data'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 2. CONNECTED PLATFORMS QUICK STRIP ─────────────────────────── */}
+            <div className="w-full">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <h3 className="text-xs uppercase tracking-widest font-semibold text-slate-400">
+                  Linked Developer Ecosystems
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => navigate('/addPlatform')}
+                  className="text-xs text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Connect Platform
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 w-full">
+                {codolioplatforms.map((p) => {
+                  const meta = PLATFORM_META[p.platform] || { label: p.platform, color: '#06b6d4', url: '#' };
+                  return (
+                    <div
+                      key={p.platform}
+                      className="rounded-xl bg-[#0c0d12]/80 border border-white/10 p-3 flex items-center justify-between gap-2 hover:border-white/20 transition-all"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
+                          <p className="text-xs font-semibold text-white truncate">{meta.label}</p>
+                        </div>
+                        <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">
+                          {p.contestRating ? `Rating ${p.contestRating}` : `${p.questionsSolved || 0} Solved`}
+                        </p>
+                      </div>
+                      <a
+                        href={meta.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-slate-500 hover:text-white transition-colors p-1"
+                        title={`Open ${meta.label}`}
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  );
+                })}
+
+                {/* If Credly is connected */}
+                {credlyBadges.length > 0 && (
+                  <div className="rounded-xl bg-[#0c0d12]/80 border border-white/10 p-3 flex items-center justify-between gap-2 hover:border-white/20 transition-all">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-orange-500" />
+                        <p className="text-xs font-semibold text-white truncate">Credly</p>
+                      </div>
+                      <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">
+                        {credlyBadges.length} Badges
+                      </p>
+                    </div>
+                    <a
+                      href="https://credly.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-slate-500 hover:text-white transition-colors p-1"
+                      title="Open Credly"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* ── 3. ENTERPRISE BENTO STATS GRID ──────────────────────────────── */}
+            <div className="w-full">
               <GradientBlobCard
                 totalBadges={totalBadges}
                 topSkill={topSkill}
@@ -254,130 +783,244 @@ const Dashboard = () => {
                 totalActiveDays={totalActiveDays}
                 loading={loading}
               />
+            </div>
 
-              {/* ── Featured Achievements ── */}
-              <div className="mt-12">
-                {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[1,2,3,4].map((i) => (
-                      <div key={i} className="h-[180px] rounded-xl bg-slate-900/40 border border-slate-800/60 animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  <FeaturedAchievements achievements={featuredAchievements} />
-                )}
-              </div>
+            {/* ── 4. FEATURED MILESTONES / ACHIEVEMENTS ───────────────────────── */}
+            <div className="w-full mt-8">
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-[180px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <FeaturedAchievements achievements={featuredAchievements} />
+              )}
+            </div>
 
-              {/* ── Contests + Rating Chart ── */}
+            {/* ── 5. CONTEST RATINGS & PERFORMANCE CHART ──────────────────────── */}
+            <div className="w-full mt-8">
               <ContestRatingSection platforms={codolioplatforms} loading={loading} />
+            </div>
 
-              {/* ── Awards / Badges ── */}
-              <div className="mt-12">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Awards</h2>
-                    <p className="text-xs text-slate-400 mt-1">
-                      {loading
-                        ? 'Loading your badges...'
-                        : totalBadges > 0
-                        ? `${totalBadges} badges across ${connectedPlatforms} connected ${connectedPlatforms === 1 ? 'platform' : 'platforms'}`
-                        : 'Connect and verify platforms to start earning badges.'}
-                    </p>
-                  </div>
-                  {allBadgesWithIcon.length + codolioBadgesNoIcon.length > 20 && (
-                    <button type="button" className="text-xs text-sky-400 hover:text-sky-300 underline-offset-2 hover:underline">
-                      show more
-                    </button>
-                  )}
+            {/* ── 6. ENTERPRISE TROPHY ROOM / BADGES SHOWCASE ─────────────────── */}
+            <div className="w-full mt-12 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-amber-400" />
+                    <span>Trophy Room</span>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
+                      {filteredBadges.length}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Verified honors, contest medals, and domain masteries across all connected platforms.
+                  </p>
                 </div>
 
-                {loading && (
-                  <div className="flex flex-wrap gap-4">
-                    {[1,2,3,4,5].map((i) => (
-                      <div key={i} className="w-[90px] h-[120px] rounded-xl bg-slate-900/40 border border-slate-800/60 animate-pulse" />
+                {/* Search Bar + Filter Tabs */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={badgeSearch}
+                      onChange={(e) => setBadgeSearch(e.target.value)}
+                      placeholder="Search awards by name or skill..."
+                      className="pl-9 pr-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-400 outline-none focus:border-cyan-400 transition-colors w-full sm:w-56"
+                    />
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                    {[
+                      { id: 'all', label: 'All' },
+                      { id: 'leetcode', label: 'LeetCode' },
+                      { id: 'credly', label: 'Credly' },
+                      { id: 'codechef', label: 'CodeChef' },
+                      { id: 'hackerrank', label: 'HackerRank' },
+                      { id: 'other', label: 'More' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setBadgeFilter(tab.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                          badgeFilter === tab.id
+                            ? 'bg-white text-black font-semibold shadow-md'
+                            : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
                     ))}
                   </div>
-                )}
-
-                {!loading && totalBadges === 0 && (
-                  <div className="text-slate-500 text-sm">No badges to display yet.</div>
-                )}
-
-                {/* Badges with resolved icon URLs */}
-                {!loading && allBadgesWithIcon.length > 0 && (
-                  <div className="flex flex-wrap gap-4">
-                    {allBadgesWithIcon.slice(0, 20).map((badge, i) => (
-                      <ImageBadge key={badge.id || i} badge={badge} />
-                    ))}
-                  </div>
-                )}
-
-                {/* Truly icon-less fallback badges */}
-                {!loading && codolioBadgesNoIcon.length > 0 && (
-                  <>
-                    {allBadgesWithIcon.length > 0 && (
-                      <div className="my-4 border-t border-slate-800/60" />
-                    )}
-                    <div className="flex flex-wrap gap-4">
-                      {codolioBadgesNoIcon.slice(0, 16).map((badge, i) => (
-                        <FallbackBadge key={badge.id || i} badge={badge} />
-                      ))}
-                    </div>
-                  </>
-                )}
+                </div>
               </div>
 
-              {/* ── Certificates ── */}
-              <div className="mt-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-white">Certificates</h2>
+              {/* Badges Grid View - Fully Stretched Grid with No Empty Gaps */}
+              {loading && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3.5 sm:gap-4 w-full">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                    <div key={i} className="w-full h-[160px] sm:h-[170px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+                  ))}
                 </div>
+              )}
 
-                {loading && <div className="text-slate-400 text-sm">Loading certificates...</div>}
-                {!loading && error && <div className="text-red-400 text-sm">{error}</div>}
-                {!loading && !error && credlyBadges.length === 0 && codolioCertificates.length === 0 && (
-                  <div className="text-slate-400 text-sm">
-                    No certificates found. Connect Credly or HackerRank to see certificates here.
-                  </div>
-                )}
+              {!loading && filteredBadges.length === 0 && (
+                <div className="py-12 text-center text-slate-400 text-sm">
+                  {badgeSearch
+                    ? `No awards matching "${badgeSearch}". Try a different keyword.`
+                    : 'No awards found for this category.'}
+                </div>
+              )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  {credlyBadges.map((badge) => (
-                    <XCard
-                      key={badge.id}
-                      authorName={badge.name || 'Credly Badge'}
-                      authorHandle={badge.issuer ? `@${badge.issuer}` : '@credly'}
-                      authorImage={badge.image}
-                      content={[
-                        badge.description || 'Achievement issued via Credly.',
-                        badge.skills?.length ? `Skills: ${badge.skills.join(', ')}` : '',
-                      ].filter(Boolean)}
-                      timestamp={badge.issued_on ? `Issued: ${new Date(badge.issued_on).toLocaleDateString()}` : ''}
-                      isVerified={true}
+              {!loading && filteredBadges.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3.5 sm:gap-4 w-full">
+                  {filteredBadges.map((badge, idx) => (
+                    <BadgeCard
+                      key={badge.id || idx}
+                      badge={badge}
+                      onClick={setSelectedBadge}
                     />
                   ))}
+                </div>
+              )}
+            </div>
 
-                  {codolioCertificates.map((cert, index) => {
-                    const meta = PLATFORM_META[cert.platform] || { label: cert.platform };
-                    return (
-                      <XCard
-                        key={cert.id || `cert-${index}`}
-                        authorName={cert.name || 'Certificate'}
-                        authorHandle={`@${cert.platform || 'codolio'}`}
-                        authorImage={cert.imageUrl || null}
-                        content={[`Verified ${cert.type || 'certificate'} from ${meta.label}.`]}
-                        timestamp=""
-                        isVerified={true}
-                      />
-                    );
-                  })}
+            {/* ── 7. VERIFIED CERTIFICATES SHOWCASE ──────────────────────────── */}
+            <div className="w-full mt-12 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                    <span>Verified Certifications</span>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
+                      {credlyBadges.length + codolioCertificates.length}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Industry-recognized certifications cryptographically verified through platforms.
+                  </p>
                 </div>
               </div>
 
+              {credlyBadges.length === 0 && codolioCertificates.length === 0 && (
+                <div className="py-10 text-center text-slate-400 text-sm border border-dashed border-white/10 rounded-2xl">
+                  No verified certificates yet. Connect your Credly or HackerRank account to populate official badges here.
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 w-full">
+                {/* Credly Verified Certificates */}
+                {credlyBadges.map((badge) => (
+                  <div
+                    key={badge.id}
+                    className="group rounded-2xl bg-[#0e0f14] border border-white/10 hover:border-white/25 p-5 shadow-lg transition-all duration-200 flex flex-col justify-between"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-black/60 border border-white/10 p-2 flex items-center justify-center shrink-0">
+                        {badge.image ? (
+                          <img
+                            src={badge.image}
+                            alt={badge.name}
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <Award className="w-8 h-8 text-amber-400" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
+                            {badge.name}
+                          </h4>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                            <CheckCircle className="w-3 h-3" /> Credly
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                          {badge.description || `Issued by ${badge.issuer || 'Accredited Authority'}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {badge.skills?.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-1.5 pt-3 border-t border-white/5">
+                        {badge.skills.slice(0, 5).map((skill, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 text-[11px] text-slate-300 border border-white/5">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Codolio Platform Certificates */}
+                {codolioCertificates.map((cert, index) => {
+                  const meta = PLATFORM_META[cert.platform] || { label: cert.platform, color: '#06b6d4' };
+                  return (
+                    <div
+                      key={cert.id || index}
+                      className="group rounded-2xl bg-[#0e0f14] border border-white/10 hover:border-white/25 p-5 shadow-lg transition-all duration-200 flex flex-col justify-between"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-14 h-14 rounded-xl bg-black/60 border border-white/10 p-2 flex items-center justify-center shrink-0">
+                          {cert.imageUrl ? (
+                            <img
+                              src={cert.imageUrl}
+                              alt={cert.name}
+                              className="w-full h-full object-contain"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          ) : (
+                            <ShieldCheck className="w-8 h-8" style={{ color: meta.color }} />
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
+                              {cert.name || 'Verified Certificate'}
+                            </h4>
+                            <span
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-white/10"
+                              style={{ backgroundColor: `${meta.color}15`, color: meta.color }}
+                            >
+                              <CheckCircle className="w-3 h-3" /> {meta.label}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-slate-400 mt-1">
+                            Verified {cert.type || 'credential'} issued through {meta.label}.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+
           </div>
         </div>
       </div>
+
+      {/* ── Badge Detail Modal ────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedBadge && (
+          <BadgeDetailModal
+            badge={selectedBadge}
+            onClose={() => setSelectedBadge(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
