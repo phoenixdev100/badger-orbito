@@ -65,6 +65,32 @@ const PLATFORM_COLORS = {
   atcoder:       '#7B7B7B',
 };
 
+// Generate direct profile URL for each coding platform based on user handle
+const getProfileUrl = (platform, handle) => {
+  if (!handle) return null;
+  const h = encodeURIComponent(String(handle).trim());
+  switch (platform?.toLowerCase()) {
+    case 'leetcode':
+      return `https://leetcode.com/u/${h}/`;
+    case 'codechef':
+      return `https://www.codechef.com/users/${h}`;
+    case 'codestudio':
+      return `https://www.naukri.com/code360/profile/${h}`;
+    case 'hackerrank':
+      return `https://www.hackerrank.com/profile/${h}`;
+    case 'geeksforgeeks':
+      return `https://www.geeksforgeeks.org/user/${h}/`;
+    case 'codeforces':
+      return `https://codeforces.com/profile/${h}`;
+    case 'atcoder':
+      return `https://atcoder.jp/users/${h}`;
+    case 'credly':
+      return `https://www.credly.com/users/${h}`;
+    default:
+      return null;
+  }
+};
+
 // Count unique active days from the submissionCalendar object
 const countActiveDaysFromCalendar = (calendar) => {
   if (!calendar || typeof calendar !== 'object') return 0;
@@ -166,9 +192,20 @@ export const fetchCodolioData = async (userKey) => {
       const hardCount       = profile.totalQuestionStats?.hardQuestionCounts  || 0;
 
       // ── Active days ───────────────────────────────────────────────────────
-      const calendar        = profile.dailyActivityStatsResponse?.submissionCalendar;
+      let rawCalendar = profile.dailyActivityStatsResponse?.submissionCalendar;
+      let parsedCalendar = null;
+      if (typeof rawCalendar === 'string') {
+        try {
+          parsedCalendar = JSON.parse(rawCalendar);
+        } catch (e) {
+          parsedCalendar = null;
+        }
+      } else if (rawCalendar && typeof rawCalendar === 'object') {
+        parsedCalendar = rawCalendar;
+      }
+
       const activeDaysApi   = profile.dailyActivityStatsResponse?.totalActiveDays;
-      const activeDays      = activeDaysApi != null ? activeDaysApi : countActiveDaysFromCalendar(calendar);
+      const activeDays      = activeDaysApi != null ? activeDaysApi : countActiveDaysFromCalendar(parsedCalendar);
 
       // ── Contest stats ─────────────────────────────────────────────────────
       const rawContestList  = profile.contestActivityStats?.contestActivityList || [];
@@ -204,9 +241,14 @@ export const fetchCodolioData = async (userKey) => {
       totalQuestionsSolved += questionsSolved;
       totalActiveDays      += activeDays;
 
+      const handle = us?.handle || profile.platformUserName || profile.username || profile.handle || profile.userName || null;
+      const profileUrl = profile.profileUrl || profile.url || getProfileUrl(platform, handle);
+
       return {
         platform,
         platformColor: color,
+        handle,
+        profileUrl,
         badges,
         certificates,
         userStats,
@@ -219,7 +261,18 @@ export const fetchCodolioData = async (userKey) => {
         contestList,            // sorted contest history for rating graph
         contestRating: userStats?.currentRating || null,
         maxRating:     userStats?.maxRating     || null,
+        submissionCalendar: parsedCalendar      || null,
       };
+    });
+
+    // Merge calendars from all platforms
+    const combinedCalendar = {};
+    processedPlatforms.forEach((p) => {
+      if (p.submissionCalendar && typeof p.submissionCalendar === 'object') {
+        Object.entries(p.submissionCalendar).forEach(([ts, count]) => {
+          combinedCalendar[ts] = (combinedCalendar[ts] || 0) + (Number(count) || 0);
+        });
+      }
     });
 
     // Fallback top skill: platform with most questions if HackerRank not connected
@@ -244,6 +297,7 @@ export const fetchCodolioData = async (userKey) => {
         contestBreakdown,
         topSkill,
         topSkillStars,
+        submissionCalendar: combinedCalendar,
       },
     };
   } catch (err) {

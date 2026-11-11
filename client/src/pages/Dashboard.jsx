@@ -57,6 +57,48 @@ const PLATFORM_META = {
   credly:        { label: 'Credly',        color: '#FF6B00', bg: '#FF6B0018', url: 'https://credly.com' },
 };
 
+// Resolve the user's authentic profile URL for a linked platform
+function getPlatformProfileUrl(platform, p, userPlatforms = {}, platformData = {}) {
+  if (p?.profileUrl) return p.profileUrl;
+
+  const handle =
+    p?.handle ||
+    p?.userStats?.handle ||
+    userPlatforms?.[platform] ||
+    platformData?.userPlatforms?.[platform] ||
+    (platform === 'credly' ? userPlatforms?.credly || platformData?.credly?.username : null) ||
+    (platform === 'leetcode' ? userPlatforms?.leetcode || platformData?.leetcode?.username : null) ||
+    (platform === 'codolio' ? userPlatforms?.codolio || platformData?.codolio?.username : null);
+
+  if (handle) {
+    const h = encodeURIComponent(String(handle).trim());
+    switch (platform?.toLowerCase()) {
+      case 'leetcode':
+        return `https://leetcode.com/u/${h}/`;
+      case 'codechef':
+        return `https://www.codechef.com/users/${h}`;
+      case 'codestudio':
+        return `https://www.naukri.com/code360/profile/${h}`;
+      case 'hackerrank':
+        return `https://www.hackerrank.com/profile/${h}`;
+      case 'geeksforgeeks':
+        return `https://www.geeksforgeeks.org/user/${h}/`;
+      case 'codeforces':
+        return `https://codeforces.com/profile/${h}`;
+      case 'atcoder':
+        return `https://atcoder.jp/users/${h}`;
+      case 'credly':
+        return `https://www.credly.com/users/${h}`;
+      case 'codolio':
+        return `https://codolio.com/profile/${h}`;
+      default:
+        break;
+    }
+  }
+
+  return PLATFORM_META[platform]?.url || '#';
+}
+
 // ─── Smart Topic & Badge Icon Resolver ───────────────────────────────────────
 // If no image icon exists (or fails to load), maps topic keywords to glowing vector emblems
 function renderTopicIcon(title = '', meta) {
@@ -390,9 +432,10 @@ const BadgeCard = ({ badge, onClick }) => {
 };
 
 // ─── Badge Inspection Modal ─────────────────────────────────────────────────
-const BadgeDetailModal = ({ badge, onClose }) => {
+const BadgeDetailModal = ({ badge, onClose, userPlatforms, platformData }) => {
   if (!badge) return null;
   const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Platform', color: '#06b6d4' };
+  const platformUrl = badge.platformUrl || getPlatformProfileUrl(badge.platform, badge, userPlatforms, platformData);
   const [imgError, setImgError] = useState(false);
 
   return (
@@ -471,14 +514,14 @@ const BadgeDetailModal = ({ badge, onClose }) => {
             <span className="flex items-center gap-1.5 text-emerald-400">
               <CheckCircle className="w-3.5 h-3.5" /> Authenticated via Orbito
             </span>
-            {meta.url && (
+            {(platformUrl || meta.url) && (
               <a
-                href={meta.url}
+                href={platformUrl || meta.url}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-white transition-colors flex items-center gap-1"
               >
-                View Platform <ExternalLink className="w-3 h-3" />
+                View Platform Profile <ExternalLink className="w-3 h-3" />
               </a>
             )}
           </div>
@@ -494,6 +537,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [platformData, setPlatformData] = useState(null);
+  const [userPlatforms, setUserPlatforms] = useState({});
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
@@ -516,14 +560,17 @@ const Dashboard = () => {
       });
       if (response.data.success) {
         setPlatformData(response.data.data || {});
+        setUserPlatforms(response.data.userPlatforms || response.data.data?.userPlatforms || {});
         if (isSync) toast.success('Platforms synchronized successfully!');
       } else {
         setPlatformData({});
+        setUserPlatforms({});
       }
     } catch (err) {
       console.error('Failed to fetch platform data:', err);
       setError('Failed to load platform data');
       setPlatformData({});
+      setUserPlatforms({});
     } finally {
       setLoading(false);
       setSyncing(false);
@@ -547,7 +594,20 @@ const Dashboard = () => {
   const codolioplatforms = codolio.platforms || [];
   const credlyBadges     = platformData?.credly?.badges || [];
 
-  const connectedPlatforms = Object.keys(platformData || {}).length;
+  // Count only genuine connected platforms that have actual verified data
+  const TRACKED_PLATFORM_KEYS = ['codolio', 'credly', 'leetcode', 'codechef', 'codestudio'];
+  const connectedPlatforms = useMemo(() => {
+    if (!platformData) return 0;
+    return TRACKED_PLATFORM_KEYS.filter((key) => {
+      const val = platformData[key];
+      if (!val) return false;
+      if (Array.isArray(val.platforms) && val.platforms.length > 0) return true;
+      if (Array.isArray(val.badges) && val.badges.length > 0) return true;
+      if (val.totalQuestions != null || val.questionsSolved != null) return true;
+      if (val.username || val.badgeCount > 0) return true;
+      return false;
+    }).length;
+  }, [platformData]);
   const totalBadges       = (codolioSummary.totalBadges || 0) + (platformData?.credly?.badgeCount || 0);
   const totalCertificates = (codolioSummary.totalCertificates || 0) + credlyBadges.length;
   const totalQuestions    = codolioSummary.totalQuestionsSolved || 0;
@@ -671,7 +731,9 @@ const Dashboard = () => {
                         Level {devLevel} · {devTitle}
                       </span>
                       <span className="text-slate-600">•</span>
-                      <span className="text-slate-400">{connectedPlatforms} Platforms Connected</span>
+                      <span className="text-slate-400">
+                        {connectedPlatforms} {connectedPlatforms === 1 ? 'Platform' : 'Platforms'} Connected
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -718,6 +780,8 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 w-full">
                 {codolioplatforms.map((p) => {
                   const meta = PLATFORM_META[p.platform] || { label: p.platform, color: '#06b6d4', url: '#' };
+                  const targetUrl = getPlatformProfileUrl(p.platform, p, userPlatforms, platformData);
+                  const handle = p.handle || p.userStats?.handle || userPlatforms?.[p.platform] || platformData?.userPlatforms?.[p.platform];
                   return (
                     <div
                       key={p.platform}
@@ -733,11 +797,11 @@ const Dashboard = () => {
                         </p>
                       </div>
                       <a
-                        href={meta.url}
+                        href={targetUrl}
                         target="_blank"
                         rel="noreferrer"
                         className="text-slate-500 hover:text-white transition-colors p-1"
-                        title={`Open ${meta.label}`}
+                        title={handle ? `Open ${meta.label} Profile (@${handle})` : `Open ${meta.label}`}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
@@ -758,11 +822,11 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <a
-                      href="https://credly.com"
+                      href={getPlatformProfileUrl('credly', null, userPlatforms, platformData)}
                       target="_blank"
                       rel="noreferrer"
                       className="text-slate-500 hover:text-white transition-colors p-1"
-                      title="Open Credly"
+                      title={userPlatforms?.credly || platformData?.userPlatforms?.credly ? `Open Credly Profile (@${userPlatforms?.credly || platformData?.userPlatforms?.credly})` : "Open Credly"}
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
@@ -800,7 +864,7 @@ const Dashboard = () => {
 
             {/* ── 5. CONTEST RATINGS & PERFORMANCE CHART ──────────────────────── */}
             <div className="w-full mt-8">
-              <ContestRatingSection platforms={codolioplatforms} loading={loading} />
+              <ContestRatingSection platforms={codolioplatforms} summary={codolioSummary} loading={loading} />
             </div>
 
             {/* ── 6. ENTERPRISE TROPHY ROOM / BADGES SHOWCASE ─────────────────── */}
@@ -1018,6 +1082,8 @@ const Dashboard = () => {
           <BadgeDetailModal
             badge={selectedBadge}
             onClose={() => setSelectedBadge(null)}
+            userPlatforms={userPlatforms}
+            platformData={platformData}
           />
         )}
       </AnimatePresence>

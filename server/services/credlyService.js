@@ -22,6 +22,7 @@ export const fetchCredlyData = async (username) => {
     }));
 
     return {
+      username,
       badges,
       badgeCount: badges.length,
       metadata: data?.metadata || null,
