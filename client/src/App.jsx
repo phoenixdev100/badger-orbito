@@ -2,15 +2,18 @@ import React, {useContext, useEffect} from 'react'
 import { Routes, Route, Navigate, useLocation} from 'react-router-dom'
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
+import Settings from './pages/Settings'
+import PublicProfile from './pages/PublicProfile'
 import Navbar from './components/Navbar'
 import Login from './components/Login'
 import { AppContext } from './context/AppContext'
 import Footer from './components/Footer'
 import AddPlatform from './pages/AddPlatform'
+import NavigationLoader from './components/NavigationLoader'
 
 const App = () => {
   const {showLogin, setShowLogin, isAuthenticated} = useContext(AppContext);
@@ -22,14 +25,15 @@ const App = () => {
 
   const isHomePage = pathname === '/';
   const isDashboard = pathname === '/dashboard';
-  const hassidebar = !isHomePage;
+  const isPublicProfile = pathname.startsWith('/u/') || pathname.startsWith('/profile/');
+  const hassidebar = !isHomePage && !isPublicProfile;
 
   return (
     <>
     <AnimatePresence>
       {showLogin && <Login onClose={() => setShowLogin(false)} />}
     </AnimatePresence>
-    <div className={`min-h-screen ${hassidebar ? 'bg-black' : 'bg-gradient-to-b from-teal-50 to-orange-50'}`}> 
+    <div className={`min-h-screen ${hassidebar || isPublicProfile ? 'bg-black' : 'bg-gradient-to-b from-teal-50 to-orange-50'}`}> 
     <ToastContainer
       position="bottom-right"
       autoClose={3000}
@@ -72,13 +76,26 @@ const App = () => {
       }}
       style={{ zIndex: 99999 }}
     />
+    {/* Global top progress & navigation loader */}
+    <NavigationLoader />
+
     {isHomePage && <Navbar />}
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />} />
-        <Route path='/addPlatform' element={isAuthenticated ? <AddPlatform /> : <Navigate to="/" replace />} />
-      </Routes>
-      <Footer />
+      <motion.div
+        key={pathname}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+      >
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/dashboard' element={isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />} />
+          <Route path='/addPlatform' element={isAuthenticated ? <AddPlatform /> : <Navigate to="/" replace />} />
+          <Route path='/settings' element={isAuthenticated ? <Settings /> : <Navigate to="/" replace />} />
+          <Route path='/u/:username' element={<PublicProfile />} />
+          <Route path='/profile/:username' element={<PublicProfile />} />
+        </Routes>
+      </motion.div>
+      {!isPublicProfile && <Footer />}
     </div>
     </>
   )

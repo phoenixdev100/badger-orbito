@@ -79,7 +79,7 @@ const SlideTabs = ({ onAuthClick, authLabel, isDashboard }) => {
         <>
           <Tab setPosition={setPosition} to="/dashboard">HOME</Tab>
           <Tab setPosition={setPosition} to="/dashboard#features">Features</Tab>
-          <Tab setPosition={setPosition} to="/dashboard#profile">Profile Settings</Tab>
+          <Tab setPosition={setPosition} to="/settings">Profile Settings</Tab>
         </>
       ) : (
         <>
