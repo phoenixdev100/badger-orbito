@@ -142,7 +142,7 @@ const GradientBlobCard: React.FC<GradientBlobCardProps> = ({
         {/* Card 4: Coding Momentum */}
         <BentoStatCard
           title="Active Momentum"
-          value={totalActiveDays > 0 ? `${totalActiveDays}d` : "Active"}
+          value={totalActiveDays > 0 ? `${totalActiveDays} days` : "Active"}
           subtitle="Consistent problem solver"
           icon={<Flame className="w-5 h-5" />}
           gradient="from-fuchsia-500 to-indigo-600"
