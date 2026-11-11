@@ -1,53 +1,78 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
+import { Award, Code2, Flame, Layers, ShieldCheck, Sparkles, Trophy } from "lucide-react";
 
-interface StatCardProps {
+interface BentoStatCardProps {
   title: string;
   value: string | number;
-  subtitle?: string;
-  gradientColors: string;
-  delay: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  gradient: string;
+  accentColor: string;
+  tag?: string;
   loading?: boolean;
 }
 
-const StatCard: React.FC<StatCardProps> = ({
+const BentoStatCard: React.FC<BentoStatCardProps> = ({
   title,
   value,
   subtitle,
-  gradientColors,
-  delay,
+  icon,
+  gradient,
+  accentColor,
+  tag,
   loading,
 }) => (
-  <div
-    className="relative flex-1 min-w-[160px] h-[110px] rounded-[14px] flex items-center justify-between px-5 py-4
-               shadow-[8px_8px_24px_#111,-8px_-8px_24px_#222] overflow-hidden shrink-0"
+  <motion.div
+    whileHover={{ y: -4, scale: 1.01 }}
+    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+    className="relative group rounded-2xl bg-[#0c0d12]/90 border border-white/10 hover:border-white/20 p-5 md:p-6 shadow-xl backdrop-blur-xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
   >
-    {/* Glassy background */}
-    <div className="absolute inset-[3px] bg-black/70 backdrop-blur-[24px] rounded-[10px] outline-1 outline-gray-700 z-10" />
-
-    {/* Animated gradient blob */}
+    {/* Subtle ambient hover glow */}
     <div
-      className={`absolute top-1/2 left-1/2 w-[80px] h-[80px] rounded-full opacity-80
-                  filter blur-[8px] z-0 animate-blob bg-gradient-to-r ${gradientColors}`}
-      style={{ animationDelay: delay }}
+      className={`pointer-events-none absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 bg-gradient-to-br ${gradient}`}
     />
 
-    {/* Content */}
-    <div className="relative z-20 flex items-center justify-between w-full gap-2">
-      <div className="min-w-0">
-        <h3 className="text-white text-sm font-bold leading-tight truncate">{title}</h3>
-        {subtitle && <p className="text-gray-400 text-xs mt-0.5 truncate">{subtitle}</p>}
+    {/* Top Row: Icon + Tag */}
+    <div className="relative z-10 flex items-center justify-between gap-3 mb-4">
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 shadow-inner"
+        style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+      >
+        {icon}
       </div>
-      <div className="text-white text-xl font-bold shrink-0">
+
+      {tag && (
+        <span
+          className="px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-wide border border-white/10"
+          style={{ backgroundColor: `${accentColor}12`, color: accentColor }}
+        >
+          {tag}
+        </span>
+      )}
+    </div>
+
+    {/* Content */}
+    <div className="relative z-10">
+      <p className="text-xs uppercase tracking-wider font-semibold text-slate-400 mb-1">
+        {title}
+      </p>
+
+      <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">
         {loading ? (
-          <span className="inline-block w-8 h-5 bg-white/10 rounded animate-pulse" />
+          <span className="inline-block w-20 h-8 bg-white/10 rounded animate-pulse" />
         ) : (
-          value ?? "-"
+          value ?? 0
         )}
       </div>
+
+      <p className="text-xs text-slate-400 mt-1.5 line-clamp-1">
+        {subtitle}
+      </p>
     </div>
-  </div>
+  </motion.div>
 );
 
 interface GradientBlobCardProps {
@@ -62,88 +87,70 @@ interface GradientBlobCardProps {
 }
 
 const GradientBlobCard: React.FC<GradientBlobCardProps> = ({
-  totalBadges,
+  totalBadges = 0,
   topSkill,
   topSkillStars,
-  connectedPlatforms,
-  totalCertificates,
-  totalQuestions,
-  totalActiveDays,
+  connectedPlatforms = 0,
+  totalCertificates = 0,
+  totalQuestions = 0,
+  totalActiveDays = 0,
   loading = false,
 }) => {
-  const stats = [
-    {
-      title: "Total Badges",
-      value: totalBadges ?? 0,
-      gradientColors: "from-purple-500 via-purple-600 to-purple-700",
-      delay: "0s",
-    },
-    {
-      title: "Top Skill",
-      subtitle: topSkill || "-",
-      value: topSkillStars != null ? `${topSkillStars}★` : topSkill ? "✓" : "-",
-      gradientColors: "from-yellow-500 via-orange-500 to-red-500",
-      delay: "0.4s",
-    },
-    {
-      title: "Platforms",
-      subtitle: "Connected",
-      value: connectedPlatforms ?? 0,
-      gradientColors: "from-pink-500 via-rose-500 to-red-600",
-      delay: "0.8s",
-    },
-    {
-      title: "Certifications",
-      subtitle: "Earned",
-      value: totalCertificates ?? 0,
-      gradientColors: "from-green-500 via-emerald-500 to-teal-600",
-      delay: "1.2s",
-    },
-    {
-      title: "Total Questions",
-      subtitle: "Solved",
-      value: totalQuestions ?? 0,
-      gradientColors: "from-blue-500 via-cyan-500 to-sky-600",
-      delay: "1.6s",
-    },
-    {
-      title: "Active Days",
-      subtitle: "All time",
-      value: totalActiveDays ?? 0,
-      gradientColors: "from-indigo-500 via-violet-500 to-purple-600",
-      delay: "2s",
-    },
-  ];
-
   return (
-    <div className="mb-8">
-      {/* Single scrollable row - all 6 cards always in one line */}
-      <div className="flex flex-row gap-3 overflow-x-auto pb-2 scrollbar-none">
-        {stats.map((stat, index) => (
-          <StatCard
-            key={index}
-            title={stat.title}
-            value={stat.value}
-            subtitle={stat.subtitle}
-            gradientColors={stat.gradientColors}
-            delay={stat.delay}
-            loading={loading}
-          />
-        ))}
-      </div>
+    <div className="w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Problems Solved */}
+        <BentoStatCard
+          title="Problems Solved"
+          value={totalQuestions.toLocaleString()}
+          subtitle="Across coding platforms"
+          icon={<Code2 className="w-5 h-5" />}
+          gradient="from-cyan-500 to-blue-600"
+          accentColor="#06b6d4"
+          tag="Global"
+          loading={loading}
+        />
 
-      <style>{`
-        @keyframes blob {
-          0%   { transform: translate(-100%, -100%); }
-          25%  { transform: translate(0%,   -100%); }
-          50%  { transform: translate(0%,    0%);   }
-          75%  { transform: translate(-100%, 0%);   }
-          100% { transform: translate(-100%, -100%);}
-        }
-        .animate-blob { animation: blob 5s linear infinite; }
-        .scrollbar-none::-webkit-scrollbar { display: none; }
-        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+        {/* Card 2: Total Badges */}
+        <BentoStatCard
+          title="Verified Badges"
+          value={totalBadges}
+          subtitle={
+            topSkill
+              ? `Top: ${topSkill} ${topSkillStars != null ? `(${topSkillStars}★)` : ""}`
+              : "Coding badges & honors"
+          }
+          icon={<Trophy className="w-5 h-5" />}
+          gradient="from-amber-500 to-orange-600"
+          accentColor="#f59e0b"
+          tag={topSkill ? "Skill Verified" : "Awards"}
+          loading={loading}
+        />
+
+        {/* Card 3: Certifications */}
+        <BentoStatCard
+          title="Certifications"
+          value={totalCertificates}
+          subtitle={`${connectedPlatforms} verified ${connectedPlatforms === 1 ? "platform" : "platforms"}`}
+          icon={<ShieldCheck className="w-5 h-5" />}
+          gradient="from-emerald-500 to-teal-600"
+          accentColor="#10b981"
+          tag="Verified"
+          loading={loading}
+        />
+
+        {/* Card 4: Coding Momentum */}
+        <BentoStatCard
+          title="Active Momentum"
+          value={totalActiveDays > 0 ? `${totalActiveDays}d` : "Active"}
+          subtitle="Consistent problem solver"
+          icon={<Flame className="w-5 h-5" />}
+          gradient="from-fuchsia-500 to-indigo-600"
+          accentColor="#d946ef"
+          tag="Streak"
+          loading={loading}
+        />
+      </div>
     </div>
   );
 };
