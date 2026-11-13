@@ -14,6 +14,7 @@ import { AppContext } from './context/AppContext'
 import Footer from './components/Footer'
 import AddPlatform from './pages/AddPlatform'
 import NavigationLoader from './components/NavigationLoader'
+import NotFound from './pages/NotFound'
 
 const App = () => {
   const {showLogin, setShowLogin, isAuthenticated} = useContext(AppContext);
@@ -93,6 +94,7 @@ const App = () => {
           <Route path='/settings' element={isAuthenticated ? <Settings /> : <Navigate to="/" replace />} />
           <Route path='/u/:username' element={<PublicProfile />} />
           <Route path='/profile/:username' element={<PublicProfile />} />
+          <Route path='*' element={<NotFound />} />
         </Routes>
       </motion.div>
       {!isPublicProfile && <Footer />}

@@ -17,7 +17,7 @@ const AppContextProvider = (props) => {
     const [token, setToken] = useState(localStorage.getItem('token'))
     const [platformData, setPlatformData] = useState(null);
 
-    const backendUrl = import.meta.env.VITE_BASE_URL
+    const backendUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
 
     const navigate = useNavigate()
 
