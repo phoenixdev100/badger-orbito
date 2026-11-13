@@ -2,13 +2,15 @@ import axios from 'axios';
 
 export const verifyCodeChefOwnership = async (username, verificationCode) => {
   try {
-    const url = `https://www.codechef.com/users/${username}`;
-    const { data } = await axios.get(url);
+    const safeUsername = encodeURIComponent(String(username).trim());
+    const url = `https://www.codechef.com/users/${safeUsername}`;
+    const { data } = await axios.get(url, {
+      timeout: 10000,
+      headers: { 'User-Agent': 'Orbito-Portfolio-Engine/1.0' }
+    });
     
-    // Check if verification code exists in the profile HTML
-    // This could be in bio, name, or other profile fields
-    const htmlContent = data.toLowerCase();
-    const codeToFind = verificationCode.toLowerCase();
+    const htmlContent = String(data).toLowerCase();
+    const codeToFind = String(verificationCode).toLowerCase();
     
     return htmlContent.includes(codeToFind);
   } catch (err) {
