@@ -2,8 +2,12 @@ import axios from 'axios';
 
 export const fetchCredlyData = async (username) => {
   try {
-    const url = `https://www.credly.com/users/${username}/badges.json`;
-    const { data } = await axios.get(url);
+    const safeUsername = encodeURIComponent(String(username).trim());
+    const url = `https://www.credly.com/users/${safeUsername}/badges.json`;
+    const { data } = await axios.get(url, {
+      timeout: 10000,
+      headers: { 'User-Agent': 'Orbito-Portfolio-Engine/1.0' }
+    });
 
     const badgesArray = Array.isArray(data?.data) ? data.data : [];
 
@@ -39,13 +43,15 @@ export const fetchCredlyData = async (username) => {
 
 export const verifyCredlyOwnership = async (username, verificationCode) => {
   try {
-    const url = `https://www.credly.com/users/${username}/badges#credly`;
-    const { data } = await axios.get(url);
+    const safeUsername = encodeURIComponent(String(username).trim());
+    const url = `https://www.credly.com/users/${safeUsername}/badges#credly`;
+    const { data } = await axios.get(url, {
+      timeout: 10000,
+      headers: { 'User-Agent': 'Orbito-Portfolio-Engine/1.0' }
+    });
     
-    // Check if verification code exists in the profile HTML
-    // This could be in bio, name, or other profile fields
-    const htmlContent = data.toLowerCase();
-    const codeToFind = verificationCode.toLowerCase();
+    const htmlContent = String(data).toLowerCase();
+    const codeToFind = String(verificationCode).toLowerCase();
     
     return htmlContent.includes(codeToFind);
   } catch (err) {

@@ -152,13 +152,14 @@ const countActiveDaysFromCalendar = (calendar) => {
 
 export const verifyCodolioOwnership = async (userKey, verificationCode) => {
   try {
-    const url = `https://api.codolio.com/profile?userKey=${userKey}`;
-    console.log('Fetching Codolio profile:', url);
+    const safeKey = encodeURIComponent(String(userKey).trim());
+    const url = `https://api.codolio.com/profile?userKey=${safeKey}`;
     const { data } = await axios.get(url, {
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      timeout: 10000,
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'User-Agent': 'Orbito-Portfolio-Engine/1.0' },
     });
     const profileData = JSON.stringify(data).toLowerCase();
-    return profileData.includes(verificationCode.toLowerCase());
+    return profileData.includes(String(verificationCode).toLowerCase());
   } catch (err) {
     console.error('Codolio verification error:', err.message);
     return false;
@@ -167,11 +168,12 @@ export const verifyCodolioOwnership = async (userKey, verificationCode) => {
 
 export const fetchCodolioData = async (userKey) => {
   try {
-    const url = `https://api.codolio.com/profile?userKey=${userKey}`;
-    console.log('Fetching Codolio data for user:', url);
+    const safeKey = encodeURIComponent(String(userKey).trim());
+    const url = `https://api.codolio.com/profile?userKey=${safeKey}`;
 
     const { data } = await axios.get(url, {
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      timeout: 10000,
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'User-Agent': 'Orbito-Portfolio-Engine/1.0' },
     });
 
     const platformProfiles = data?.data?.platformProfiles?.platformProfiles || [];
