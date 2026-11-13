@@ -18,6 +18,11 @@ export const linkPlatform = async (req, res) => {
     if (!['credly', 'leetcode', 'codechef', 'codestudio', 'codolio'].includes(platform))
       return res.status(400).json({ success: false, message: 'Invalid platform' });
 
+    if (!username || typeof username !== 'string' || !username.trim()) {
+      return res.status(400).json({ success: false, message: 'Platform username or identifier is required' });
+    }
+    const cleanUsername = username.trim();
+
     // ── Mutual-exclusivity: Codolio ↔ individual platforms ─────────────────
     if (platform === 'codolio') {
       // Trying to connect Codolio → block if any tracked platform is already verified
@@ -49,7 +54,7 @@ export const linkPlatform = async (req, res) => {
     const verificationCode = 'ORBITO' + randomLetters;
 
     user.platforms[platform] = {
-      username,
+      username: cleanUsername,
       verified: false,
       verificationCode,
       isPublic: user.platforms[platform]?.isPublic ?? true, // preserve existing flag
@@ -215,6 +220,7 @@ export const updatePlatformVisibility = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     if (!['credly', 'leetcode', 'codechef', 'codestudio', 'codolio'].includes(platform))
       return res.status(400).json({ success: false, message: 'Invalid platform' });
+
     if (typeof isPublic !== 'boolean')
       return res.status(400).json({ success: false, message: 'isPublic must be a boolean' });
 

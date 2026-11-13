@@ -5,6 +5,9 @@ import { fetchCredlyData } from '../services/credlyService.js';
 import { fetchLeetCodeData } from '../services/leetcodeService.js';
 import { fetchCodolioData } from '../services/codolioService.js';
 
+// Helper: Escape special regex characters to prevent ReDoS / NoSQL injection
+const escapeRegex = (str = '') => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Helper: Format safe user object for client response
 const formatSafeUser = (user) => ({
     name:                  user.name,
@@ -48,21 +51,31 @@ const registerUser = async (req, res) => {
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
-            return res.json({ success: false, message: "Missing details" });
+            return res.status(400).json({ success: false, message: "Missing required details (name, email, password)" });
         }
 
-        const existingUser = await userModel.findOne({ email });
+        const normalizedEmail = String(email).trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({ success: false, message: "Please provide a valid email address" });
+        }
+
+        if (typeof password !== 'string' || password.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+        }
+
+        const existingUser = await userModel.findOne({ email: normalizedEmail });
         if (existingUser) {
-            return res.json({ success: false, message: "User with this email already exists" });
+            return res.status(409).json({ success: false, message: "User with this email already exists" });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const username = await generateUniqueUsername(email);
+        const username = await generateUniqueUsername(normalizedEmail);
 
         const userData = {
-            name,
-            email,
+            name: String(name).trim(),
+            email: normalizedEmail,
             password: hashedPassword,
             username,
             isProfilePublic: true,
@@ -71,21 +84,27 @@ const registerUser = async (req, res) => {
         const newUser = new userModel(userData);
         const user = await newUser.save();
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-        res.json({ success: true, token, user: formatSafeUser(user) });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.status(201).json({ success: true, token, user: formatSafeUser(user) });
     } catch (error) {
         console.error('Registration error:', error);
-        res.json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Registration failed. Please try again.' });
     }
 };
 
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await userModel.findOne({ email }).exec();
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email and password are required' });
+        }
+
+        const normalizedEmail = String(email).trim().toLowerCase();
+        const user = await userModel.findOne({ email: normalizedEmail }).exec();
 
         if (!user) {
-            return res.json({ success: false, message: 'User does not exist' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -97,14 +116,14 @@ const loginUser = async (req, res) => {
                 await user.save();
             }
 
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
             res.json({ success: true, token, user: formatSafeUser(user) });
         } else {
-            return res.json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
     } catch (error) {
         console.error('Login error:', error);
-        res.json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
     }
 };
 
@@ -221,9 +240,9 @@ const getPublicProfile = async (req, res) => {
         const clean = username.trim().toLowerCase();
         let user = await userModel.findOne({ username: clean });
 
-        // Fallback: check email prefix
+        // Fallback: check email prefix safely using escaped regex to prevent ReDoS
         if (!user) {
-            user = await userModel.findOne({ email: new RegExp(`^${clean}@`, 'i') });
+            user = await userModel.findOne({ email: new RegExp(`^${escapeRegex(clean)}@`, 'i') });
         }
 
         if (!user) {
