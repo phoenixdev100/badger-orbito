@@ -706,6 +706,10 @@ const Dashboard = () => {
   const { backendUrl, token, user } = useContext(AppContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.title = 'Dashboard | Orbito';
+  }, []);
+
   const [platformData, setPlatformData] = useState(null);
   const [userPlatforms, setUserPlatforms] = useState({});
   const [loading, setLoading] = useState(false);

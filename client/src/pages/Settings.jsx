@@ -6,7 +6,6 @@ import {
   User,
   Shield,
   Layers,
-  Bell,
   AlertTriangle,
   ArrowLeft,
   CheckCircle,
@@ -49,6 +48,10 @@ const PLATFORM_META = {
 
 const Settings = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Settings | Orbito';
+  }, []);
   const {
     user,
     setUser,
@@ -117,28 +120,6 @@ const Settings = () => {
   const [platforms, setPlatforms] = useState({});
   const [loadingPlatforms, setLoadingPlatforms] = useState(true);
   const [togglingPlatform, setTogglingPlatform] = useState(null);
-
-  // Notification preferences state (local storage backed)
-  const [notifPreferences, setNotifPreferences] = useState(() => {
-    try {
-      const saved = localStorage.getItem('orbito_notif_prefs');
-      return saved
-        ? JSON.parse(saved)
-        : {
-            ratingAlerts: true,
-            syncAlerts: true,
-            weeklyDigest: true,
-            publicProfile: true,
-          };
-    } catch {
-      return {
-        ratingAlerts: true,
-        syncAlerts: true,
-        weeklyDigest: true,
-        publicProfile: true,
-      };
-    }
-  });
 
   // Danger Zone dialog
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -232,16 +213,6 @@ const Settings = () => {
     }
   };
 
-  // Toggle notification preference
-  const togglePreference = (key) => {
-    setNotifPreferences((prev) => {
-      const updated = { ...prev, [key]: !prev[key] };
-      localStorage.setItem('orbito_notif_prefs', JSON.stringify(updated));
-      toast.success('Preferences updated');
-      return updated;
-    });
-  };
-
   // Copy shareable public link
   const copyProfileLink = () => {
     const url = `${window.location.origin}/dashboard`;
@@ -253,7 +224,6 @@ const Settings = () => {
     { id: 'profile', label: 'Profile & Identity', icon: User },
     { id: 'platforms', label: 'Connected Platforms', icon: Layers },
     { id: 'security', label: 'Security & Access', icon: Shield },
-    { id: 'preferences', label: 'Preferences & Alerts', icon: Bell },
     { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
   ];
 
@@ -717,91 +687,7 @@ const Settings = () => {
             </motion.div>
           )}
 
-          {/* ── TAB 4: PREFERENCES & ALERTS ───────────────────────────────── */}
-          {activeTab === 'preferences' && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-6"
-            >
-              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl space-y-5">
-                <div className="pb-5 border-b border-white/10">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-amber-400" />
-                    <span>Notification & Portfolio Preferences</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Control how Orbito alerts you on achievements, rating jumps, and platform synchronizations.
-                  </p>
-                </div>
-
-                <div className="divide-y divide-white/5">
-                  <div className="py-4 flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Contest Rating Alerts</p>
-                      <p className="text-xs text-slate-400">Receive notifications when your rating updates on LeetCode or CodeChef.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => togglePreference('ratingAlerts')}
-                      className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                        notifPreferences.ratingAlerts ? 'bg-cyan-500' : 'bg-white/20'
-                      }`}
-                    >
-                      <div
-                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                          notifPreferences.ratingAlerts ? 'translate-x-7' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="py-4 flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Realtime Sync Notifications</p>
-                      <p className="text-xs text-slate-400">Alerts when automated background aggregators verify new badges or activity.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => togglePreference('syncAlerts')}
-                      className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                        notifPreferences.syncAlerts ? 'bg-cyan-500' : 'bg-white/20'
-                      }`}
-                    >
-                      <div
-                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                          notifPreferences.syncAlerts ? 'translate-x-7' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="py-4 flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Weekly Developer Digest</p>
-                      <p className="text-xs text-slate-400">Receive a weekly summary email of your questions solved, badges, and momentum.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => togglePreference('weeklyDigest')}
-                      className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                        notifPreferences.weeklyDigest ? 'bg-cyan-500' : 'bg-white/20'
-                      }`}
-                    >
-                      <div
-                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                          notifPreferences.weeklyDigest ? 'translate-x-7' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── TAB 5: DANGER ZONE ────────────────────────────────────────── */}
+          {/* ── TAB 4: DANGER ZONE ────────────────────────────────────────── */}
           {activeTab === 'danger' && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
