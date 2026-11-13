@@ -1,0 +1,11 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /u/
+Allow: /profile/
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /addPlatform
+
+Sitemap: https://badger-orbito-frontend.vercel.app/sitemap.xml
+
