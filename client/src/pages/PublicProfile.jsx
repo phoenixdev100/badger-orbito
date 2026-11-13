@@ -223,7 +223,8 @@ const PublicProfile = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/user/public/${username}`);
+        const baseUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
+        const res = await axios.get(`${baseUrl}/api/user/public/${encodeURIComponent(username)}`);
         if (!isMounted) return;
 
         if (res.data?.success) {
@@ -248,6 +249,16 @@ const PublicProfile = () => {
     fetchPublicProfile();
     return () => { isMounted = false; };
   }, [username]);
+
+  // Dynamic SEO Title
+  useEffect(() => {
+    if (profileData?.user?.name || username) {
+      const displayName = profileData?.user?.name ? `${profileData.user.name} (@${username})` : `@${username}`;
+      document.title = `${displayName} — Developer Portfolio | Orbito`;
+    } else {
+      document.title = 'Developer Profile | Orbito';
+    }
+  }, [profileData, username]);
 
   // Aggregation
   const user = profileData?.user || {};
