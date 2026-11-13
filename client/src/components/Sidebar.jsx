@@ -60,7 +60,8 @@ const Sidebar = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/platforms/status`, {
+        const baseUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
+        const response = await axios.get(`${baseUrl}/api/platforms/status`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
