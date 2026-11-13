@@ -171,6 +171,10 @@ const PlatformRow = ({
 
 // ── Main Page ──────────────────────────────────────────────────────────────
 const AddPlatform = () => {
+  useEffect(() => {
+    document.title = 'Connect Platforms | Orbito';
+  }, []);
+
   const [usernames, setUsernames] = useState({
     credly: '', leetcode: '', codechef: '', codestudio: '', codolio: ''
   })

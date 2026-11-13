@@ -3,11 +3,14 @@ import * as cheerio from 'cheerio';
 
 export const fetchLeetCodeData = async (username) => {
   try {
-    const url = `https://leetcode.com/u/${username}/`;
-    const { data } = await axios.get(url);
+    const safeUsername = encodeURIComponent(String(username).trim());
+    const url = `https://leetcode.com/u/${safeUsername}/`;
+    const { data } = await axios.get(url, {
+      timeout: 10000,
+      headers: { 'User-Agent': 'Orbito-Portfolio-Engine/1.0' }
+    });
     const $ = cheerio.load(data);
 
-    // Example: extract badges or stats from the page (LeetCode doesn’t have public API)
     const badges = [];
     $('.badge-item').each((_, el) => {
       badges.push({
@@ -25,13 +28,15 @@ export const fetchLeetCodeData = async (username) => {
 
 export const verifyLeetCodeOwnership = async (username, verificationCode) => {
   try {
-    const url = `https://leetcode.com/u/${username}/`;
-    console.log(url);
-    const { data } = await axios.get(url);
-    console.log(data);
+    const safeUsername = encodeURIComponent(String(username).trim());
+    const url = `https://leetcode.com/u/${safeUsername}/`;
+    const { data } = await axios.get(url, {
+      timeout: 10000,
+      headers: { 'User-Agent': 'Orbito-Portfolio-Engine/1.0' }
+    });
     
-    const htmlContent = data.toLowerCase();
-    const codeToFind = verificationCode.toLowerCase();
+    const htmlContent = String(data).toLowerCase();
+    const codeToFind = String(verificationCode).toLowerCase();
     
     return htmlContent.includes(codeToFind);
   } catch (err) {

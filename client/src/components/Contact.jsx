@@ -55,7 +55,8 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/contact/submit`, formData);
+      const baseUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
+      const response = await axios.post(`${baseUrl}/api/contact/submit`, formData);
       
       if (response.data.success) {
         toast.success('Message sent successfully!');
