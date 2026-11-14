@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo } from 'react';
+import React, { useEffect, useState, useContext, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -51,6 +51,8 @@ import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
 
 // ─── Platform Metadata & Brand Accents ───────────────────────────────────────
+const TRACKED_PLATFORM_KEYS = ['codolio', 'credly', 'leetcode', 'codechef', 'codestudio'];
+
 const PLATFORM_META = {
   leetcode:      { label: 'LeetCode',      color: '#FFA116', bg: '#FFA11618', url: 'https://leetcode.com' },
   codechef:      { label: 'CodeChef',      color: '#6B3FA0', bg: '#6B3FA018', url: 'https://codechef.com' },
@@ -438,9 +440,9 @@ const BadgeCard = ({ badge, onClick }) => {
 
 // ─── Badge Inspection Modal ─────────────────────────────────────────────────
 const BadgeDetailModal = ({ badge, onClose }) => {
+  const [imgError, setImgError] = useState(false);
   if (!badge) return null;
   const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Platform', color: '#06b6d4' };
-  const [imgError, setImgError] = useState(false);
 
   return (
     <motion.div
@@ -529,9 +531,9 @@ const BadgeDetailModal = ({ badge, onClose }) => {
 // ─── Certificate Inspection Modal ───────────────────────────────────────────
 // ─── Certificate Inspection Modal (High-Resolution Enterprise Diploma) ──────
 const CertificateDetailModal = ({ cert, onClose, userName }) => {
+  const [imgError, setImgError] = useState(false);
   if (!cert) return null;
   const meta = PLATFORM_META[cert.platform] || { label: cert.platform || 'Platform', color: '#10b981' };
-  const [imgError, setImgError] = useState(false);
   const certImage = (cert.image || cert.imageUrl) && !imgError ? (cert.image || cert.imageUrl) : null;
 
   return (
@@ -717,7 +719,7 @@ const Dashboard = () => {
   const [userPlatforms, setUserPlatforms] = useState({});
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
 
   // Search states for Trophy Room (platform filter lives in AppContext so the
   // left sidebar platform icons can drive it)
@@ -734,7 +736,7 @@ const Dashboard = () => {
   }, [platformFilter]);
 
   // Fetch full developer achievements
-  const fetchData = async (isSync = false) => {
+  const fetchData = useCallback(async (isSync = false) => {
     if (!token) return;
     if (isSync) setSyncing(true);
     else setLoading(true);
@@ -761,11 +763,11 @@ const Dashboard = () => {
       setLoading(false);
       setSyncing(false);
     }
-  };
+  }, [backendUrl, token]);
 
   useEffect(() => {
     fetchData();
-  }, [backendUrl, token]);
+  }, [fetchData]);
 
   // Handle hash scrolling for quick section jumps
   useEffect(() => {
@@ -790,11 +792,10 @@ const Dashboard = () => {
   // ── Aggregation ──────────────────────────────────────────────────────────
   const codolio          = platformData?.codolio || {};
   const codolioSummary   = codolio.summary || {};
-  const codolioplatforms = codolio.platforms || [];
-  const credlyBadges     = platformData?.credly?.badges || [];
+  const codolioplatforms = useMemo(() => codolio.platforms || [], [codolio.platforms]);
+  const credlyBadges     = useMemo(() => platformData?.credly?.badges || [], [platformData]);
 
   // Count only genuine connected platforms that have actual verified data
-  const TRACKED_PLATFORM_KEYS = ['codolio', 'credly', 'leetcode', 'codechef', 'codestudio'];
   const connectedPlatforms = useMemo(() => {
     if (!platformData) return 0;
     return TRACKED_PLATFORM_KEYS.filter((key) => {
@@ -938,7 +939,7 @@ const Dashboard = () => {
                     </div>
 
                     <p className="text-xs sm:text-sm text-slate-400 mt-1 flex items-center gap-3 flex-wrap">
-                      <span className="font-mono text-cyan-400">@{user?.email?.split('@')[0] || 'orbito'}</span>
+                      <span className="font-mono text-cyan-400">@{user?.username || user?.customUsername || user?.email?.split('@')[0] || 'orbito'}</span>
                       <span className="text-slate-600">•</span>
                       <span className="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 text-xs font-medium">
                         Level {devLevel} · {devTitle}

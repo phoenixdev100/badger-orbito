@@ -10,11 +10,11 @@ import MeetTeam from '../components/MeetTeam'
 import FAQ from '../components/FAQ'
 import Contact from '../components/Contact'
 
+const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
+
 const Home = () => {
   const location = useLocation();
 
-  // Match Hero's color cycle exactly
-  const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
   const color = useMotionValue(COLORS_TOP[0]);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Home = () => {
       repeatType: 'mirror',
     });
     return () => controls.stop();
-  }, []);
+  }, [color]);
 
   const backgroundImage = useMotionTemplate`
     radial-gradient(60% 60% at 100% 100%, ${color} 0%, rgba(0,0,0,0) 60%),

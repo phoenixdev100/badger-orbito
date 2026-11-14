@@ -15,6 +15,15 @@ import {
   Share2,
 } from 'lucide-react';
 
+// Platform metadata with official logos
+const PLATFORM_LOGOS = {
+  leetcode:   { name: 'LeetCode',   logo: assets.leetcodeImage },
+  codechef:   { name: 'CodeChef',   logo: assets.codechefImage },
+  credly:     { name: 'Credly',     logo: assets.credlyImage },
+  codestudio: { name: 'CodeStudio', logo: assets.codestudioImage },
+  codolio:    { name: 'Codolio',    logo: assets.codolioImage },
+};
+
 // ─── Compact Sleek Sidebar Tooltip ──────────────────────────────────────────
 const SidebarTooltip = ({ label }) => (
   <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-[99999] pointer-events-none opacity-0 group-hover:opacity-100 -translate-x-1.5 group-hover:translate-x-0 transition-all duration-150 ease-out whitespace-nowrap">
@@ -40,13 +49,7 @@ const Sidebar = () => {
   const profileTimerRef = useRef(null);
 
   // Platform metadata with official logos
-  const PLATFORM_LOGOS = {
-    leetcode:   { name: 'LeetCode',   logo: assets.leetcodeImage },
-    codechef:   { name: 'CodeChef',   logo: assets.codechefImage },
-    credly:     { name: 'Credly',     logo: assets.credlyImage },
-    codestudio: { name: 'CodeStudio', logo: assets.codestudioImage },
-    codolio:    { name: 'Codolio',    logo: assets.codolioImage },
-  };
+  // (PLATFORM_LOGOS moved to module scope)
 
   // Fetch user's verified connected platforms
   useEffect(() => {

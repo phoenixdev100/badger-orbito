@@ -41,6 +41,8 @@ const Login = ({ onClose }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [twoFATemp, setTwoFATemp] = useState(null);
+  const [twoFACode, setTwoFACode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -116,10 +118,37 @@ const Login = ({ onClose }) => {
     setIsLoading(true);
     try {
 
+      if (twoFATemp) {
+        const { data } = await axios.post(backendUrl + '/api/user/2fa/verify-login', {
+          tempToken: twoFATemp,
+          code: twoFACode,
+        });
+        if (data.success) {
+          setToken(data.token)
+          setUser(data.user)
+          localStorage.setItem('token', data.token)
+          setTwoFATemp(null);
+          setTwoFACode('');
+          setShowLogin(false)
+          onClose?.();
+          toast.success(`Welcome back, ${data.user?.name || 'Developer'}!`);
+          navigate('/dashboard')
+        } else {
+          toast.error(data.message)
+        }
+        return;
+      }
+
       if (state === 'Login') {
         const { data } = await axios.post(backendUrl + '/api/user/login', { email, password })
 
         if (data.success) {
+          if (data.requires2FA) {
+            setTwoFATemp(data.tempToken);
+            setTwoFACode('');
+            setIsLoading(false);
+            return;
+          }
           setToken(data.token)
           setUser(data.user)
           localStorage.setItem('token', data.token)
@@ -191,12 +220,14 @@ const Login = ({ onClose }) => {
       document.body.style.overflow = 'unset';
       if (navbar) navbar.style.opacity = 1;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- GSI init is intentionally mount-only
   }, []);
 
   // Re-render Google button dynamically whenever switching between Login & Sign Up
   useEffect(() => {
     const t = setTimeout(renderGoogleButton, 50);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-render only on auth mode change
   }, [state]);
 
   // Keep Google button width strictly equal to the submit button at all times
@@ -217,6 +248,7 @@ const Login = ({ onClose }) => {
       clearTimeout(timeoutId);
       observer.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- observer setup is intentionally mount-only
   }, []);
 
   return (
@@ -302,6 +334,32 @@ const Login = ({ onClose }) => {
           )}
         </AnimatePresence>
 
+        {twoFATemp ? (
+          <div className="space-y-3">
+            <p className="text-xs text-slate-400 text-center">
+              Two-factor authentication is enabled. Enter the 6-digit code from your authenticator app.
+            </p>
+            <div className="border border-white/20 focus-within:border-cyan-400 bg-white/5 focus-within:bg-white/10 px-4 py-2 flex items-center gap-2.5 rounded-full transition-colors">
+              <span className="text-slate-400"><IconLock /></span>
+              <input
+                onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                value={twoFACode}
+                type="text"
+                inputMode="numeric"
+                className="outline-none text-sm flex-1 bg-transparent text-white placeholder-slate-400 text-center tracking-[0.5em] font-mono"
+                placeholder="000000"
+                required
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => { setTwoFATemp(null); setTwoFACode(''); }}
+              className="w-full text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              ← Back to login
+            </button>
+          </div>
+        ) : (
         <div className="space-y-3">
           <div className="border border-white/20 focus-within:border-cyan-400 bg-white/5 focus-within:bg-white/10 px-4 py-2 flex items-center gap-2.5 rounded-full transition-colors">
             <span className="text-slate-400">
@@ -331,6 +389,7 @@ const Login = ({ onClose }) => {
             />
           </div>
         </div>
+        )}
 
         <div className="flex justify-end my-2.5">
           <button
