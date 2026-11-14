@@ -46,6 +46,7 @@ import ContestRatingSection from '../components/ContestRatingSection';
 import ShareProfileModal from '../components/ShareProfileModal';
 import SkillRadarChart from '../components/SkillRadarChart';
 import RecentActivityTimeline from '../components/RecentActivityTimeline';
+import PlatformEngagementChart from '../components/PlatformEngagementChart';
 import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
 
@@ -1144,6 +1145,16 @@ const Dashboard = () => {
                     loading={loading || filterLoading}
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* ── 3.6 PLATFORM ENGAGEMENT DISTRIBUTION ─────────────────────── */}
+            <div className="w-full mt-6">
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-3 sm:p-4 shadow-2xl backdrop-blur-xl">
+                <PlatformEngagementChart
+                  platforms={visiblePlatforms}
+                  loading={loading || filterLoading}
+                />
               </div>
             </div>
 
