@@ -45,6 +45,7 @@ import FeaturedAchievements from '../components/FeaturedAchievements';
 import ContestRatingSection from '../components/ContestRatingSection';
 import ShareProfileModal from '../components/ShareProfileModal';
 import SkillRadarChart from '../components/SkillRadarChart';
+import RecentActivityTimeline from '../components/RecentActivityTimeline';
 import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
 
@@ -1096,13 +1097,14 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* ── 3.5 SKILL RADAR ANALYSIS ──────────────────────────────────── */}
-            <div className="w-full mt-8">
-              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            {/* ── 3.5 SKILL RADAR + RECENT ACTIVITY ─────────────────────────── */}
+            <div className="w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              {/* Skill Radar */}
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-3 sm:p-4 shadow-2xl backdrop-blur-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-cyan-400" />
+                    <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                       <span>Skill Radar</span>
                     </h2>
                     <p className="text-xs text-slate-400 mt-1">
@@ -1111,11 +1113,37 @@ const Dashboard = () => {
                   </div>
                   {platformFilter !== 'all' && (
                     <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
-                      Filtered: {activeFilterLabel}
+                      {activeFilterLabel}
                     </span>
                   )}
                 </div>
-                <SkillRadarChart platforms={visiblePlatforms} loading={loading || filterLoading} />
+                <SkillRadarChart
+                  platforms={visiblePlatforms}
+                  credlyBadges={filteredCredlyBadges}
+                  loading={loading || filterLoading}
+                />
+              </div>
+
+              {/* Recent Activity */}
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-3 sm:p-4 shadow-2xl backdrop-blur-xl h-full flex flex-col">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Recent Activity</span>
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Latest contests, badge unlocks, and submissions.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <RecentActivityTimeline
+                    platforms={visiblePlatforms}
+                    credlyBadges={filteredCredlyBadges}
+                    loading={loading || filterLoading}
+                  />
+                </div>
               </div>
             </div>
 
