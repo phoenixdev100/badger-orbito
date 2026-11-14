@@ -173,6 +173,12 @@ const PlatformRow = ({
 const AddPlatform = () => {
   useEffect(() => {
     document.title = 'Connect Platforms | Orbito';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
+    };
   }, []);
 
   const [usernames, setUsernames] = useState({
@@ -361,11 +367,11 @@ const AddPlatform = () => {
 
   return (
     <>
-      <div className="w-full bg-black min-h-screen">
+      <div className="w-full bg-black h-screen overflow-hidden">
         <Sidebar />
-        <div className="ml-20">
+        <div className="ml-0 md:ml-20 h-full overflow-y-auto overflow-x-hidden overscroll-contain">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
-            <div className="relative overflow-visible text-white">
+            <div className="relative overflow-x-clip text-white">
               <style>{`
                 @keyframes grid-draw { 0% { stroke-dashoffset: 1000; opacity: 0; } 50% { opacity: 0.4; } 100% { stroke-dashoffset: 0; opacity: 0.25; } }
                 @keyframes pulse-glow { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.1); } }
