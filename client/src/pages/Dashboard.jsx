@@ -44,6 +44,7 @@ import Sidebar from '../components/Sidebar';
 import FeaturedAchievements from '../components/FeaturedAchievements';
 import ContestRatingSection from '../components/ContestRatingSection';
 import ShareProfileModal from '../components/ShareProfileModal';
+import SkillRadarChart from '../components/SkillRadarChart';
 import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
 
@@ -1093,6 +1094,29 @@ const Dashboard = () => {
                 totalActiveDays={totalActiveDays}
                 loading={loading}
               />
+            </div>
+
+            {/* ── 3.5 SKILL RADAR ANALYSIS ──────────────────────────────────── */}
+            <div className="w-full mt-8">
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-cyan-400" />
+                      <span>Skill Radar</span>
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Estimated skill distribution across your connected platforms.
+                    </p>
+                  </div>
+                  {platformFilter !== 'all' && (
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+                      Filtered: {activeFilterLabel}
+                    </span>
+                  )}
+                </div>
+                <SkillRadarChart platforms={visiblePlatforms} loading={loading || filterLoading} />
+              </div>
             </div>
 
             {/* ── 4. FEATURED MILESTONES / ACHIEVEMENTS ───────────────────────── */}
