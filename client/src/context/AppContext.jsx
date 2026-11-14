@@ -16,6 +16,7 @@ const AppContextProvider = (props) => {
     const [showLogin, setShowLogin] = useState(false);
     const [token, setToken] = useState(localStorage.getItem('token'))
     const [platformData, setPlatformData] = useState(null);
+    const [platformFilter, setPlatformFilter] = useState('all');
 
     const backendUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
 
@@ -29,6 +30,7 @@ const AppContextProvider = (props) => {
         setToken('');
         setUser(null);
         setPlatformData(null);
+        setPlatformFilter('all');
         navigate('/');
     }
 
@@ -275,7 +277,7 @@ const AppContextProvider = (props) => {
 
     const value = {
         user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated,
-        platformData, setPlatformData,
+        platformData, setPlatformData, platformFilter, setPlatformFilter,
         linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData,
         updatePlatformVisibility, updateProfile, changePassword, updateUsername, updateVisibility,
     };

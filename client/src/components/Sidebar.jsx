@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import assets from '../assets/assets.js';
 import AnimatedProfileCard from './info-card';
-import SyncedPlatformsCard from './SyncedPlatformsCard';
 import ShareProfileModal from './ShareProfileModal';
 import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
@@ -14,7 +13,6 @@ import {
   Award,
   Plus,
   Share2,
-  Layers,
 } from 'lucide-react';
 
 // ─── Compact Sleek Sidebar Tooltip ──────────────────────────────────────────
@@ -29,18 +27,16 @@ const SidebarTooltip = ({ label }) => (
 const Sidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { user, platformData } = useContext(AppContext);
+  const { user, platformData, platformFilter, setPlatformFilter } = useContext(AppContext);
 
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Popups & Modal states
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showSyncedPopup, setShowSyncedPopup] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
 
-  // Debounced hover timers for smooth transitions
-  const syncedTimerRef = useRef(null);
+  // Debounced hover timer for smooth transitions
   const profileTimerRef = useRef(null);
 
   // Platform metadata with official logos
@@ -90,23 +86,9 @@ const Sidebar = () => {
     return () => { isMounted = false; };
   }, []);
 
-  // Hover Handlers for Synced Platforms
-  const handleMouseEnterSynced = () => {
-    clearTimeout(syncedTimerRef.current);
-    setShowProfilePopup(false);
-    setShowSyncedPopup(true);
-  };
-
-  const handleMouseLeaveSynced = () => {
-    syncedTimerRef.current = setTimeout(() => {
-      setShowSyncedPopup(false);
-    }, 220);
-  };
-
   // Hover Handlers for Profile & Settings
   const handleMouseEnterProfile = () => {
     clearTimeout(profileTimerRef.current);
-    setShowSyncedPopup(false);
     setShowProfilePopup(true);
   };
 
@@ -123,6 +105,7 @@ const Sidebar = () => {
       icon: LayoutDashboard,
       label: 'Dashboard',
       onClick: () => {
+        setPlatformFilter('all');
         if (pathname === '/dashboard') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -173,9 +156,20 @@ const Sidebar = () => {
     },
   ];
 
+  // Select a platform filter and jump to the dashboard top
+  const handlePlatformSelect = (platformId) => {
+    const newFilter = platformFilter === platformId ? 'all' : platformId;
+    setPlatformFilter(newFilter);
+    if (pathname === '/dashboard') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <>
-      <div className="fixed left-0 top-0 h-screen w-20 bg-[#07080c]/95 backdrop-blur-2xl flex flex-col items-center py-4 z-50 border-r border-white/10 select-none">
+      <div className="fixed left-0 top-0 h-screen w-20 bg-[#07080c]/95 backdrop-blur-2xl flex flex-col items-center py-4 z-50 border-r border-white/10 select-none overscroll-contain">
         {/* ── Brand Logo at Top ── */}
         <div className="mb-5 relative group">
           <a
@@ -188,7 +182,7 @@ const Sidebar = () => {
         </div>
 
         {/* ── Primary Navigation Items ── */}
-        <nav className="flex flex-col items-center space-y-3">
+        <nav className="flex flex-col items-center space-y-3 overflow-hidden overscroll-contain">
           {primaryNavItems.map((item) => {
             const IconComponent = item.icon;
             const active = item.isActive;
@@ -220,44 +214,56 @@ const Sidebar = () => {
           })}
         </nav>
 
-        {/* ── Bottom Section: Synced Platforms + Profile & Settings ── */}
-        <div className="mt-auto flex flex-col items-center space-y-3 pt-3">
-          {/* 1. SYNCED PLATFORMS ICON (Just Above Profile) */}
-          <div
-            className="relative group"
-            onMouseEnter={handleMouseEnterSynced}
-            onMouseLeave={handleMouseLeaveSynced}
-          >
-            <button
-              id="synced-trigger-btn"
-              type="button"
-              onClick={() => {
-                setShowProfilePopup(false);
-                setShowSyncedPopup((prev) => !prev);
-              }}
-              className={`
-                relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer
-                ${showSyncedPopup
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.3)]'
-                  : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20'
-                }
-              `}
-              aria-label="Synced Platforms"
-            >
-              <Layers className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+        {/* ── Connected Platforms — scrollable dashboard filter ── */}
+        {(loading || connectedPlatforms.length > 0) && (
+          <div className="flex-1 min-h-0 w-full mt-4 flex flex-col items-center">
+            <div className="w-10 border-t border-white/10 mb-2 shrink-0" />
+            <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider mb-3 shrink-0">
+              Synced
+            </span>
+            <div className="flex-1 min-h-0 w-full overflow-y-auto scrollbar-none overscroll-contain flex flex-col items-center">
+              {loading
+                ? [1, 2, 3].map((i) => (
+                    <div key={i} className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 animate-pulse shrink-0 mt-3" />
+                  ))
+                : connectedPlatforms.map((platform) => {
+                    const isActive = platformFilter === platform.id;
+                    return (
+                      <div key={platform.id} className="relative group shrink-0 mt-3">
+                        <button
+                          type="button"
+                          onClick={() => handlePlatformSelect(platform.id)}
+                          className={`
+                            relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden p-1.5
+                            ${isActive
+                              ? 'bg-emerald-500/20 border border-emerald-400/60 shadow-[0_0_16px_rgba(52,211,153,0.35)]'
+                              : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+                            }
+                          `}
+                          aria-label={`Filter by ${platform.name}`}
+                          title={platform.name}
+                        >
+                          <img
+                            src={platform.logo}
+                            alt={platform.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </button>
 
-              {/* Connected count indicator dot */}
-              {connectedPlatforms.length > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#07080c] shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-              )}
-            </button>
-
-            {!showSyncedPopup && (
-              <SidebarTooltip label="Synced Platforms" />
-            )}
+                        {/* Active filter indicator dot */}
+                        {isActive && (
+                          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#07080c] shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                        )}
+                      </div>
+                    );
+                  })}
+            </div>
           </div>
+        )}
 
-          {/* 2. PROFILE & SETTINGS ICON (At Very Bottom) */}
+        {/* ── Bottom Section: Profile & Settings ── */}
+        <div className="mt-auto flex flex-col items-center space-y-3 pt-3">
+          {/* PROFILE & SETTINGS ICON (At Very Bottom) */}
           <div
             className="relative group"
             onMouseEnter={handleMouseEnterProfile}
@@ -266,10 +272,7 @@ const Sidebar = () => {
             <button
               id="profile-trigger-btn"
               type="button"
-              onClick={() => {
-                setShowSyncedPopup(false);
-                setShowProfilePopup((prev) => !prev);
-              }}
+              onClick={() => setShowProfilePopup((prev) => !prev)}
               className={`
                 relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 cursor-pointer group
                 ${showProfilePopup
@@ -297,20 +300,6 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
-
-      {/* ── SYNCED PLATFORMS BLACK CARD UI ── */}
-      {showSyncedPopup && (
-        <div
-          onMouseEnter={handleMouseEnterSynced}
-          onMouseLeave={handleMouseLeaveSynced}
-          className="fixed left-24 bottom-20 z-[99999]"
-        >
-          <SyncedPlatformsCard
-            connectedPlatforms={connectedPlatforms}
-            onClose={() => setShowSyncedPopup(false)}
-          />
-        </div>
-      )}
 
       {/* ── ORIGINAL BLACK PROFILE CARD UI (With Memoji Photo & 2 Options) ── */}
       {showProfilePopup && (
