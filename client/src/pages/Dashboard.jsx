@@ -42,6 +42,7 @@ import {
 import GradientBlobCard from '../components/gradient-bold-card';
 import Sidebar from '../components/Sidebar';
 import FeaturedAchievements from '../components/FeaturedAchievements';
+import CredlyView from '../components/CredlyView';
 import ContestRatingSection from '../components/ContestRatingSection';
 import ShareProfileModal from '../components/ShareProfileModal';
 import SkillRadarChart from '../components/SkillRadarChart';
@@ -1085,6 +1086,15 @@ const Dashboard = () => {
               )}
             </div>
 
+            {/* ── PLATFORM-SPECIFIC VIEW: Credly gets its own dashboard ─────── */}
+            {platformFilter === 'credly' ? (
+              <CredlyView
+                credly={platformData?.credly}
+                username={userPlatforms?.credly || platformData?.credly?.username}
+                loading={loading || filterLoading}
+              />
+            ) : (
+            <>
             {/* ── 3. ENTERPRISE BENTO STATS GRID ──────────────────────────────── */}
             <div className="w-full">
               <GradientBlobCard
@@ -1330,7 +1340,10 @@ const Dashboard = () => {
                           <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
                             {badge.name}
                           </h4>
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                          <span
+                            onClick={(e) => { e.stopPropagation(); setSelectedCert({ ...badge, platform: 'credly' }); }}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 cursor-pointer hover:bg-emerald-500/20 transition-colors"
+                          >
                             <CheckCircle className="w-3 h-3" /> Credly
                           </span>
                         </div>
@@ -1340,16 +1353,6 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-
-                    {badge.skills?.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-1.5 pt-3 border-t border-white/5">
-                        {badge.skills.slice(0, 5).map((skill, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 text-[11px] text-slate-300 border border-white/5">
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))}
 
@@ -1400,6 +1403,8 @@ const Dashboard = () => {
               </div>
               )}
             </div>
+            </>
+            )}
 
           </div>
         </div>
