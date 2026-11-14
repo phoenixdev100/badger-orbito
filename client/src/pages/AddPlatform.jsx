@@ -132,6 +132,17 @@ const PlatformRow = ({
           </ButtonGroup>
         </div>
 
+        {/* Lock reason */}
+        {isLocked && (
+          <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <p className="text-[11px] text-amber-200/80">
+              Locked — <span className="font-semibold text-amber-300 capitalize">{blockedBy}</span> already aggregates this platform's data.
+              Disconnect {blockedBy} first to connect {name} individually.
+            </p>
+          </div>
+        )}
+
         {/* Removed Conflict banner */}
 
         {/* Verification UI */}
