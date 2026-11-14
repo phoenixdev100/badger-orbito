@@ -1,7 +1,7 @@
 import userModel from '../models/userModel.js';
 import { fetchCredlyData, verifyCredlyOwnership } from '../services/credlyService.js';
 import { fetchLeetCodeData, verifyLeetCodeOwnership } from '../services/leetcodeService.js';
-import { verifyCodeChefOwnership } from '../services/codechefService.js';
+import { verifyCodeChefOwnership, fetchCodeChefData } from '../services/codechefService.js';
 import { verifyCodeStudioOwnership } from '../services/codestudioService.js';
 import { verifyCodolioOwnership, fetchCodolioData } from '../services/codolioService.js';
 
@@ -95,6 +95,14 @@ export const fetchAllPlatformsData = async (req, res) => {
       user.platforms.leetcode?.isPublic !== false
     ) {
       results.leetcode = await fetchLeetCodeData(user.platforms.leetcode.username);
+    }
+
+    if (
+      user.platforms.codechef?.username &&
+      user.platforms.codechef?.verified &&
+      user.platforms.codechef?.isPublic !== false
+    ) {
+      results.codechef = await fetchCodeChefData(user.platforms.codechef.username);
     }
 
     if (

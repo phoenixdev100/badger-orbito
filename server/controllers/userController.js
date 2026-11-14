@@ -1,6 +1,8 @@
 import userModel from "../models/userModel.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import speakeasy from 'speakeasy';
+import QRCode from 'qrcode';
 import { fetchCredlyData } from '../services/credlyService.js';
 import { fetchLeetCodeData } from '../services/leetcodeService.js';
 import { fetchCodolioData } from '../services/codolioService.js';
@@ -14,6 +16,10 @@ const formatSafeUser = (user) => ({
     email:                 user.email,
     username:              user.username || user.email?.split('@')[0] || 'developer',
     usernameLastChangedAt: user.usernameLastChangedAt || null,
+    passwordChangedAt:     user.passwordChangedAt || null,
+    lastLoginAt:           user.lastLoginAt || null,
+    loginHistory:          (user.loginHistory || []).slice(0, 10),
+    twoFactorEnabled:      !!user.twoFactorEnabled,
     isProfilePublic:       user.isProfilePublic !== false,
     bio:                   user.bio || '',
     profilePicture:        user.profilePicture || '',
@@ -60,8 +66,8 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please provide a valid email address" });
         }
 
-        if (typeof password !== 'string' || password.length < 6) {
-            return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+        if (typeof password !== 'string' || password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+            return res.status(400).json({ success: false, message: "Password must be at least 8 characters and include a letter and a number" });
         }
 
         const existingUser = await userModel.findOne({ email: normalizedEmail });
@@ -110,11 +116,26 @@ const loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
+            if (user.twoFactorEnabled && user.twoFactorSecret) {
+                const tempToken = jwt.sign(
+                    { id: user._id, purpose: '2fa-pending' },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '5m' }
+                );
+                return res.json({ success: true, requires2FA: true, tempToken });
+            }
+
             // Lazy initialization of username if missing
             if (!user.username) {
                 user.username = await generateUniqueUsername(user.email);
-                await user.save();
             }
+            user.lastLoginAt = new Date();
+            const ua = String(req.headers['user-agent'] || '');
+            user.loginHistory = [
+              { at: user.lastLoginAt, ip: req.ip || '', userAgent: ua.slice(0, 200) },
+              ...(user.loginHistory || []),
+            ].slice(0, 10);
+            await user.save();
 
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
             res.json({ success: true, token, user: formatSafeUser(user) });
@@ -310,8 +331,11 @@ const changePassword = async (req, res) => {
         if (!currentPassword || !newPassword) {
             return res.status(400).json({ success: false, message: 'Current and new password are required' });
         }
-        if (newPassword.length < 6) {
-            return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+        if (typeof newPassword !== 'string' || newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+            return res.status(400).json({ success: false, message: 'New password must be at least 8 characters and include a letter and a number' });
+        }
+        if (newPassword === currentPassword) {
+            return res.status(400).json({ success: false, message: 'New password must be different from the current password' });
         }
 
         const user = await userModel.findById(req.userId);
@@ -324,21 +348,169 @@ const changePassword = async (req, res) => {
 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
+        user.passwordChangedAt = new Date();
         await user.save();
 
-        res.json({ success: true, message: 'Password changed successfully' });
+        res.json({ success: true, message: 'Password changed successfully. All other sessions have been signed out.' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
+// ── Two-Factor Authentication (TOTP) ────────────────────────────────────────
+const setup2FA = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (user.twoFactorEnabled) {
+            return res.status(400).json({ success: false, message: '2FA is already enabled' });
+        }
+
+        const secret = speakeasy.generateSecret({
+            name: `Orbito (${user.email})`,
+            issuer: 'Orbito',
+        });
+
+        user.twoFactorSecret = secret.base32;
+        await user.save();
+
+        const qrDataUrl = await QRCode.toDataURL(secret.otpauth_url);
+        res.json({
+            success: true,
+            secret: secret.base32,
+            qrCode: qrDataUrl,
+            otpauthUrl: secret.otpauth_url,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to setup 2FA' });
+    }
+};
+
+const enable2FA = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const user = await userModel.findById(req.userId);
+        if (!user?.twoFactorSecret) {
+            return res.status(400).json({ success: false, message: 'Run 2FA setup first' });
+        }
+
+        const valid = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token: String(code || '').replace(/\s/g, ''),
+            window: 1,
+        });
+
+        if (!valid) {
+            return res.status(400).json({ success: false, message: 'Invalid verification code' });
+        }
+
+        user.twoFactorEnabled = true;
+        await user.save();
+        res.json({ success: true, message: 'Two-factor authentication enabled' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to enable 2FA' });
+    }
+};
+
+const disable2FA = async (req, res) => {
+    try {
+        const { password, code } = req.body;
+        const user = await userModel.findById(req.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        if (!user.twoFactorEnabled) {
+            return res.status(400).json({ success: false, message: '2FA is not enabled' });
+        }
+
+        const isMatch = await bcrypt.compare(String(password || ''), user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Password is incorrect' });
+        }
+
+        const valid = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token: String(code || '').replace(/\s/g, ''),
+            window: 1,
+        });
+        if (!valid) {
+            return res.status(400).json({ success: false, message: 'Invalid verification code' });
+        }
+
+        user.twoFactorSecret = null;
+        user.twoFactorEnabled = false;
+        await user.save();
+        res.json({ success: true, message: 'Two-factor authentication disabled' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to disable 2FA' });
+    }
+};
+
+const verify2FALogin = async (req, res) => {
+    try {
+        const { tempToken, code } = req.body;
+        if (!tempToken || !code) {
+            return res.status(400).json({ success: false, message: 'Token and code are required' });
+        }
+
+        const decoded = jwt.verify(String(tempToken), process.env.JWT_SECRET);
+        if (decoded.purpose !== '2fa-pending' || !decoded.id) {
+            return res.status(401).json({ success: false, message: 'Invalid session' });
+        }
+
+        const user = await userModel.findById(decoded.id).exec();
+        if (!user?.twoFactorEnabled || !user.twoFactorSecret) {
+            return res.status(400).json({ success: false, message: '2FA is not enabled for this account' });
+        }
+
+        const valid = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token: String(code).replace(/\s/g, ''),
+            window: 1,
+        });
+        if (!valid) {
+            return res.status(401).json({ success: false, message: 'Invalid authentication code' });
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.json({ success: true, token, user: formatSafeUser(user) });
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'Verification failed. Please login again.' });
+    }
+};
+
+// Sign out all devices: bumps passwordChangedAt so every existing JWT is rejected
+const signOutAllDevices = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        user.passwordChangedAt = new Date();
+        await user.save();
+
+        res.json({ success: true, message: 'Signed out from all devices. Please login again.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to sign out devices' });
+    }
+};
+
 export {
     registerUser,
     loginUser,
+    signOutAllDevices,
     updateProfile,
     changePassword,
     updateUsername,
     updateVisibility,
-    getPublicProfile
+    getPublicProfile,
+    setup2FA,
+    enable2FA,
+    disable2FA,
+    verify2FALogin
 };

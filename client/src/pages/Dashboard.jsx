@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo } from 'react';
+import React, { useEffect, useState, useContext, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -42,12 +42,18 @@ import {
 import GradientBlobCard from '../components/gradient-bold-card';
 import Sidebar from '../components/Sidebar';
 import FeaturedAchievements from '../components/FeaturedAchievements';
+import CredlyView from '../components/CredlyView';
 import ContestRatingSection from '../components/ContestRatingSection';
 import ShareProfileModal from '../components/ShareProfileModal';
+import SkillRadarChart from '../components/SkillRadarChart';
+import RecentActivityTimeline from '../components/RecentActivityTimeline';
+import PlatformEngagementChart from '../components/PlatformEngagementChart';
 import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
 
 // ─── Platform Metadata & Brand Accents ───────────────────────────────────────
+const TRACKED_PLATFORM_KEYS = ['codolio', 'credly', 'leetcode', 'codechef', 'codestudio'];
+
 const PLATFORM_META = {
   leetcode:      { label: 'LeetCode',      color: '#FFA116', bg: '#FFA11618', url: 'https://leetcode.com' },
   codechef:      { label: 'CodeChef',      color: '#6B3FA0', bg: '#6B3FA018', url: 'https://codechef.com' },
@@ -435,9 +441,9 @@ const BadgeCard = ({ badge, onClick }) => {
 
 // ─── Badge Inspection Modal ─────────────────────────────────────────────────
 const BadgeDetailModal = ({ badge, onClose }) => {
+  const [imgError, setImgError] = useState(false);
   if (!badge) return null;
   const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Platform', color: '#06b6d4' };
-  const [imgError, setImgError] = useState(false);
 
   return (
     <motion.div
@@ -526,9 +532,9 @@ const BadgeDetailModal = ({ badge, onClose }) => {
 // ─── Certificate Inspection Modal ───────────────────────────────────────────
 // ─── Certificate Inspection Modal (High-Resolution Enterprise Diploma) ──────
 const CertificateDetailModal = ({ cert, onClose, userName }) => {
+  const [imgError, setImgError] = useState(false);
   if (!cert) return null;
   const meta = PLATFORM_META[cert.platform] || { label: cert.platform || 'Platform', color: '#10b981' };
-  const [imgError, setImgError] = useState(false);
   const certImage = (cert.image || cert.imageUrl) && !imgError ? (cert.image || cert.imageUrl) : null;
 
   return (
@@ -703,7 +709,7 @@ const CertificateDetailModal = ({ cert, onClose, userName }) => {
 
 // ─── Main Dashboard Page ────────────────────────────────────────────────────
 const Dashboard = () => {
-  const { backendUrl, token, user } = useContext(AppContext);
+  const { backendUrl, token, user, platformFilter, setPlatformFilter } = useContext(AppContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -714,16 +720,24 @@ const Dashboard = () => {
   const [userPlatforms, setUserPlatforms] = useState({});
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
 
-  // Filter & Search states for Trophy Room
-  const [badgeFilter, setBadgeFilter] = useState('all');
+  // Search states for Trophy Room (platform filter lives in AppContext so the
+  // left sidebar platform icons can drive it)
   const [badgeSearch, setBadgeSearch] = useState('');
   const [selectedBadge, setSelectedBadge] = useState(null);
   const [selectedCert, setSelectedCert] = useState(null);
+  const [filterLoading, setFilterLoading] = useState(false);
+
+  // Show loading skeleton when platform filter changes
+  useEffect(() => {
+    setFilterLoading(true);
+    const timer = setTimeout(() => setFilterLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, [platformFilter]);
 
   // Fetch full developer achievements
-  const fetchData = async (isSync = false) => {
+  const fetchData = useCallback(async (isSync = false) => {
     if (!token) return;
     if (isSync) setSyncing(true);
     else setLoading(true);
@@ -750,11 +764,11 @@ const Dashboard = () => {
       setLoading(false);
       setSyncing(false);
     }
-  };
+  }, [backendUrl, token]);
 
   useEffect(() => {
     fetchData();
-  }, [backendUrl, token]);
+  }, [fetchData]);
 
   // Handle hash scrolling for quick section jumps
   useEffect(() => {
@@ -779,11 +793,10 @@ const Dashboard = () => {
   // ── Aggregation ──────────────────────────────────────────────────────────
   const codolio          = platformData?.codolio || {};
   const codolioSummary   = codolio.summary || {};
-  const codolioplatforms = codolio.platforms || [];
-  const credlyBadges     = platformData?.credly?.badges || [];
+  const codolioplatforms = useMemo(() => codolio.platforms || [], [codolio.platforms]);
+  const credlyBadges     = useMemo(() => platformData?.credly?.badges || [], [platformData]);
 
   // Count only genuine connected platforms that have actual verified data
-  const TRACKED_PLATFORM_KEYS = ['codolio', 'credly', 'leetcode', 'codechef', 'codestudio'];
   const connectedPlatforms = useMemo(() => {
     if (!platformData) return 0;
     return TRACKED_PLATFORM_KEYS.filter((key) => {
@@ -838,16 +851,20 @@ const Dashboard = () => {
     return list;
   }, [credlyBadges, codolioplatforms]);
 
-  // Filtered badges based on active tab and search query
+  // Shared platform matcher — 'codolio' is an aggregator, so it matches every
+  // codolio-sourced platform (i.e. anything that isn't Credly)
+  const matchesPlatform = (p) => {
+    if (platformFilter === 'all') return true;
+    if (platformFilter === 'codolio') return p !== 'credly';
+    if (platformFilter === 'other') {
+      return !['leetcode', 'credly', 'codechef', 'hackerrank'].includes(p);
+    }
+    return p === platformFilter;
+  };
+
+  // Filtered badges based on active platform filter and search query
   const filteredBadges = useMemo(() => {
     return allBadges.filter((b) => {
-      const matchesTab =
-        badgeFilter === 'all'
-          ? true
-          : badgeFilter === 'other'
-          ? !['leetcode', 'credly', 'codechef', 'hackerrank'].includes(b.platform)
-          : b.platform === badgeFilter;
-
       const query = badgeSearch.toLowerCase().trim();
       const matchesSearch =
         !query ||
@@ -855,13 +872,21 @@ const Dashboard = () => {
         b.platform?.toLowerCase().includes(query) ||
         (b.skills && b.skills.some((s) => s.toLowerCase().includes(query)));
 
-      return matchesTab && matchesSearch;
+      return matchesPlatform(b.platform) && matchesSearch;
     });
-  }, [allBadges, badgeFilter, badgeSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allBadges, platformFilter, badgeSearch]);
 
-  // Certificates list
+  // Certificates & platform sections narrowed by the same filter
   const codolioCertificates = codolioplatforms.flatMap((p) => p.certificates || []);
-  const featuredAchievements = buildFeaturedAchievements(codolioplatforms);
+  const filteredCredlyBadges = credlyBadges.filter(() => matchesPlatform('credly'));
+  const filteredCodolioCertificates = codolioCertificates.filter((c) => matchesPlatform(c.platform));
+  const visiblePlatforms = codolioplatforms.filter((p) => matchesPlatform(p.platform));
+  const featuredAchievements = buildFeaturedAchievements(visiblePlatforms);
+  const activeFilterLabel =
+    platformFilter === 'codolio' ? 'Codolio'
+    : platformFilter === 'other' ? 'More'
+    : PLATFORM_META[platformFilter]?.label || platformFilter;
 
   // Dynamic developer level calculation
   const devLevel = Math.min(99, Math.max(1, Math.floor(totalQuestions / 40 + totalBadges * 2) || 1));
@@ -915,7 +940,7 @@ const Dashboard = () => {
                     </div>
 
                     <p className="text-xs sm:text-sm text-slate-400 mt-1 flex items-center gap-3 flex-wrap">
-                      <span className="font-mono text-cyan-400">@{user?.email?.split('@')[0] || 'orbito'}</span>
+                      <span className="font-mono text-cyan-400">@{user?.username || user?.customUsername || user?.email?.split('@')[0] || 'orbito'}</span>
                       <span className="text-slate-600">•</span>
                       <span className="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 text-xs font-medium">
                         Level {devLevel} · {devTitle}
@@ -967,64 +992,109 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 w-full">
-                {codolioplatforms.map((p) => {
-                  const meta = PLATFORM_META[p.platform] || { label: p.platform, color: '#06b6d4', url: '#' };
-                  const targetUrl = getPlatformProfileUrl(p.platform, p, userPlatforms, platformData);
-                  const handle = p.handle || p.userStats?.handle || userPlatforms?.[p.platform] || platformData?.userPlatforms?.[p.platform];
-                  return (
-                    <div
-                      key={p.platform}
-                      className="rounded-xl bg-[#0c0d12]/80 border border-white/10 p-3 flex items-center justify-between gap-2 hover:border-white/20 transition-all"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
-                          <p className="text-xs font-semibold text-white truncate">{meta.label}</p>
-                        </div>
-                        <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">
-                          {p.contestRating ? `Rating ${p.contestRating}` : `${p.questionsSolved || 0} Solved`}
-                        </p>
-                      </div>
-                      <a
-                        href={targetUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-slate-500 hover:text-white transition-colors p-1"
-                        title={handle ? `Open ${meta.label} Profile (@${handle})` : `Open ${meta.label}`}
+              {filterLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 w-full">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="rounded-xl bg-white/5 border border-white/10 p-3 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 w-full">
+                  {visiblePlatforms.map((p) => {
+                    const meta = PLATFORM_META[p.platform] || { label: p.platform, color: '#06b6d4', url: '#' };
+                    const targetUrl = getPlatformProfileUrl(p.platform, p, userPlatforms, platformData);
+                    const handle = p.handle || p.userStats?.handle || userPlatforms?.[p.platform] || platformData?.userPlatforms?.[p.platform];
+                    const isActive = platformFilter === p.platform;
+                    return (
+                      <div
+                        key={p.platform}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setPlatformFilter(isActive ? 'all' : p.platform)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPlatformFilter(isActive ? 'all' : p.platform); }}
+                        title={isActive ? `Clear ${meta.label} filter` : `Filter dashboard by ${meta.label}`}
+                        className={`rounded-xl bg-[#0c0d12]/80 border p-3 flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                          isActive
+                            ? 'border-cyan-400/60 shadow-[0_0_18px_rgba(6,182,212,0.25)]'
+                            : 'border-white/10 hover:border-white/20'
+                        }`}
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  );
-                })}
-
-                {/* If Credly is connected */}
-                {credlyBadges.length > 0 && (
-                  <div className="rounded-xl bg-[#0c0d12]/80 border border-white/10 p-3 flex items-center justify-between gap-2 hover:border-white/20 transition-all">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-orange-500" />
-                        <p className="text-xs font-semibold text-white truncate">Credly</p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
+                            <p className="text-xs font-semibold text-white truncate">{meta.label}</p>
+                            {isActive && <CheckCircle className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">
+                            {p.contestRating ? `Rating ${p.contestRating}` : `${p.questionsSolved || 0} Solved`}
+                          </p>
+                        </div>
+                        <a
+                          href={targetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-slate-500 hover:text-white transition-colors p-1"
+                          title={handle ? `Open ${meta.label} Profile (@${handle})` : `Open ${meta.label}`}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
                       </div>
-                      <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">
-                        {credlyBadges.length} Badges
-                      </p>
-                    </div>
-                    <a
-                      href={getPlatformProfileUrl('credly', null, userPlatforms, platformData)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-slate-500 hover:text-white transition-colors p-1"
-                      title={userPlatforms?.credly || platformData?.userPlatforms?.credly ? `Open Credly Profile (@${userPlatforms?.credly || platformData?.userPlatforms?.credly})` : "Open Credly"}
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                )}
-              </div>
+                    );
+                  })}
+
+                  {/* If Credly is connected */}
+                  {filteredCredlyBadges.length > 0 && (() => {
+                    const isActive = platformFilter === 'credly';
+                    return (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setPlatformFilter(isActive ? 'all' : 'credly')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setPlatformFilter(isActive ? 'all' : 'credly'); }}
+                        title={isActive ? 'Clear Credly filter' : 'Filter dashboard by Credly'}
+                        className={`rounded-xl bg-[#0c0d12]/80 border p-3 flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                          isActive
+                            ? 'border-orange-400/60 shadow-[0_0_18px_rgba(255,107,0,0.25)]'
+                            : 'border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-orange-500" />
+                            <p className="text-xs font-semibold text-white truncate">Credly</p>
+                            {isActive && <CheckCircle className="w-3.5 h-3.5 text-orange-400 shrink-0" />}
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-mono mt-0.5 truncate">
+                            {filteredCredlyBadges.length} Badges
+                          </p>
+                        </div>
+                        <a
+                          href={getPlatformProfileUrl('credly', null, userPlatforms, platformData)}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-slate-500 hover:text-white transition-colors p-1"
+                          title={userPlatforms?.credly || platformData?.userPlatforms?.credly ? `Open Credly Profile (@${userPlatforms?.credly || platformData?.userPlatforms?.credly})` : "Open Credly"}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
 
+            {/* ── PLATFORM-SPECIFIC VIEW: Credly gets its own dashboard ─────── */}
+            {platformFilter === 'credly' ? (
+              <CredlyView
+                credly={platformData?.credly}
+                username={userPlatforms?.credly || platformData?.credly?.username}
+                loading={loading || filterLoading}
+              />
+            ) : (
+            <>
             {/* ── 3. ENTERPRISE BENTO STATS GRID ──────────────────────────────── */}
             <div className="w-full">
               <GradientBlobCard
@@ -1039,9 +1109,69 @@ const Dashboard = () => {
               />
             </div>
 
+            {/* ── 3.5 SKILL RADAR + RECENT ACTIVITY ─────────────────────────── */}
+            <div className="w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              {/* Skill Radar */}
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-3 sm:p-4 shadow-2xl backdrop-blur-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Skill Radar</span>
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Estimated skill distribution across your connected platforms.
+                    </p>
+                  </div>
+                  {platformFilter !== 'all' && (
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+                      {activeFilterLabel}
+                    </span>
+                  )}
+                </div>
+                <SkillRadarChart
+                  platforms={visiblePlatforms}
+                  credlyBadges={filteredCredlyBadges}
+                  loading={loading || filterLoading}
+                />
+              </div>
+
+              {/* Recent Activity */}
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-3 sm:p-4 shadow-2xl backdrop-blur-xl h-full flex flex-col">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-orange-400" />
+                      <span>Recent Activity</span>
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Latest contests, badge unlocks, and submissions.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <RecentActivityTimeline
+                    platforms={visiblePlatforms}
+                    credlyBadges={filteredCredlyBadges}
+                    loading={loading || filterLoading}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── 3.6 PLATFORM ENGAGEMENT DISTRIBUTION ─────────────────────── */}
+            <div className="w-full mt-6">
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-3 sm:p-4 shadow-2xl backdrop-blur-xl">
+                <PlatformEngagementChart
+                  platforms={visiblePlatforms}
+                  loading={loading || filterLoading}
+                />
+              </div>
+            </div>
+
             {/* ── 4. FEATURED MILESTONES / ACHIEVEMENTS ───────────────────────── */}
             <div className="w-full mt-8">
-              {loading ? (
+              {loading || filterLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="h-[180px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
@@ -1054,7 +1184,7 @@ const Dashboard = () => {
 
             {/* ── 5. CONTEST RATINGS & PERFORMANCE CHART ──────────────────────── */}
             <div className="w-full mt-8">
-              <ContestRatingSection platforms={codolioplatforms} summary={codolioSummary} loading={loading} />
+              <ContestRatingSection platforms={visiblePlatforms} summary={codolioSummary} loading={loading || filterLoading} />
             </div>
 
             {/* ── 6. ENTERPRISE TROPHY ROOM / BADGES SHOWCASE ─────────────────── */}
@@ -1071,6 +1201,17 @@ const Dashboard = () => {
                   <p className="text-xs text-slate-400 mt-1">
                     Verified honors, contest medals, and domain masteries across all connected platforms.
                   </p>
+                  {platformFilter !== 'all' && (
+                    <button
+                      type="button"
+                      onClick={() => setPlatformFilter('all')}
+                      title="Clear platform filter"
+                      className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold hover:bg-cyan-500/25 transition-colors cursor-pointer"
+                    >
+                      <span>Filtered: {activeFilterLabel}</span>
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Search Bar + Filter Tabs */}
@@ -1100,9 +1241,9 @@ const Dashboard = () => {
                       <button
                         key={tab.id}
                         type="button"
-                        onClick={() => setBadgeFilter(tab.id)}
+                        onClick={() => setPlatformFilter(tab.id)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                          badgeFilter === tab.id
+                          platformFilter === tab.id
                             ? 'bg-white text-black font-semibold shadow-md'
                             : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
                         }`}
@@ -1115,23 +1256,21 @@ const Dashboard = () => {
               </div>
 
               {/* Badges Grid View - Fully Stretched Grid with No Empty Gaps */}
-              {loading && (
+              {loading || filterLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3.5 sm:gap-4 w-full">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
                     <div key={i} className="w-full h-[135px] sm:h-[145px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
                   ))}
                 </div>
-              )}
-
-              {!loading && filteredBadges.length === 0 && (
+              ) : filteredBadges.length === 0 ? (
                 <div className="py-12 text-center text-slate-400 text-sm">
                   {badgeSearch
                     ? `No awards matching "${badgeSearch}". Try a different keyword.`
+                    : platformFilter !== 'all'
+                    ? `No awards found for ${activeFilterLabel}.`
                     : 'No awards found for this category.'}
                 </div>
-              )}
-
-              {!loading && filteredBadges.length > 0 && (
+              ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3.5 sm:gap-4 w-full">
                   {filteredBadges.map((badge, idx) => (
                     <BadgeCard
@@ -1152,7 +1291,7 @@ const Dashboard = () => {
                     <ShieldCheck className="w-5 h-5 text-emerald-400" />
                     <span>Verified Certifications</span>
                     <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
-                      {credlyBadges.length + codolioCertificates.length}
+                      {filteredCredlyBadges.length + filteredCodolioCertificates.length}
                     </span>
                   </h2>
                   <p className="text-xs text-slate-400 mt-1">
@@ -1161,15 +1300,22 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {credlyBadges.length === 0 && codolioCertificates.length === 0 && (
-                <div className="py-10 text-center text-slate-400 text-sm border border-dashed border-white/10 rounded-2xl">
-                  No verified certificates yet. Connect your Credly or HackerRank account to populate official badges here.
+              {filterLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 w-full">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-[120px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+                  ))}
                 </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 w-full">
-                {/* Credly Verified Certificates */}
-                {credlyBadges.map((badge) => (
+              ) : filteredCredlyBadges.length === 0 && filteredCodolioCertificates.length === 0 ? (
+                <div className="py-10 text-center text-slate-400 text-sm border border-dashed border-white/10 rounded-2xl">
+                  {platformFilter !== 'all'
+                    ? 'No verified certificates found for the selected platform.'
+                    : 'No verified certificates yet. Connect your Credly or HackerRank account to populate official badges here.'}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 w-full">
+                  {/* Credly Verified Certificates */}
+                  {filteredCredlyBadges.map((badge) => (
                   <div
                     key={badge.id}
                     onClick={() => setSelectedCert({ ...badge, platform: 'credly' })}
@@ -1194,7 +1340,10 @@ const Dashboard = () => {
                           <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
                             {badge.name}
                           </h4>
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                          <span
+                            onClick={(e) => { e.stopPropagation(); setSelectedCert({ ...badge, platform: 'credly' }); }}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 cursor-pointer hover:bg-emerald-500/20 transition-colors"
+                          >
                             <CheckCircle className="w-3 h-3" /> Credly
                           </span>
                         </div>
@@ -1204,21 +1353,11 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-
-                    {badge.skills?.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-1.5 pt-3 border-t border-white/5">
-                        {badge.skills.slice(0, 5).map((skill, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 text-[11px] text-slate-300 border border-white/5">
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))}
 
                 {/* Codolio Platform Certificates */}
-                {codolioCertificates.map((cert, index) => {
+                {filteredCodolioCertificates.map((cert, index) => {
                   const meta = PLATFORM_META[cert.platform] || { label: cert.platform, color: '#06b6d4' };
                   return (
                     <div
@@ -1262,7 +1401,10 @@ const Dashboard = () => {
                   );
                 })}
               </div>
+              )}
             </div>
+            </>
+            )}
 
           </div>
         </div>

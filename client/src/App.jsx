@@ -1,6 +1,6 @@
 import React, {useContext, useEffect} from 'react'
 import { Routes, Route, Navigate, useLocation} from 'react-router-dom'
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -25,7 +25,6 @@ const App = () => {
   }, [pathname]);
 
   const isHomePage = pathname === '/';
-  const isDashboard = pathname === '/dashboard';
   const isPublicProfile = pathname.startsWith('/u/') || pathname.startsWith('/profile/');
   const hassidebar = !isHomePage && !isPublicProfile;
 

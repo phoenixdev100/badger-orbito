@@ -1,7 +1,8 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
+// eslint-disable-next-line react-refresh/only-export-components -- context + provider is a standard pattern
 export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
@@ -16,6 +17,7 @@ const AppContextProvider = (props) => {
     const [showLogin, setShowLogin] = useState(false);
     const [token, setToken] = useState(localStorage.getItem('token'))
     const [platformData, setPlatformData] = useState(null);
+    const [platformFilter, setPlatformFilter] = useState('all');
 
     const backendUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
 
@@ -29,6 +31,7 @@ const AppContextProvider = (props) => {
         setToken('');
         setUser(null);
         setPlatformData(null);
+        setPlatformFilter('all');
         navigate('/');
     }
 
@@ -124,7 +127,7 @@ const AppContextProvider = (props) => {
     }
 
     // Fetch all platforms data
-    const fetchPlatformsData = async () => {
+    const fetchPlatformsData = useCallback(async () => {
         try {
             if (!token) return { success: false };
             const response = await axios.get(
@@ -144,14 +147,14 @@ const AppContextProvider = (props) => {
             console.error('Failed to fetch platform data:', message);
             return { success: false, message }
         }
-    }
+    }, [token, backendUrl])
 
     // Auto-fetch platforms data when token exists
     useEffect(() => {
         if (token) {
             fetchPlatformsData();
         }
-    }, [token]);
+    }, [token, fetchPlatformsData]);
 
     // Toggle platform public/private visibility
     const updatePlatformVisibility = async (platform, isPublic) => {
@@ -275,7 +278,7 @@ const AppContextProvider = (props) => {
 
     const value = {
         user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated,
-        platformData, setPlatformData,
+        platformData, setPlatformData, platformFilter, setPlatformFilter,
         linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData,
         updatePlatformVisibility, updateProfile, changePassword, updateUsername, updateVisibility,
     };

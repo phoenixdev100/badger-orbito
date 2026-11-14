@@ -50,7 +50,7 @@ const VisibilityCheckbox = ({ platform, isVerified, isPublic, onToggle, disabled
 }
 
 // ── Mutual Exclusivity Note (No longer a banner/warning) ──────────────────
-const ConflictNote = ({ blockedBy }) => {
+const ConflictNote = () => {
   return null // Removed detailed error messages as requested
 }
 
@@ -132,6 +132,17 @@ const PlatformRow = ({
           </ButtonGroup>
         </div>
 
+        {/* Lock reason */}
+        {isLocked && (
+          <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <p className="text-[11px] text-amber-200/80">
+              Locked — <span className="font-semibold text-amber-300 capitalize">{blockedBy}</span> already aggregates this platform's data.
+              Disconnect {blockedBy} first to connect {name} individually.
+            </p>
+          </div>
+        )}
+
         {/* Removed Conflict banner */}
 
         {/* Verification UI */}
@@ -173,6 +184,12 @@ const PlatformRow = ({
 const AddPlatform = () => {
   useEffect(() => {
     document.title = 'Connect Platforms | Orbito';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
+    };
   }, []);
 
   const [usernames, setUsernames] = useState({
@@ -199,7 +216,7 @@ const AddPlatform = () => {
   const [isDeleting, setIsDeleting] = useState({
     credly: false, leetcode: false, codechef: false, codestudio: false, codolio: false
   })
-  const [isTogglingVisibility, setIsTogglingVisibility] = useState({})
+  const [, setIsTogglingVisibility] = useState({})
 
   const confettiRef = useRef(null)
   const { linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, updatePlatformVisibility } = useContext(AppContext)
@@ -262,7 +279,7 @@ const AddPlatform = () => {
       await navigator.clipboard.writeText(text)
       setCopiedCode((prev) => ({ ...prev, [platform]: true }))
       setTimeout(() => setCopiedCode((prev) => ({ ...prev, [platform]: false })), 2000)
-    } catch {}
+    } catch { /* clipboard unavailable */ }
   }
 
   // ── Generic connect handler ─────────────────────────────────────────────
@@ -361,11 +378,11 @@ const AddPlatform = () => {
 
   return (
     <>
-      <div className="w-full bg-black min-h-screen">
+      <div className="w-full bg-black h-screen overflow-hidden">
         <Sidebar />
-        <div className="ml-20">
+        <div className="ml-0 md:ml-20 h-full overflow-y-auto overflow-x-hidden overscroll-contain">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
-            <div className="relative overflow-visible text-white">
+            <div className="relative overflow-x-clip text-white">
               <style>{`
                 @keyframes grid-draw { 0% { stroke-dashoffset: 1000; opacity: 0; } 50% { opacity: 0.4; } 100% { stroke-dashoffset: 0; opacity: 0.25; } }
                 @keyframes pulse-glow { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.1); } }

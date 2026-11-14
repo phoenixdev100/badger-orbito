@@ -2,7 +2,7 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="relative overflow-hidden bottom-0 left-0 right-0 bg-black">
+    <footer className="relative overflow-hidden bottom-0 left-0 right-0 bg-black border-t border-white/10">
       {/* Match Testimonial's animated grid background */}
       <style>{`
         @keyframes grid-draw { 0% { stroke-dashoffset: 1000; opacity: 0; } 50% { opacity: 0.3; } 100% { stroke-dashoffset: 0; opacity: 0.15; } }
@@ -41,10 +41,10 @@ const Footer = () => {
         <div className="absolute bottom-0 left-0 w-2 h-2 bg-slate-300 opacity-30 rounded-full"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-4">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-4 ml-0 md:ml-20">
         <div className="flex flex-col md:flex-row justify-between items-center gap-3">
           {/* Left: copyright */}
-          <p className="text-sm text-white/80">© Copyright Orbito {new Date().getFullYear()}</p>
+          <p className="text-sm text-white/80 pl-4 md:pl-5">© Copyright Orbito {new Date().getFullYear()}</p>
 
           {/* Middle: slogan */}
           <p className="text-sm md:text-base text-white/90 text-center">Built for Learners ❤️ Loved by Creators</p>

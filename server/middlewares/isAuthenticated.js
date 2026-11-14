@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import userModel from '../models/userModel.js';
 
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ success: false, message: 'Unauthorized. Missing authentication token.' });
@@ -21,6 +22,15 @@ const isAuthenticated = (req, res, next) => {
     if (!decoded || !decoded.id) {
       return res.status(401).json({ success: false, message: 'Unauthorized. Invalid token payload.' });
     }
+
+    // Invalidate tokens issued before the last password change
+    if (decoded.iat) {
+      const user = await userModel.findById(decoded.id).select('passwordChangedAt').lean();
+      if (user?.passwordChangedAt && decoded.iat * 1000 < user.passwordChangedAt.getTime()) {
+        return res.status(401).json({ success: false, message: 'Session expired. Password was changed, please login again.' });
+      }
+    }
+
     req.userId = decoded.id;
     return next();
   } catch (err) {

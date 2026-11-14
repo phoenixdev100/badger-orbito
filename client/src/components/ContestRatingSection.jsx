@@ -40,15 +40,6 @@ function RatingChart({ contestList, color, label }) {
   const svgRef = useRef(null);
   const [tooltip, setTooltip] = useState(null);
 
-  if (!contestList || contestList.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[210px] text-slate-500 text-sm">
-        <Trophy className="w-8 h-8 text-slate-600 mb-2" />
-        No contest rating history available for {label}.
-      </div>
-    );
-  }
-
   const ratings  = contestList.map((c) => c.rating);
   const minR     = Math.min(...ratings);
   const maxR     = Math.max(...ratings);
@@ -62,10 +53,12 @@ function RatingChart({ contestList, color, label }) {
   const toY = (r) => PAD.top + (1 - (r - yMin) / yRange) * CHART_H;
 
   const points   = contestList.map((c, i) => ({ x: toX(i), y: toY(c.rating) }));
-  const linePath = catmullRomPath(points);
-  const areaPath = linePath
-    + ` L ${points[points.length - 1].x} ${PAD.top + CHART_H}`
-    + ` L ${points[0].x} ${PAD.top + CHART_H} Z`;
+  const linePath = points.length ? catmullRomPath(points) : '';
+  const areaPath = points.length
+    ? linePath
+      + ` L ${points[points.length - 1].x} ${PAD.top + CHART_H}`
+      + ` L ${points[0].x} ${PAD.top + CHART_H} Z`
+    : '';
 
   const tickCount = 4;
   const yTicks = Array.from({ length: tickCount + 1 }, (_, i) =>
@@ -93,6 +86,15 @@ function RatingChart({ contestList, color, label }) {
   };
 
   const gradId = `areaGrad-${label.replace(/\s+/g, '')}`;
+
+  if (!contestList || contestList.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[210px] text-slate-500 text-sm">
+        <Trophy className="w-8 h-8 text-slate-600 mb-2" />
+        No contest rating history available for {label}.
+      </div>
+    );
+  }
 
   return (
     <div className="relative select-none w-full">
@@ -234,9 +236,8 @@ function ActivityHeatmap({ calendar, activeDaysCount = 0 }) {
 
   // Generate real calendar days for the past 28 weeks (196 days)
   const TOTAL_WEEKS = 28;
-  const { weeks, totalSubmissions } = useMemo(() => {
+  const { weeks } = useMemo(() => {
     const dayMap = {};
-    let subSum = 0;
 
     if (calendar && typeof calendar === 'object') {
       Object.entries(calendar).forEach(([ts, count]) => {
@@ -245,7 +246,6 @@ function ActivityHeatmap({ calendar, activeDaysCount = 0 }) {
           const key = d.toISOString().split('T')[0];
           const val = Number(count) || 0;
           dayMap[key] = (dayMap[key] || 0) + val;
-          subSum += val;
         }
       });
     }
@@ -274,7 +274,7 @@ function ActivityHeatmap({ calendar, activeDaysCount = 0 }) {
       cols.push(flatDays.slice(i, i + 7));
     }
 
-    return { weeks: cols, totalSubmissions: subSum };
+    return { weeks: cols };
   }, [calendar]);
 
   // Intensity color mapper based on real submission counts
@@ -395,7 +395,8 @@ const ContestRatingSection = ({ platforms = [], summary = {}, loading = false })
     bg: '#06b6d418',
   };
 
-  const totalContestsCount = platformsWithContests.reduce((s, p) => s + (p.contestCount || 0), 0);
+
+
 
   // Real submission calendar: active platform calendar OR combined calendar from summary
   const activeCalendar = activePlatform?.submissionCalendar || summary?.submissionCalendar || null;

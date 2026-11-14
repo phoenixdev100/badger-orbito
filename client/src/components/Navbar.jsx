@@ -7,7 +7,7 @@ import Login from './Login.jsx';
 import { User, Plus } from 'lucide-react';
 
 const Navbar = () => {
-  const { showLogin, setShowLogin, isAuthenticated, user } = useContext(AppContext);
+  const { setShowLogin, isAuthenticated } = useContext(AppContext);
   const navigate = useNavigate();
   const location = useLocation();
 
