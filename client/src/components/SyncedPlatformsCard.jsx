@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Layers, Plus, ExternalLink, Settings } from 'lucide-react';
+import React, { useEffect, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Layers, Plus, ExternalLink, Settings, LayoutGrid, Check } from 'lucide-react';
+import { AppContext } from '../context/AppContext';
 
 const getPlatformExternalUrl = (platformId, username) => {
   if (!username) return '#';
@@ -24,6 +25,19 @@ const getPlatformExternalUrl = (platformId, username) => {
 
 export default function SyncedPlatformsCard({ connectedPlatforms = [], onClose }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { platformFilter, setPlatformFilter } = useContext(AppContext);
+
+  // Apply a platform filter and jump to the dashboard Trophy Room
+  const applyFilter = (platformId) => {
+    setPlatformFilter(platformId);
+    onClose?.();
+    if (pathname === '/dashboard') {
+      document.getElementById('trophy-room')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/dashboard#trophy-room');
+    }
+  };
 
   // Handle click outside to close the card
   useEffect(() => {
@@ -79,14 +93,54 @@ export default function SyncedPlatformsCard({ connectedPlatforms = [], onClose }
       </div>
 
       {/* Platforms List */}
-      <div className="mt-4 space-y-2 max-h-40 overflow-y-auto scrollbar-none pr-0.5 relative z-10">
+      <div className="mt-4 space-y-2 max-h-48 overflow-y-auto scrollbar-none pr-0.5 relative z-10">
+        {/* All Platforms (reset filter) */}
+        <button
+          type="button"
+          onClick={() => {
+            setPlatformFilter('all');
+            onClose?.();
+            if (pathname === '/dashboard') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              navigate('/dashboard');
+            }
+          }}
+          className={`w-full flex items-center justify-between p-2 rounded-2xl border transition-all cursor-pointer ${
+            platformFilter === 'all'
+              ? 'bg-emerald-500/15 border-emerald-500/50'
+              : 'bg-gray-900/60 border-gray-800/80 hover:border-gray-700'
+          }`}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-black/80 border border-gray-800 flex items-center justify-center p-1 shrink-0">
+              <LayoutGrid className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-xs font-bold text-white truncate">All Platforms</p>
+              <p className="text-[10px] text-gray-400 font-mono truncate">Show everything</p>
+            </div>
+          </div>
+          {platformFilter === 'all' && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
+        </button>
+
         {connectedPlatforms.length > 0 ? (
           connectedPlatforms.map((platform) => {
             const extUrl = getPlatformExternalUrl(platform.id, platform.username);
+            const isActive = platformFilter === platform.id;
             return (
               <div
                 key={platform.id}
-                className="flex items-center justify-between p-2 rounded-2xl bg-gray-900/60 border border-gray-800/80 hover:border-gray-700 transition-all"
+                role="button"
+                tabIndex={0}
+                onClick={() => applyFilter(platform.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') applyFilter(platform.id); }}
+                title={`Filter dashboard by ${platform.name}`}
+                className={`w-full flex items-center justify-between p-2 rounded-2xl border transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-emerald-500/15 border-emerald-500/50'
+                    : 'bg-gray-900/60 border-gray-800/80 hover:border-gray-700'
+                }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-7 h-7 rounded-lg bg-black/80 border border-gray-800 flex items-center justify-center p-1 shrink-0">
@@ -100,15 +154,19 @@ export default function SyncedPlatformsCard({ connectedPlatforms = [], onClose }
                   </div>
                 </div>
 
-                <a
-                  href={extUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 rounded-md text-gray-400 hover:text-white transition-colors"
-                  title={`Open ${platform.name}`}
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                <div className="flex items-center gap-1 shrink-0">
+                  {isActive && <Check className="w-4 h-4 text-emerald-400" />}
+                  <a
+                    href={extUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-1 rounded-md text-gray-400 hover:text-white transition-colors"
+                    title={`Open ${platform.name}`}
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
             );
           })
@@ -118,6 +176,12 @@ export default function SyncedPlatformsCard({ connectedPlatforms = [], onClose }
           </div>
         )}
       </div>
+
+      {connectedPlatforms.length > 0 && (
+        <p className="mt-3 text-[10px] text-gray-500 text-center relative z-10">
+          Click a platform to filter your dashboard
+        </p>
+      )}
 
       {/* Action Buttons: Add Platform & Manage */}
       <div className="mt-6 flex gap-3 relative z-10">

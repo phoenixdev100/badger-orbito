@@ -254,7 +254,7 @@ const PublicProfile = () => {
   useEffect(() => {
     if (profileData?.user?.name || username) {
       const displayName = profileData?.user?.name ? `${profileData.user.name} (@${username})` : `@${username}`;
-      document.title = `${displayName} — Developer Portfolio | Orbito`;
+      document.title = `${displayName} - Developer Portfolio | Orbito`;
     } else {
       document.title = 'Developer Profile | Orbito';
     }

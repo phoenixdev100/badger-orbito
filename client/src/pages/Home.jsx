@@ -18,7 +18,7 @@ const Home = () => {
   const color = useMotionValue(COLORS_TOP[0]);
 
   useEffect(() => {
-    document.title = 'Orbito — Unified Developer Portfolio & Verified Coding Profile Aggregator';
+    document.title = 'Orbito - Unified Developer Portfolio & Verified Coding Profile Aggregator';
     const controls = animate(color, COLORS_TOP, {
       ease: 'easeInOut',
       duration: 10,
