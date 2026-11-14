@@ -17,6 +17,15 @@ const AppContextProvider = (props) => {
     const [token, setToken] = useState(localStorage.getItem('token'))
     const [platformData, setPlatformData] = useState(null);
     const [platformFilter, setPlatformFilter] = useState('all');
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+    // Apply & persist theme
+    useEffect(() => {
+        document.documentElement.classList.toggle('light', theme === 'light');
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
     const backendUrl = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
 
@@ -277,7 +286,7 @@ const AppContextProvider = (props) => {
 
     const value = {
         user, setUser, showLogin, setShowLogin, backendUrl, token, setToken, logout, isAuthenticated,
-        platformData, setPlatformData, platformFilter, setPlatformFilter,
+        platformData, setPlatformData, platformFilter, setPlatformFilter, theme, toggleTheme,
         linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, fetchPlatformsData,
         updatePlatformVisibility, updateProfile, changePassword, updateUsername, updateVisibility,
     };
