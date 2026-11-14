@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 import {
   User,
   Shield,
@@ -54,8 +55,8 @@ const Settings = () => {
   }, []);
   const {
     user,
-    setUser,
     logout,
+    backendUrl,
     platformData,
     updateProfile,
     changePassword,
@@ -63,7 +64,6 @@ const Settings = () => {
     updateVisibility,
     getUserPlatforms,
     updatePlatformVisibility,
-    deletePlatform,
   } = useContext(AppContext);
 
   const [activeTab, setActiveTab] = useState('profile');
@@ -114,7 +114,75 @@ const Settings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
+
+  // 2FA state
+  const [tfaEnabled, setTfaEnabled] = useState(!!user?.twoFactorEnabled);
+  const [tfaSetup, setTfaSetup] = useState(null); // { qrCode, secret }
+  const [tfaCode, setTfaCode] = useState('');
+  const [tfaPassword, setTfaPassword] = useState('');
+  const [tfaLoading, setTfaLoading] = useState(false);
+
+  const tfaHeaders = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+
+  const handle2FASetup = async () => {
+    setTfaLoading(true);
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/user/2fa/setup`, {}, { headers: tfaHeaders });
+      if (data.success) {
+        setTfaSetup({ qrCode: data.qrCode, secret: data.secret });
+        setTfaCode('');
+      } else toast.error(data.message);
+    } catch (e) { toast.error(e.response?.data?.message || '2FA setup failed'); }
+    finally { setTfaLoading(false); }
+  };
+
+  const handle2FAEnable = async () => {
+    setTfaLoading(true);
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/user/2fa/enable`, { code: tfaCode }, { headers: tfaHeaders });
+      if (data.success) {
+        setTfaEnabled(true);
+        setTfaSetup(null);
+        setTfaCode('');
+        toast.success('Two-factor authentication enabled!');
+      } else toast.error(data.message);
+    } catch (e) { toast.error(e.response?.data?.message || 'Invalid code'); }
+    finally { setTfaLoading(false); }
+  };
+
+  const handle2FADisable = async () => {
+    setTfaLoading(true);
+    try {
+      const { data } = await axios.post(`${backendUrl}/api/user/2fa/disable`, { password: tfaPassword, code: tfaCode }, { headers: tfaHeaders });
+      if (data.success) {
+        setTfaEnabled(false);
+        setTfaSetup(null);
+        setTfaCode('');
+        setTfaPassword('');
+        toast.success('Two-factor authentication disabled');
+      } else toast.error(data.message);
+    } catch (e) { toast.error(e.response?.data?.message || 'Disable failed'); }
+    finally { setTfaLoading(false); }
+  };
+
+  // Password strength evaluation
+  const passChecks = {
+    length: newPassword.length >= 8,
+    letter: /[a-zA-Z]/.test(newPassword),
+    number: /[0-9]/.test(newPassword),
+    symbol: /[^a-zA-Z0-9]/.test(newPassword),
+  };
+  const passScore =
+    [passChecks.length, passChecks.letter, passChecks.number, passChecks.symbol].filter(Boolean).length +
+    (newPassword.length >= 12 ? 1 : 0);
+  const passStrength =
+    passScore <= 2
+      ? { label: 'Weak', bar: 'bg-red-500', text: 'text-red-400' }
+      : passScore <= 4
+        ? { label: 'Fair', bar: 'bg-amber-500', text: 'text-amber-400' }
+        : { label: 'Strong', bar: 'bg-emerald-500', text: 'text-emerald-400' };
 
   // Platform state
   const [platforms, setPlatforms] = useState({});
@@ -144,6 +212,7 @@ const Settings = () => {
     if (user?.name) setName(user.name);
     if (user?.bio) setBio(user.bio);
     loadPlatforms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadPlatforms is intentionally mount/user-scoped
   }, [user]);
 
   // Handle Profile Update
@@ -171,8 +240,12 @@ const Settings = () => {
       toast.error('Current password is required');
       return;
     }
-    if (newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters');
+    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      toast.error('Password must be at least 8 characters and include a letter and a number');
+      return;
+    }
+    if (newPassword === currentPassword) {
+      toast.error('New password must be different from the current password');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -601,20 +674,20 @@ const Settings = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="space-y-6"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
             >
-              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-                <div className="pb-6 border-b border-white/10 mb-6">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <KeyRound className="w-5 h-5 text-indigo-400" />
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-4 sm:p-5 backdrop-blur-xl shadow-xl">
+                <div className="pb-4 border-b border-white/10 mb-4">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <KeyRound className="w-4 h-4 text-indigo-400" />
                     <span>Password & Authentication</span>
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-[11px] text-slate-400 mt-0.5">
                     Manage your secret access credentials and account protection.
                   </p>
                 </div>
 
-                <form onSubmit={handleChangePassword} className="space-y-5 max-w-lg">
+                <form onSubmit={handleChangePassword} className="space-y-3 max-w-md">
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                       Current Password
@@ -625,7 +698,7 @@ const Settings = () => {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Enter current password"
-                        className="w-full px-4 py-2.5 pr-10 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                        className="w-full px-3.5 py-2 pr-10 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
                       />
                       <button
                         type="button"
@@ -646,8 +719,8 @@ const Settings = () => {
                         type={showNewPass ? 'text' : 'password'}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="At least 6 characters"
-                        className="w-full px-4 py-2.5 pr-10 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                        placeholder="8+ chars, letter & number"
+                        className="w-full px-3.5 py-2 pr-10 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
                       />
                       <button
                         type="button"
@@ -657,33 +730,186 @@ const Settings = () => {
                         {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+
+                    {/* Password strength meter */}
+                    {newPassword && (
+                      <div className="mt-2 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-1 flex-1 mr-3">
+                            {[0, 1, 2, 3].map((i) => (
+                              <div
+                                key={i}
+                                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                                  i < Math.min(passScore, 4) ? passStrength.bar : 'bg-white/10'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className={`text-[11px] font-semibold ${passStrength.text}`}>
+                            {passStrength.label}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                          {[
+                            { ok: passChecks.length, label: '8+ characters' },
+                            { ok: passChecks.letter, label: 'Letter (a-z)' },
+                            { ok: passChecks.number, label: 'Number (0-9)' },
+                            { ok: passChecks.symbol, label: 'Symbol (!@#…)' },
+                          ].map((req) => (
+                            <span
+                              key={req.label}
+                              className={`text-[10px] flex items-center gap-1 ${req.ok ? 'text-emerald-400' : 'text-slate-500'}`}
+                            >
+                              {req.ok ? <Check className="w-3 h-3" /> : <span className="w-3 h-3 rounded-full border border-current inline-block" />}
+                              {req.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                       Confirm New Password
                     </label>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Repeat new password"
-                      className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showConfirmPass ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Repeat new password"
+                        className="w-full px-3.5 py-2 pr-10 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPass(!showConfirmPass)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {confirmPassword && newPassword !== confirmPassword && (
+                      <p className="mt-1.5 text-[11px] text-red-400">Passwords do not match</p>
+                    )}
+                    {confirmPassword && newPassword === confirmPassword && newPassword.length > 0 && (
+                      <p className="mt-1.5 text-[11px] text-emerald-400 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> Passwords match
+                      </p>
+                    )}
                   </div>
 
-                  <div className="pt-3">
+                  <div className="pt-2">
                     <button
                       type="submit"
                       disabled={isChangingPass}
-                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-all cursor-pointer shadow-lg disabled:opacity-50"
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-all cursor-pointer shadow-lg disabled:opacity-50"
                     >
-                      <Lock className="w-4 h-4" />
+                      <Lock className="w-3.5 h-3.5" />
                       <span>{isChangingPass ? 'Updating Password...' : 'Update Password'}</span>
                     </button>
                   </div>
                 </form>
               </div>
+
+              {/* Two-Factor Authentication */}
+              <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-6 backdrop-blur-xl shadow-xl max-w-md">
+                <div className="pb-4 border-b border-white/10 mb-4">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Two-Factor Authentication</span>
+                    {tfaEnabled && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                        ENABLED
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Add an extra layer of security with an authenticator app (Google Authenticator, Authy).
+                  </p>
+                </div>
+
+                {!tfaEnabled && !tfaSetup && (
+                  <button
+                    type="button"
+                    onClick={handle2FASetup}
+                    disabled={tfaLoading}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 font-semibold text-xs sm:text-sm hover:bg-cyan-500/25 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span>{tfaLoading ? 'Setting up...' : 'Enable 2FA'}</span>
+                  </button>
+                )}
+
+                {tfaSetup && !tfaEnabled && (
+                  <div className="space-y-4">
+                    <div className="flex justify-center">
+                      <img src={tfaSetup.qrCode} alt="2FA QR Code" className="w-40 h-40 rounded-xl bg-white p-2" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Or enter manually</p>
+                      <p className="text-xs font-mono text-cyan-300 break-all bg-black/40 border border-white/10 rounded-lg px-3 py-2">{tfaSetup.secret}</p>
+                    </div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={tfaCode}
+                      onChange={(e) => setTfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="Enter 6-digit code"
+                      className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white text-center tracking-[0.4em] font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handle2FAEnable}
+                        disabled={tfaLoading || tfaCode.length !== 6}
+                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-semibold text-xs hover:bg-emerald-500/25 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <Check className="w-4 h-4" /> Verify & Enable
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setTfaSetup(null); setTfaCode(''); }}
+                        className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-xs hover:text-white transition-all cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {tfaEnabled && (
+                  <div className="space-y-3">
+                    <p className="text-xs text-slate-400">
+                      Your account is protected with time-based one-time passwords.
+                    </p>
+                    <input
+                      type="password"
+                      value={tfaPassword}
+                      onChange={(e) => setTfaPassword(e.target.value)}
+                      placeholder="Current password"
+                      className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white focus:outline-none focus:border-cyan-400"
+                    />
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={tfaCode}
+                      onChange={(e) => setTfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="6-digit code to disable"
+                      className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-sm text-white text-center tracking-[0.4em] font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handle2FADisable}
+                      disabled={tfaLoading || !tfaPassword || tfaCode.length !== 6}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/15 border border-red-500/40 text-red-300 font-semibold text-xs sm:text-sm hover:bg-red-500/25 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <span>{tfaLoading ? 'Disabling...' : 'Disable 2FA'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
             </motion.div>
           )}
 

@@ -1,6 +1,6 @@
 import { Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useContext } from "react";
 import { Rocket } from "lucide-react";
 import { FiArrowRight } from "react-icons/fi";
 import {
@@ -38,7 +38,7 @@ const Hero = () => {
       repeat: Infinity,
       repeatType: "mirror",
     });
-  }, []);
+  }, [color]);
 
   const backgroundImage = useMotionTemplate`radial-gradient(125% 125% at 50% 0%, #020617 50%, ${color})`;
   const border = useMotionTemplate`1px solid ${color}`;
@@ -115,10 +115,6 @@ const floatingIcons = [
   { type: 'icon', Icon: SiKaggle, color: '#20BEFF', size: 48 },
   { type: 'icon', Icon: SiGithub, color: '#fff', size: 48 },
 ];
-
-function getRandom(min, max) {
-  return Math.random() * (max - min) + min;
-}
 
 const FloatingPlatformIcons = () => {
   // Arrange icons in a fixed grid to avoid collision and use equal speed/duration

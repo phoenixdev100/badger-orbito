@@ -50,7 +50,7 @@ const VisibilityCheckbox = ({ platform, isVerified, isPublic, onToggle, disabled
 }
 
 // ── Mutual Exclusivity Note (No longer a banner/warning) ──────────────────
-const ConflictNote = ({ blockedBy }) => {
+const ConflictNote = () => {
   return null // Removed detailed error messages as requested
 }
 
@@ -199,7 +199,7 @@ const AddPlatform = () => {
   const [isDeleting, setIsDeleting] = useState({
     credly: false, leetcode: false, codechef: false, codestudio: false, codolio: false
   })
-  const [isTogglingVisibility, setIsTogglingVisibility] = useState({})
+  const [, setIsTogglingVisibility] = useState({})
 
   const confettiRef = useRef(null)
   const { linkPlatform, verifyPlatform, deletePlatform, getUserPlatforms, updatePlatformVisibility } = useContext(AppContext)
@@ -262,7 +262,7 @@ const AddPlatform = () => {
       await navigator.clipboard.writeText(text)
       setCopiedCode((prev) => ({ ...prev, [platform]: true }))
       setTimeout(() => setCopiedCode((prev) => ({ ...prev, [platform]: false })), 2000)
-    } catch {}
+    } catch { /* clipboard unavailable */ }
   }
 
   // ── Generic connect handler ─────────────────────────────────────────────

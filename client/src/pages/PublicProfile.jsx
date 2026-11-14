@@ -38,35 +38,6 @@ const PLATFORM_META = {
   codolio:       { label: 'Codolio',       color: '#06b6d4', bg: '#06b6d418', url: 'https://codolio.com' },
 };
 
-function getPlatformProfileUrl(platform, handle, userPlatforms, platformData) {
-  const h =
-    handle ||
-    userPlatforms?.[platform] ||
-    platformData?.userPlatforms?.[platform] ||
-    platformData?.[platform]?.username ||
-    '';
-
-  if (h) {
-    switch (platform) {
-      case 'leetcode':
-        return `https://leetcode.com/u/${h}`;
-      case 'codechef':
-        return `https://www.codechef.com/users/${h}`;
-      case 'codestudio':
-        return `https://www.naukri.com/code360/profile/${h}`;
-      case 'credly':
-        return `https://www.credly.com/users/${h}`;
-      case 'codolio':
-        return `https://codolio.com/profile/${h}`;
-      case 'hackerrank':
-        return `https://www.hackerrank.com/profile/${h}`;
-      default:
-        break;
-    }
-  }
-  return PLATFORM_META[platform]?.url || '#';
-}
-
 // ── Badge Card Component ────────────────────────────────────────────────────
 const BadgeCard = ({ badge, onClick }) => {
   const meta = PLATFORM_META[badge.platform] || { label: badge.platform || 'Platform', color: '#06b6d4' };
@@ -148,7 +119,6 @@ const BadgeDetailModal = ({ badge, onClose }) => {
 // ── Certificate Modal ───────────────────────────────────────────────────────
 const CertificateModal = ({ cert, onClose, userName }) => {
   if (!cert) return null;
-  const meta = PLATFORM_META[cert.platform] || { label: cert.platform || 'Platform', color: '#10b981' };
 
   return (
     <div className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
@@ -262,13 +232,12 @@ const PublicProfile = () => {
 
   // Aggregation
   const user = profileData?.user || {};
-  const platformData = profileData?.data || {};
-  const userPlatforms = profileData?.userPlatforms || {};
+  const platformData = useMemo(() => profileData?.data || {}, [profileData]);
 
   const codolio = platformData?.codolio || {};
   const codolioSummary = codolio.summary || {};
-  const codolioplatforms = codolio.platforms || [];
-  const credlyBadges = platformData?.credly?.badges || [];
+  const codolioplatforms = useMemo(() => codolio.platforms || [], [codolio.platforms]);
+  const credlyBadges = useMemo(() => platformData?.credly?.badges || [], [platformData]);
 
   const totalBadges = (codolioSummary.totalBadges || 0) + (platformData?.credly?.badgeCount || 0);
   const totalCertificates = (codolioSummary.totalCertificates || 0) + credlyBadges.length;
