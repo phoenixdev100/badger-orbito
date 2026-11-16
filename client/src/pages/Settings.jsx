@@ -33,7 +33,7 @@ import {
 
 import Sidebar from '../components/Sidebar';
 import { AppContext } from '../context/AppContext';
-import getDeveloperAvatar from '../utils/avatarHelper.js';
+import getDeveloperAvatar, { DEFAULT_MEMOJI_AVATAR } from '../utils/avatarHelper.js';
 
 const PLATFORM_META = {
   leetcode:      { label: 'LeetCode',      color: '#FFA116', bg: '#FFA11615', url: 'https://leetcode.com' },
@@ -374,6 +374,7 @@ const Settings = () => {
                     <img
                       src={getDeveloperAvatar(user, platformData)}
                       alt={name || 'Developer'}
+                      onError={(e) => { e.currentTarget.src = DEFAULT_MEMOJI_AVATAR; }}
                       className="w-full h-full object-cover rounded-[14px]"
                     />
                   </div>
@@ -676,6 +677,7 @@ const Settings = () => {
               transition={{ duration: 0.2 }}
               className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
             >
+              {!user?.isGoogleAccount && (
               <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-4 sm:p-5 backdrop-blur-xl shadow-xl">
                 <div className="pb-4 border-b border-white/10 mb-4">
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -811,6 +813,7 @@ const Settings = () => {
                   </div>
                 </form>
               </div>
+              )}
 
               {/* Two-Factor Authentication */}
               <div className="rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-6 backdrop-blur-xl shadow-xl max-w-md">
@@ -1012,10 +1015,18 @@ const Settings = () => {
                 <button
                   type="button"
                   disabled={deleteConfirmText !== 'DELETE'}
-                  onClick={() => {
-                    localStorage.clear();
-                    toast.success('Account reset successfully');
-                    navigate('/');
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      await axios.delete(`${backendUrl}/api/user/account`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      localStorage.clear();
+                      toast.success('Account permanently deleted');
+                      navigate('/');
+                    } catch (err) {
+                      toast.error(err.response?.data?.message || 'Failed to delete account');
+                    }
                   }}
                   className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-40"
                 >
