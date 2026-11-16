@@ -5,7 +5,7 @@ import assets from '../assets/assets.js';
 import AnimatedProfileCard from './info-card';
 import ShareProfileModal from './ShareProfileModal';
 import { AppContext } from '../context/AppContext';
-import getDeveloperAvatar from '../utils/avatarHelper.js';
+import getDeveloperAvatar, { DEFAULT_MEMOJI_AVATAR } from '../utils/avatarHelper.js';
 
 import {
   LayoutDashboard,
@@ -289,6 +289,7 @@ const Sidebar = () => {
                 <img
                   src={getDeveloperAvatar(user, platformData)}
                   alt={user?.name || 'Developer'}
+                  onError={(e) => { e.currentTarget.src = DEFAULT_MEMOJI_AVATAR; }}
                   className="w-full h-full object-cover rounded-[12px]"
                 />
               </div>

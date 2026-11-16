@@ -15,9 +15,22 @@ export const DEFAULT_MEMOJI_AVATAR = "https://ik.imagekit.io/fpxbgsota/memoji-al
  * 4. Default memoji fallback
  */
 export const getDeveloperAvatar = (user = null, platformData = null) => {
+  const isValidUrl = (u) =>
+    typeof u === 'string' &&
+    u.trim() !== '' &&
+    (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('data:') || u.startsWith('blob:'));
+
+  const pick = (...candidates) => candidates.find(isValidUrl) || null;
+
   // 1. Explicit user profile picture
-  if (user?.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.trim() !== '') {
-    return user.profilePicture;
+  const profilePic = pick(user?.profilePicture);
+  if (profilePic) {
+    // Route Google avatars through our backend proxy (browser may block googleusercontent)
+    if (profilePic.includes('googleusercontent.com')) {
+      const base = (import.meta.env.VITE_BASE_URL || '').replace(/\/+$/, '');
+      return `${base}/api/user/avatar?url=${encodeURIComponent(profilePic)}`;
+    }
+    return profilePic;
   }
 
   // 2. Connected platform avatars cascade

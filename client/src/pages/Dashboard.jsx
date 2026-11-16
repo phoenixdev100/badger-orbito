@@ -50,7 +50,7 @@ import SkillRadarChart from '../components/SkillRadarChart';
 import RecentActivityTimeline from '../components/RecentActivityTimeline';
 import PlatformEngagementChart from '../components/PlatformEngagementChart';
 import { AppContext } from '../context/AppContext';
-import getDeveloperAvatar from '../utils/avatarHelper.js';
+import getDeveloperAvatar, { DEFAULT_MEMOJI_AVATAR } from '../utils/avatarHelper.js';
 
 // ─── Platform Metadata & Brand Accents ───────────────────────────────────────
 const TRACKED_PLATFORM_KEYS = ['codolio', 'credly', 'leetcode', 'codechef', 'codestudio'];
@@ -909,7 +909,7 @@ const Dashboard = () => {
       <Sidebar />
 
       {/* Main Content Pane - Fully Utilizing Screen Width */}
-      <div className="ml-0 md:ml-20">
+      <div className="ml-20">
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-8 sm:py-10">
           <div className="relative overflow-visible space-y-8">
 
@@ -927,6 +927,7 @@ const Dashboard = () => {
                       <img
                         src={getDeveloperAvatar(user, platformData)}
                         alt={user?.name || 'Developer'}
+                        onError={(e) => { e.currentTarget.src = DEFAULT_MEMOJI_AVATAR; }}
                         className="w-full h-full object-cover rounded-2xl"
                       />
                     </div>

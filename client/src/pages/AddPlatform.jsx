@@ -72,7 +72,7 @@ const PlatformRow = ({
       <div className="absolute inset-[2px] bg-black rounded-[10px] border border-gray-800" />
 
       <div className="relative z-10">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
           {/* Visibility checkbox + icon */}
           <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
             <VisibilityCheckbox
@@ -88,7 +88,7 @@ const PlatformRow = ({
           </div>
 
           {/* URL + username input + action button */}
-          <ButtonGroup className="flex-1">
+          <ButtonGroup className="flex-1 flex-col sm:flex-row">
             <ButtonGroupText className="bg-black border-gray-800 text-gray-300 shadow-[4px_4px_12px_#111,-4px_-4px_12px_#222]">
               {urlPrefix}
             </ButtonGroupText>
@@ -380,7 +380,7 @@ const AddPlatform = () => {
     <>
       <div className="w-full bg-black h-screen overflow-hidden">
         <Sidebar />
-        <div className="ml-0 md:ml-20 h-full overflow-y-auto overflow-x-hidden overscroll-contain">
+        <div className="ml-20 h-full overflow-y-auto overflow-x-hidden overscroll-contain">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 py-8">
             <div className="relative overflow-x-clip text-white">
               <style>{`
