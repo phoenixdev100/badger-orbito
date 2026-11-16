@@ -1,6 +1,7 @@
 import userModel from "../models/userModel.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { fetchCredlyData } from '../services/credlyService.js';
@@ -500,9 +501,83 @@ const signOutAllDevices = async (req, res) => {
     }
 };
 
+// Google OAuth login/signup via Google Identity Services ID token
+const googleLogin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) {
+            return res.status(400).json({ success: false, message: 'Google credential is required' });
+        }
+
+        // Verify the Google ID token
+        const { data: tokenInfo } = await axios.get(
+            `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
+            { timeout: 10000 }
+        );
+
+        const email = String(tokenInfo.email || '').trim().toLowerCase();
+        const googleId = String(tokenInfo.sub || '');
+        if (!email || !googleId) {
+            return res.status(401).json({ success: false, message: 'Invalid Google token' });
+        }
+
+        // Find existing user by googleId or email
+        let user = await userModel.findOne({
+            $or: [{ googleId }, { email }],
+        }).exec();
+
+        if (!user) {
+            // Auto sign-up: random unusable password + googleId
+            const randomPassword = await bcrypt.hash(googleId + Date.now(), 10);
+            user = new userModel({
+                name: tokenInfo.name || email.split('@')[0],
+                email,
+                password: randomPassword,
+                googleId,
+                username: await generateUniqueUsername(email),
+                profilePicture: tokenInfo.picture || '',
+            });
+        } else {
+            // Link googleId if missing (e.g. account created with password earlier)
+            if (!user.googleId) user.googleId = googleId;
+            if (!user.profilePicture && tokenInfo.picture) user.profilePicture = tokenInfo.picture;
+            if (!user.username) user.username = await generateUniqueUsername(email);
+        }
+
+        // 2FA check (same flow as password login)
+        if (user.twoFactorEnabled && user.twoFactorSecret) {
+            await user.save();
+            const tempToken = jwt.sign(
+                { id: user._id, purpose: '2fa-pending' },
+                process.env.JWT_SECRET,
+                { expiresIn: '5m' }
+            );
+            return res.json({ success: true, requires2FA: true, tempToken });
+        }
+
+        user.lastLoginAt = new Date();
+        const ua = String(req.headers['user-agent'] || '');
+        user.loginHistory = [
+            { at: user.lastLoginAt, ip: req.ip || '', userAgent: ua.slice(0, 200) },
+            ...(user.loginHistory || []),
+        ].slice(0, 10);
+        await user.save();
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        res.json({ success: true, token, user: formatSafeUser(user) });
+    } catch (error) {
+        if (error.response?.status === 400) {
+            return res.status(401).json({ success: false, message: 'Invalid Google token' });
+        }
+        console.error('Google login error:', error);
+        res.status(500).json({ success: false, message: 'Google login failed' });
+    }
+};
+
 export {
     registerUser,
     loginUser,
+    googleLogin,
     signOutAllDevices,
     updateProfile,
     changePassword,

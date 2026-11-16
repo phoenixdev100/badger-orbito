@@ -94,22 +94,38 @@ const Login = ({ onClose }) => {
       }
     }
   };
-  const handleCredentialLogin = (response) => {
+  const handleCredentialLogin = async (response) => {
     console.log('GIS response:', response);
 
     if (response?.credential) {
-      // Store token under "user" key as requested and also keep existing token behavior
-      localStorage.setItem(
-        'user',
-        JSON.stringify({ isLogin: true, token: response.credential })
-      );
+      setIsLoading(true);
+      try {
+        const { data } = await axios.post(backendUrl + '/api/user/google', {
+          credential: response.credential,
+        });
 
-      // Optionally, you could exchange this token with your backend here.
-      // For now, just close modal and redirect to dashboard.
-      setShowLogin(false);
-      onClose?.();
-      toast.success('Welcome to Orbito!');
-      navigate('/dashboard');
+        if (data.success) {
+          if (data.requires2FA) {
+            setTwoFATemp(data.tempToken);
+            setTwoFACode('');
+            setIsLoading(false);
+            return;
+          }
+          setToken(data.token)
+          setUser(data.user)
+          localStorage.setItem('token', data.token)
+          setShowLogin(false);
+          onClose?.();
+          toast.success(`Welcome, ${data.user?.name || 'Developer'}!`);
+          navigate('/dashboard');
+        } else {
+          toast.error(data.message || 'Google login failed');
+        }
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Google login failed');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

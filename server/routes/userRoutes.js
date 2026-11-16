@@ -2,6 +2,7 @@ import express from 'express';
 import {
     registerUser,
     loginUser,
+    googleLogin,
     updateProfile,
     changePassword,
     updateUsername,
@@ -19,6 +20,7 @@ const userRouter = express.Router();
 
 userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
+userRouter.post('/google', googleLogin);
 userRouter.post('/2fa/verify-login', verify2FALogin);
 userRouter.post('/2fa/setup', isAuthenticated, setup2FA);
 userRouter.post('/2fa/enable', isAuthenticated, enable2FA);
