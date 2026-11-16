@@ -21,6 +21,7 @@ const formatSafeUser = (user) => ({
     lastLoginAt:           user.lastLoginAt || null,
     loginHistory:          (user.loginHistory || []).slice(0, 10),
     twoFactorEnabled:      !!user.twoFactorEnabled,
+    isGoogleAccount:       !!user.googleId,
     isProfilePublic:       user.isProfilePublic !== false,
     bio:                   user.bio || '',
     profilePicture:        user.profilePicture || '',
@@ -574,10 +575,53 @@ const googleLogin = async (req, res) => {
     }
 };
 
+// Proxy external avatar images (e.g. Google profile photos) to bypass browser blocking
+const getAvatarProxy = async (req, res) => {
+    try {
+        const url = String(req.query.url || '');
+        if (!url.startsWith('https://') || !url.includes('googleusercontent.com')) {
+            return res.status(400).json({ success: false, message: 'Invalid avatar URL' });
+        }
+        const { data } = await axios.get(url, {
+            timeout: 10000,
+            responseType: 'arraybuffer',
+            headers: { 'User-Agent': 'Mozilla/5.0' },
+        });
+        res.set('Content-Type', 'image/png').set('Cache-Control', 'public, max-age=86400');
+        res.send(Buffer.from(data));
+    } catch (err) {
+        res.status(502).json({ success: false, message: 'Avatar fetch failed' });
+    }
+};
+
+// Permanently delete account + all related data (platforms live inside user doc)
+const deleteAccount = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.userId);
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // Remove contact form submissions tied to this account's email
+        try {
+            const contactModel = (await import('../models/contactModel.js')).default;
+            await contactModel.deleteMany({ email: user.email });
+        } catch (e) {
+            console.error('Contact cleanup skipped:', e.message);
+        }
+
+        await userModel.findByIdAndDelete(req.userId);
+        res.json({ success: true, message: 'Account permanently deleted' });
+    } catch (error) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete account' });
+    }
+};
+
 export {
     registerUser,
     loginUser,
     googleLogin,
+    deleteAccount,
+    getAvatarProxy,
     signOutAllDevices,
     updateProfile,
     changePassword,
