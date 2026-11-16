@@ -3,6 +3,8 @@ import {
     registerUser,
     loginUser,
     googleLogin,
+    deleteAccount,
+    getAvatarProxy,
     updateProfile,
     changePassword,
     updateUsername,
@@ -21,6 +23,8 @@ const userRouter = express.Router();
 userRouter.post('/register', registerUser);
 userRouter.post('/login', loginUser);
 userRouter.post('/google', googleLogin);
+userRouter.delete('/account', isAuthenticated, deleteAccount);
+userRouter.get('/avatar', getAvatarProxy);
 userRouter.post('/2fa/verify-login', verify2FALogin);
 userRouter.post('/2fa/setup', isAuthenticated, setup2FA);
 userRouter.post('/2fa/enable', isAuthenticated, enable2FA);
