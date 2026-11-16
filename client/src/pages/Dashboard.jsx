@@ -1228,48 +1228,6 @@ const Dashboard = () => {
                   </div>
                 </button>
 
-                {/* Search Bar + Filter Tabs */}
-                {trophyOpen && (
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  {/* Search Input */}
-                  <div className="relative">
-                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={badgeSearch}
-                      onChange={(e) => setBadgeSearch(e.target.value)}
-                      placeholder="Search awards by name or skill..."
-                      className="pl-9 pr-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-400 outline-none focus:border-cyan-400 transition-colors w-full sm:w-56"
-                    />
-                  </div>
-
-                  {/* Filter Pills */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-                    {[
-                      { id: 'all', label: 'All' },
-                      { id: 'leetcode', label: 'LeetCode' },
-                      { id: 'credly', label: 'Credly' },
-                      { id: 'codechef', label: 'CodeChef' },
-                      { id: 'hackerrank', label: 'HackerRank' },
-                      { id: 'other', label: 'More' },
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setPlatformFilter(tab.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                          platformFilter === tab.id
-                            ? 'bg-white text-black font-semibold shadow-md'
-                            : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                )}
-
                 <button
                   type="button"
                   onClick={() => setTrophyOpen((v) => !v)}
@@ -1280,32 +1238,87 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              {/* Badges Grid View - Fully Stretched Grid with No Empty Gaps */}
-              {!trophyOpen ? null : loading || filterLoading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3.5 sm:gap-4 w-full">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                    <div key={i} className="w-full h-[135px] sm:h-[145px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
-                  ))}
-                </div>
-              ) : filteredBadges.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-sm">
-                  {badgeSearch
-                    ? `No awards matching "${badgeSearch}". Try a different keyword.`
-                    : platformFilter !== 'all'
-                    ? `No awards found for ${activeFilterLabel}.`
-                    : 'No awards found for this category.'}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3.5 sm:gap-4 w-full">
-                  {filteredBadges.map((badge, idx) => (
-                    <BadgeCard
-                      key={badge.id || idx}
-                      badge={badge}
-                      onClick={setSelectedBadge}
-                    />
-                  ))}
-                </div>
-              )}
+              {/* Collapsible content: search + badges grid */}
+              <AnimatePresence initial={false}>
+                {trophyOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-5 space-y-5">
+                      {/* Search Bar + Filter Tabs */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        {/* Search Input */}
+                        <div className="relative">
+                          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            value={badgeSearch}
+                            onChange={(e) => setBadgeSearch(e.target.value)}
+                            placeholder="Search awards by name or skill..."
+                            className="pl-9 pr-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-400 outline-none focus:border-cyan-400 transition-colors w-full sm:w-56"
+                          />
+                        </div>
+
+                        {/* Filter Pills */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                          {[
+                            { id: 'all', label: 'All' },
+                            { id: 'leetcode', label: 'LeetCode' },
+                            { id: 'credly', label: 'Credly' },
+                            { id: 'codechef', label: 'CodeChef' },
+                            { id: 'hackerrank', label: 'HackerRank' },
+                            { id: 'other', label: 'More' },
+                          ].map((tab) => (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => setPlatformFilter(tab.id)}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                                platformFilter === tab.id
+                                  ? 'bg-white text-black font-semibold shadow-md'
+                                  : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
+                              }`}
+                            >
+                              {tab.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Badges Grid View */}
+                      {loading || filterLoading ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3.5 sm:gap-4 w-full">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                            <div key={i} className="w-full h-[135px] sm:h-[145px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
+                          ))}
+                        </div>
+                      ) : filteredBadges.length === 0 ? (
+                        <div className="py-12 text-center text-slate-400 text-sm">
+                          {badgeSearch
+                            ? `No awards matching "${badgeSearch}". Try a different keyword.`
+                            : platformFilter !== 'all'
+                            ? `No awards found for ${activeFilterLabel}.`
+                            : 'No awards found for this category.'}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3.5 sm:gap-4 w-full">
+                          {filteredBadges.map((badge, idx) => (
+                            <BadgeCard
+                              key={badge.id || idx}
+                              badge={badge}
+                              onClick={setSelectedBadge}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* ── 7. VERIFIED CERTIFICATES SHOWCASE ──────────────────────────── */}
@@ -1340,7 +1353,17 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              {!certsOpen ? null : filterLoading ? (
+              <AnimatePresence initial={false}>
+                {certsOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-5">
+              {filterLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 w-full">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="h-[120px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
@@ -1442,6 +1465,10 @@ const Dashboard = () => {
                 })}
               </div>
               )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             </>
             )}
