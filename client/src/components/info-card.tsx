@@ -3,7 +3,7 @@ import { useMemo, useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AppContext } from "../context/AppContext"
 import assets from "../assets/assets.js"
-import getDeveloperAvatar from "../utils/avatarHelper.js"
+import getDeveloperAvatar, { DEFAULT_MEMOJI_AVATAR } from "../utils/avatarHelper.js"
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
@@ -99,6 +99,7 @@ function ProfileCard({ name, role, status, avatar, followers, onClose }: Profile
             <img
               src={avatar}
               alt={name}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = DEFAULT_MEMOJI_AVATAR; }}
               className="h-full w-full rounded-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>
