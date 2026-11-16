@@ -12,6 +12,7 @@ import {
   Brackets,
   Calculator,
   CheckCircle,
+  ChevronDown,
   Cpu,
   Database,
   ExternalLink,
@@ -728,6 +729,10 @@ const Dashboard = () => {
   const [selectedBadge, setSelectedBadge] = useState(null);
   const [selectedCert, setSelectedCert] = useState(null);
   const [filterLoading, setFilterLoading] = useState(false);
+  const [trophyOpen, setTrophyOpen] = useState(() => localStorage.getItem('dashboard.trophyOpen') !== '0');
+  const [certsOpen, setCertsOpen] = useState(() => localStorage.getItem('dashboard.certsOpen') !== '0');
+  useEffect(() => { localStorage.setItem('dashboard.trophyOpen', trophyOpen ? '1' : '0'); }, [trophyOpen]);
+  useEffect(() => { localStorage.setItem('dashboard.certsOpen', certsOpen ? '1' : '0'); }, [certsOpen]);
 
   // Show loading skeleton when platform filter changes
   useEffect(() => {
@@ -1190,31 +1195,41 @@ const Dashboard = () => {
             {/* ── 6. ENTERPRISE TROPHY ROOM / BADGES SHOWCASE ─────────────────── */}
             <div id="trophy-room" className="w-full mt-12 scroll-mt-6 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-amber-400" />
-                    <span>Trophy Room</span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
-                      {filteredBadges.length}
-                    </span>
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Verified honors, contest medals, and domain masteries across all connected platforms.
-                  </p>
-                  {platformFilter !== 'all' && (
-                    <button
-                      type="button"
-                      onClick={() => setPlatformFilter('all')}
-                      title="Clear platform filter"
-                      className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold hover:bg-cyan-500/25 transition-colors cursor-pointer"
-                    >
-                      <span>Filtered: {activeFilterLabel}</span>
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setTrophyOpen((v) => !v)}
+                  className="flex items-center gap-2 text-left group"
+                  title={trophyOpen ? 'Collapse Trophy Room' : 'Expand Trophy Room'}
+                >
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-amber-400" />
+                      <span>Trophy Room</span>
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
+                        {filteredBadges.length}
+                      </span>
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Verified honors, contest medals, and domain masteries across all connected platforms.
+                    </p>
+                    {platformFilter !== 'all' && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); setPlatformFilter('all'); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setPlatformFilter('all'); } }}
+                        title="Clear platform filter"
+                        className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold hover:bg-cyan-500/25 transition-colors cursor-pointer"
+                      >
+                        <span>Filtered: {activeFilterLabel}</span>
+                        <X className="w-3 h-3" />
+                      </span>
+                    )}
+                  </div>
+                </button>
 
                 {/* Search Bar + Filter Tabs */}
+                {trophyOpen && (
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   {/* Search Input */}
                   <div className="relative">
@@ -1253,10 +1268,20 @@ const Dashboard = () => {
                     ))}
                   </div>
                 </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setTrophyOpen((v) => !v)}
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0 self-start md:self-center"
+                  title={trophyOpen ? 'Collapse Trophy Room' : 'Expand Trophy Room'}
+                >
+                  <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${trophyOpen ? 'rotate-180' : ''}`} />
+                </button>
               </div>
 
               {/* Badges Grid View - Fully Stretched Grid with No Empty Gaps */}
-              {loading || filterLoading ? (
+              {!trophyOpen ? null : loading || filterLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3.5 sm:gap-4 w-full">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
                     <div key={i} className="w-full h-[135px] sm:h-[145px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
@@ -1286,21 +1311,36 @@ const Dashboard = () => {
             {/* ── 7. VERIFIED CERTIFICATES SHOWCASE ──────────────────────────── */}
             <div id="certificates-section" className="w-full mt-12 scroll-mt-6 rounded-2xl bg-[#0c0d12]/95 border border-white/10 p-5 sm:p-7 lg:p-8 shadow-2xl backdrop-blur-xl">
               <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                    <span>Verified Certifications</span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
-                      {filteredCredlyBadges.length + filteredCodolioCertificates.length}
-                    </span>
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Industry-recognized certifications cryptographically verified through platforms.
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setCertsOpen((v) => !v)}
+                  className="flex items-center gap-2 text-left group"
+                  title={certsOpen ? 'Collapse Certifications' : 'Expand Certifications'}
+                >
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                      <span>Verified Certifications</span>
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white font-mono">
+                        {filteredCredlyBadges.length + filteredCodolioCertificates.length}
+                      </span>
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Industry-recognized certifications cryptographically verified through platforms.
+                    </p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCertsOpen((v) => !v)}
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors shrink-0"
+                  title={certsOpen ? 'Collapse Certifications' : 'Expand Certifications'}
+                >
+                  <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${certsOpen ? 'rotate-180' : ''}`} />
+                </button>
               </div>
 
-              {filterLoading ? (
+              {!certsOpen ? null : filterLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 w-full">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="h-[120px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
