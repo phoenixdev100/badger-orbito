@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import assets from '../assets/assets.js';
@@ -46,7 +46,6 @@ const Sidebar = () => {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   // Debounced hover timer for smooth transitions
-  const profileTimerRef = useRef(null);
 
   // Platform metadata with official logos
   // (PLATFORM_LOGOS moved to module scope)
@@ -89,17 +88,18 @@ const Sidebar = () => {
     return () => { isMounted = false; };
   }, []);
 
-  // Hover Handlers for Profile & Settings
-  const handleMouseEnterProfile = () => {
-    clearTimeout(profileTimerRef.current);
-    setShowProfilePopup(true);
-  };
-
-  const handleMouseLeaveProfile = () => {
-    profileTimerRef.current = setTimeout(() => {
+  // Close profile popup on outside click
+  useEffect(() => {
+    if (!showProfilePopup) return;
+    const onDocClick = (e) => {
+      const trigger = document.getElementById('profile-trigger-btn');
+      if (trigger?.contains(e.target)) return;
+      if (e.target.closest('[data-profile-popup]')) return;
       setShowProfilePopup(false);
-    }, 220);
-  };
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [showProfilePopup]);
 
   // Primary Navigation Actions
   const primaryNavItems = [
@@ -267,11 +267,7 @@ const Sidebar = () => {
         {/* ── Bottom Section: Profile & Settings ── */}
         <div className="mt-auto flex flex-col items-center space-y-3 pt-3">
           {/* PROFILE & SETTINGS ICON (At Very Bottom) */}
-          <div
-            className="relative group"
-            onMouseEnter={handleMouseEnterProfile}
-            onMouseLeave={handleMouseLeaveProfile}
-          >
+          <div className="relative group">
             <button
               id="profile-trigger-btn"
               type="button"
@@ -307,11 +303,7 @@ const Sidebar = () => {
 
       {/* ── ORIGINAL BLACK PROFILE CARD UI (With Memoji Photo & 2 Options) ── */}
       {showProfilePopup && (
-        <div
-          onMouseEnter={handleMouseEnterProfile}
-          onMouseLeave={handleMouseLeaveProfile}
-          className="fixed left-24 bottom-4 z-[99999]"
-        >
+        <div data-profile-popup className="fixed left-24 bottom-4 z-[99999]">
           <AnimatedProfileCard onClose={() => setShowProfilePopup(false)} />
         </div>
       )}
