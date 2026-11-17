@@ -24,6 +24,7 @@ import ContestRatingSection from '../components/ContestRatingSection';
 import FeaturedAchievements from '../components/FeaturedAchievements';
 import { AppContext } from '../context/AppContext';
 import getDeveloperAvatar from '../utils/avatarHelper.js';
+import assets from '../assets/assets';
 
 // ── Platform Colors & Meta ──────────────────────────────────────────────────
 const PLATFORM_META = {
@@ -379,7 +380,7 @@ const PublicProfile = () => {
       <header className="sticky top-0 z-40 w-full bg-[#07080c]/85 backdrop-blur-xl border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 font-bold text-base tracking-tight text-white hover:text-cyan-400 transition-colors">
-            <span className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-xs font-black">O</span>
+            <img src={assets.websiteLogo} alt="Orbito" className="w-7 h-7 object-contain" />
             <span>Orbito</span>
           </Link>
           <span className="hidden sm:inline text-xs text-slate-500">|</span>
